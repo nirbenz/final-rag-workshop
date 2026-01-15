@@ -1,0 +1,12 @@
+defaults:
+  - override hydra/hydra_logging: "none"
+  - override hydra/job_logging: "none"
+  - _self_
+
+config_name: ${hydra:job.config_name}
+single_run_dir: ${hydra:run.dir}
+
+hydra:
+  output_subdir: null
+  run:
+    dir: .

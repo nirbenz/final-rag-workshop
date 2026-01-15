@@ -1,0 +1,20 @@
+{
+    "useLibraryCodeForTypes": true,
+    "typeCheckingMode": "basic",
+    "exclude": [
+        "examples",
+        "scripts",
+        "setup"
+    ],
+    "include": [
+        "src"
+    ],
+    "executionEnvironments": [
+        {
+            "root": "./",
+            "extraPaths": [
+                "src"
+            ]
+        }
+    ]
+}

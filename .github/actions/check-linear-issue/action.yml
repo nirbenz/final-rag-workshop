@@ -1,0 +1,31 @@
+name: Check Linear Issue Link
+description: Action used to verify that a PR references a Linear issue in its description or comments for compliance.
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Check for Linear Issue Link
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const LINEAR_ISSUE_REGEX = /https:\/\/linear\.app\/my-space\/issue\/PREFIX-\d+(?:\/[\w-]+)?/;
+
+          // Paginate all comments to avoid missing matches beyond the first page
+          const allComments = await github.paginate(
+            github.rest.issues.listComments,
+            { ...context.repo, issue_number: context.issue.number, per_page: 100 }
+          );
+
+          // Check PR description as well
+          const pullRequest = await github.rest.pulls.get({
+            ...context.repo,
+            pull_number: context.issue.number
+          });
+
+          const hasLinearIssueInComments = allComments.some(c => LINEAR_ISSUE_REGEX.test(c.body || ''));
+          const hasLinearIssueInDescription = LINEAR_ISSUE_REGEX.test(pullRequest.data.body || '');
+
+          if (!hasLinearIssueInComments && !hasLinearIssueInDescription) {
+            core.setFailed('Missing Linear link: add https://linear.app/my-space/issue/PREFIX-XX in PR description or a comment');
+          }

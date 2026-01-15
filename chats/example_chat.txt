@@ -1,0 +1,38 @@
+[15/12/26, 09:00:00] WhatsApp: Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more.
+[15/12/26, 09:00:01] Alice: Hey everyone! Ready for the RAG workshop today?
+[15/12/26, 09:01:15] Bob: Absolutely! I've been reading about chunking strategies
+[15/12/26, 09:01:45] Alice: Nice! What did you find most interesting?
+[15/12/26, 09:02:22] Bob: The trade-off between chunk size and context quality
+[15/12/26, 09:02:48] Bob: Smaller chunks = more precise retrieval but less context
+[15/12/26, 09:03:12] Charlie: That's exactly what I was confused about
+[15/12/26, 09:03:38] Charlie: How do you decide the right chunk size?
+[15/12/26, 09:04:05] Alice: It depends on your use case! For Q&A, smaller chunks work better
+[15/12/26, 09:04:32] Alice: For summarization, you want larger chunks with more context
+[15/12/26, 09:05:01] Bob: What about overlapping chunks?
+[15/12/26, 09:05:28] Alice: Great question! Overlap helps preserve context at boundaries
+[15/12/26, 09:06:14] Alice: Usually 10-20% overlap is a good starting point
+[15/12/26, 09:07:03] Charlie: Makes sense. What about embeddings?
+[15/12/26, 09:08:11] Bob: I've been using OpenAI's text-embedding-3-small
+[15/12/26, 09:08:42] Bob: Works great for semantic search
+[15/12/26, 09:09:18] Alice: Gemini embeddings are also excellent
+[15/12/26, 09:09:45] Alice: And they support task-specific embeddings
+[15/12/26, 09:10:22] Charlie: What's the difference between RETRIEVAL_QUERY and RETRIEVAL_DOCUMENT?
+[15/12/26, 09:11:08] Alice: RETRIEVAL_DOCUMENT is for indexing your chunks
+[15/12/26, 09:11:35] Alice: RETRIEVAL_QUERY is for embedding the user's question
+[15/12/26, 09:12:14] Alice: Using different task types improves retrieval quality
+[15/12/26, 09:13:02] Bob: That's a neat trick! I didn't know that
+[15/12/26, 09:14:18] Charlie: Should we use a vector database?
+[15/12/26, 09:15:05] Alice: For production, definitely. LanceDB is great for local development
+[15/12/26, 09:15:38] Alice: It's embedded, fast, and supports hybrid search
+[15/12/26, 09:16:22] Bob: What about Pinecone or Qdrant?
+[15/12/26, 09:17:01] Alice: Those are better for larger scale deployments
+[15/12/26, 09:17:34] Alice: But for a workshop, LanceDB keeps things simple
+[15/12/26, 09:18:15] Charlie: Perfect. I think I'm ready to start coding!
+[15/12/26, 09:19:02] Bob: Same here. Let's build something cool
+[15/12/26, 09:20:11] Alice: Awesome! Remember: start simple with MessageCountChunker
+[15/12/26, 09:20:45] Alice: Then iterate based on retrieval quality
+[15/12/26, 09:21:18] Charlie: Got it. Simple first, optimize later
+[15/12/26, 09:22:06] Bob: The best engineering advice :)
+[15/12/26, 09:23:14] Alice: Alright, let's get started! Good luck everyone
+[15/12/26, 09:24:02] Charlie: Thanks Alice! This is going to be fun
+[15/12/26, 09:25:08] Bob: See you all in the workshop!

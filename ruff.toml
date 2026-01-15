@@ -1,0 +1,42 @@
+target-version = "py312"
+line-length = 120
+
+[lint]
+logger-objects = ["loguru.logger"]
+select = ["E", "F", "I"]
+fixable = ["I", "F"]
+ignore = [
+  "F841",
+  "F541",
+  "E501",
+  # "F401",
+  "E402",
+  "F403",
+  "F405",
+]
+
+[lint.isort]
+known-first-party = ["src", "nicegui_app", "workshop", "boilerplate"]
+known-third-party = [
+  "torch",
+  "torchvision",
+  "tiktoken",
+  "tenacity",
+  "hydra",
+  "omegaconf",
+  "pydantic",
+  "openai",
+  "langchain-*",
+  "anthropic",
+  "pandas",
+  "numpy",
+  "loguru",
+]
+section-order = [
+  "future",
+  "standard-library",
+  "third-party",
+  "first-party",
+  "local-folder",
+]
+force-sort-within-sections = true

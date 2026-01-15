@@ -1,0 +1,11 @@
+defaults:
+  - models@models.conversation_llm.0: openai_gpt52_base
+  - models@models.conversation_llm.1: vertexai_gemini_flash_3
+  - models@models.conversation_llm.2: vertexai_gemini_pro_3
+  - models@models.conversation_llm.3: openai_gpt52_thinking
+  - models@models.embedding_llm: openai_text_embedding_3_small
+  - hydra_cfg
+  - _self_
+
+paths: 
+  chat_export_path: "./chats/example_chat.txt"

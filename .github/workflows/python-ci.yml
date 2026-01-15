@@ -1,0 +1,128 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  changes:
+    name: Detect Main Code Changes
+    runs-on: ubuntu-latest
+    outputs:
+      py: ${{ steps.changes.outputs.py }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect file changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            py:
+              - '**/*.py'
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - 'ruff.toml'
+              - 'pyrightconfig.json'
+              - '.python-version'
+
+  pyright:
+    name: Type check with Pyright
+    runs-on: ubuntu-latest
+    # needs: changes
+    # if: ${{ needs.changes.outputs.py == 'true' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          version-file: "pyproject.toml"
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install project dependencies and run Pyright
+        run: |
+          uv sync --frozen
+          uv run pyright
+
+  ruff:
+    name: Lint with Ruff
+    runs-on: ubuntu-latest
+    # needs: changes
+    # if: ${{ needs.changes.outputs.py == 'true' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          version-file: "pyproject.toml"
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Set up Python, install dependencies, and run Ruff
+        run: |
+          uv sync --frozen --group dev
+          uv run ruff check . --output-format=github
+
+  pytest:
+    name: Run Tests with Pytest
+    runs-on: ubuntu-latest
+    # needs: changes
+    # if: ${{ needs.changes.outputs.py == 'true' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup uv and Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          version-file: "pyproject.toml"
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install dependencies and run pytest
+        run: |
+          uv sync --frozen
+          uv run pytest tests/ -v
+
+  # Check for Linear Issue Link
+  check-linear-issue:
+    name: Check for Linear Issue in PR
+    runs-on: ubuntu-latest
+    # disable this for now until we have a way to test it
+    if: false
+    # if: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for Linear Issue Link
+        uses: ./.github/actions/check-linear-issue 

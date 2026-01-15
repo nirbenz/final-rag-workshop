@@ -1,0 +1,7 @@
+defaults:
+  - anthropic_claude_opus_45_base
+
+kwargs:
+  thinking:
+    type: "enabled"
+    budget_tokens: 4096

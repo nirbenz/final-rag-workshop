@@ -1,0 +1,5 @@
+model: "google-vertex:gemini-3-pro-preview"
+model_name: ${.model}
+kwargs:
+  temperature: 0.0
+  max_tokens: 16384

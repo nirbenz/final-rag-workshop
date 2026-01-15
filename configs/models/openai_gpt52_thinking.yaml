@@ -1,0 +1,6 @@
+defaults:
+  - openai_gpt52_base
+
+kwargs:
+  reasoning:
+    effort: medium
