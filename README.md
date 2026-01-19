@@ -67,31 +67,36 @@ Place the exported text file at `chats/default_chat.txt` or use the included `ch
 
 ---
 
-## Workshop Flow (4 hours)
+## Workshop Overview (4 hours)
 
-**TBD**
+A progressive, hands-on workshop where participants implement core RAG components:
+
+| Phase | Duration | What You Build |
+|-------|----------|----------------|
+| **Phase 1** | 35 min | Explore baseline system (no coding) |
+| **Phase 2** | 55 min | Cosine similarity & top-k retrieval |
+| **Phase 3** | 60 min | ANN search, re-ranking & prompt engineering |
+| **Phase 4** | 45 min | Time-gap based conversation segmentation |
+
+### Exercise Files
+
+All participant code goes in `src/workshop/rag/exercises/`:
+
+```
+exercises/
+  similarity.py    # Phase 2: cosine_similarity(), get_top_k()
+  reranking.py     # Phase 3: rerank()
+  prompting.py     # Phase 3: system prompts, context formatting
+  segmenting.py    # Phase 4: segment_by_time_gaps(), chunk_segments()
+```
+
+Solutions in `src/workshop/rag/solutions/` - swap via `USE_SOLUTIONS = True` after each exercise.
 
 ### Phase Configurations
 
-Edit `src/nicegui_app/workshop_config.py` to switch between phases:
+Edit `src/nicegui_app/workshop_config.py` to switch between phases.
 
-**Phase 1** - Baseline:
-```python
-CHUNKER_CLASS = MessageCountChunker
-ENGINE_CLASS = NaiveContextEngine
-```
-
-**Phase 2** - Better chunking:
-```python
-CHUNKER_CLASS = SentenceBoundaryChunker
-ENGINE_CLASS = NaiveContextEngine
-```
-
-**Phase 3** - Better retrieval:
-```python
-CHUNKER_CLASS = MessageCountChunker
-ENGINE_CLASS = SimilarityContextEngine  # or RAGContextEngine
-```
+See [WORKSHOP.md](WORKSHOP.md) for the detailed instructor guide with timing, discussion points, and common issues.
 
 ---
 
