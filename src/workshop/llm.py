@@ -24,6 +24,16 @@ import tqdm
 
 from workshop.types import LLMConfig
 
+# Toggle between exercise stubs and solutions for prompts:
+# - Use exercises for workshop participants to implement
+# - Use solutions for working reference implementation
+USE_PROMPT_SOLUTIONS = True
+
+if USE_PROMPT_SOLUTIONS:
+    from workshop.rag.solutions.prompting import build_full_prompt
+else:
+    from workshop.rag.exercises.prompting import build_full_prompt
+
 
 class APIInitializationError(Exception):
     """Error raised when model initialization fails."""
@@ -141,6 +151,7 @@ def get_pydantic_agent(
     Create an agent with a context-aware system prompt for RAG.
 
     This is the main entry point for workshop participants.
+    The system prompt is built using prompts from exercises/solutions.
 
     Args:
         model_config: LLM configuration
@@ -151,19 +162,11 @@ def get_pydantic_agent(
     """
     agent = create_agent(model_config, structured_output_type=structured_output_type)
 
-    context_prompt = textwrap.dedent("""
-        Use the following context to answer the question:
-        <context>
-        {context}
-        </context>
-    """)
-
     @agent.instructions
     def system_prompt_input(ctx: RunContext[Any]) -> str:
         deps = ctx.deps or {}
-        if not deps.get("context"):
-            deps = {"context": "N/A"}
-        return context_prompt.format(**deps)
+        context = deps.get("context", "No context available.")
+        return build_full_prompt(context)
 
     return agent
 
@@ -182,77 +185,152 @@ def get_embedding_model(model_config: LLMConfig) -> Embedder:
     return Embedder(model=model_config["model_name"], settings=settings)
 
 
-async def get_embeddings(
-    embedder: Embedder, texts: List[str], max_tokens: int, input_type: str = "document"
-) -> List[List[float]]:
+def _prepare_texts_for_embedding(
+    texts: List[str],
+    token_counts: List[int],
+    max_tokens: int,
+) -> List[List[str]]:
     """
-    Get embeddings for a list of texts (async version).
+    Preprocess texts for embedding: split long texts and batch by token limit.
 
-    Pydantic-AI handles batching internally. This function adds guardrails
-    for token limits and provides consistent error handling.
+    This is a pure function that prepares texts for the embedding API.
+    It splits texts that exceed max_tokens and groups them into batches.
 
     Args:
-        embedder: Pydantic-AI Embedder instance
-        texts: List of texts to embed
-        input_type: "document" for storage, "query" for retrieval
+        texts: Original texts to embed
+        token_counts: Token count for each text (same length as texts)
+        max_tokens: Maximum tokens per text/batch
 
     Returns:
-        List of embedding vectors
-
-    Raises:
-        ValueError: If model doesn't support max_input_tokens
+        List of text batches, each batch fits within max_tokens
     """
-    # Count tokens in text
-    token_counts = []
-    for text in texts:
-        token_count = await embedder.count_tokens(text)
-        token_counts.append((text, token_count))
-
-    total_token_counts = sum(token_count for _, token_count in token_counts)
-
     if max_tokens is None:
-        raise ValueError("Model does not support maximum input tokens")
+        raise ValueError("max_tokens is required")
 
-    # split long texts into chunks
-    token_counts_updated = []
-    for text, token_count in token_counts:
-        if len(text) > max_tokens:
-            text_chunks = textwrap.wrap(text, max_tokens)
-            token_counts_updated.extend(
-                [(text_chunk, await embedder.count_tokens(text_chunk)) for text_chunk in text_chunks]
-            )
+    # Split long texts into chunks
+    processed_texts = []
+    processed_counts = []
+    for text, token_count in zip(texts, token_counts):
+        if token_count > max_tokens:
+            # Split by characters (approximation, textwrap uses chars not tokens)
+            text_chunks = textwrap.wrap(text, max_tokens * 4)  # ~4 chars per token
+            for chunk in text_chunks:
+                processed_texts.append(chunk)
+                # Approximate token count for chunk
+                processed_counts.append(len(chunk) // 4)
         else:
-            token_counts_updated.append((text, token_count))
+            processed_texts.append(text)
+            processed_counts.append(token_count)
 
-    token_counts = token_counts_updated
-    total_token_counts = sum(token_count for _, token_count in token_counts)
-
-    # batch texts if needed
+    # Batch texts to fit within max_tokens per batch
     text_batches = []
-    current_batch = []
+    current_batch: List[str] = []
     current_batch_count = 0
-    for tidx, (text, token_count) in enumerate(token_counts):
-        if tidx > 0 and current_batch_count + token_count > max_tokens:
+
+    for text, token_count in zip(processed_texts, processed_counts):
+        if current_batch and current_batch_count + token_count > max_tokens:
             text_batches.append(current_batch)
             current_batch = [text]
             current_batch_count = token_count
         else:
             current_batch.append(text)
             current_batch_count += token_count
+
     if current_batch:
         text_batches.append(current_batch)
-    logger.info(f"Batched {len(text_batches)} texts into {total_token_counts} tokens")
+
+    return text_batches
+
+
+async def _count_tokens(embedder: Embedder, texts: List[str]) -> List[int]:
+    """
+    Count tokens for each text using the embedder.
+
+    Args:
+        embedder: Pydantic-AI Embedder instance
+        texts: List of texts to count tokens for
+
+    Returns:
+        List of token counts (same length as texts)
+    """
+    counts = []
+    for text in texts:
+        count = await embedder.count_tokens(text)
+        counts.append(count)
+    return counts
+
+
+async def get_embeddings(
+    embedder: Embedder, texts: List[str], max_tokens: int, input_type: str = "document"
+) -> List[List[float]]:
+    """
+    Get embeddings for a list of texts (async version) with caching.
+
+    Args:
+        embedder: Pydantic-AI Embedder instance
+        texts: List of texts to embed
+        max_tokens: Maximum tokens per batch
+        input_type: "document" for storage, "query" for retrieval
+
+    Returns:
+        List of embedding vectors
+    """
+    from workshop.embedding_cache import cache_embedding, get_cached_embedding, save_cache
+
+    # Count tokens and prepare batches
+    token_counts = await _count_tokens(embedder, texts)
+    text_batches = _prepare_texts_for_embedding(texts, token_counts, max_tokens)
+
+    total_texts = sum(len(batch) for batch in text_batches)
+    logger.info(f"Prepared {len(text_batches)} batches with {total_texts} texts")
+
+    model_name = str(embedder.model_name) if hasattr(embedder, "model_name") else "unknown"
 
     results = []
-    for text_batch in tqdm.tqdm(text_batches, desc="Embedding batches"):
-        logger.info(f"Embedding batch of {len(text_batch)} texts")
-        if input_type == "query":
-            result = await embedder.embed_query(text_batch)
-        else:
-            result = await embedder.embed_documents(text_batch)
-        results.extend([list(vec) for vec in result.embeddings])
+    cache_hits = 0
+    cache_misses = 0
 
-    logger.info(f"Got {len(results)} embeddings for {len(texts)} texts, totalling {token_count} tokens")
+    for text_batch in tqdm.tqdm(text_batches, desc="Embedding batches"):
+        batch_results: list = [None] * len(text_batch)
+        uncached_texts = []
+        uncached_positions = []
+
+        # Check cache for each text in batch
+        for i, text in enumerate(text_batch):
+            cached = get_cached_embedding(model_name, text)
+            if cached is not None:
+                batch_results[i] = cached
+                cache_hits += 1
+            else:
+                uncached_texts.append(text)
+                uncached_positions.append(i)
+                cache_misses += 1
+
+        # Only call API for uncached texts
+        if uncached_texts:
+            logger.info(f"Embedding {len(uncached_texts)}/{len(text_batch)} uncached texts")
+            if input_type == "query":
+                result = await embedder.embed_query(uncached_texts)
+            else:
+                result = await embedder.embed_documents(uncached_texts)
+
+            # Fill in results and cache new embeddings
+            for pos, emb in zip(uncached_positions, result.embeddings):
+                emb_list = list(emb)
+                batch_results[pos] = emb_list
+                cache_embedding(model_name, text_batch[pos], emb_list)
+        else:
+            logger.info(f"Cache hit: all {len(text_batch)} texts cached")
+
+        results.extend(batch_results)
+
+    # Persist cache to disk after all batches
+    save_cache()
+
+    logger.info(
+        f"Got {len(results)} embeddings for {len(texts)} texts "
+        f"(cache: {cache_hits} hits, {cache_misses} misses)"
+    )
     return results
 
 

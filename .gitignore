@@ -206,3 +206,6 @@ private_scripts
 
 # Vector DB storage
 .qdrant
+
+# Embedding cache
+.embedding_cache

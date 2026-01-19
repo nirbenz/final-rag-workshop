@@ -3,7 +3,7 @@
 # me@nirbnzvi.com
 
 """
-Segmenting chunker - Phase 4 extension stub.
+Segmenting chunker - Phase 4 extension.
 
 This chunker first segments conversations by time gaps (or other criteria),
 then applies message-count chunking within each segment. This prevents chunks
@@ -15,13 +15,24 @@ Workshop participants implement this as an advanced extension to learn about:
 - Metadata enrichment with segment_id
 """
 
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Tuple
 
 from pydantic import Field
 
 from workshop.chat import WhatsappMessage
 from workshop.rag.chunkers.types import BaseChunkerParams
+from workshop.rag.chunkers.utils import compute_sliding_window_boundaries
 from workshop.rag.engines.types import ChunkObject
+
+# Toggle between exercise stubs and solutions:
+# - Use exercises for workshop participants to implement
+# - Use solutions for working reference implementation
+USE_SOLUTIONS = True
+
+if USE_SOLUTIONS:
+    from workshop.rag.solutions.segmenting import chunk_segments, segment_by_time_gaps
+else:
+    from workshop.rag.exercises.segmenting import chunk_segments, segment_by_time_gaps
 
 
 class SegmentingChunkerParams(BaseChunkerParams):
@@ -119,21 +130,9 @@ class SegmentingChunker:
         Returns:
             List of message lists, each representing a continuous segment
 
-        Implementation:
-        1. Initialize first segment with first message
-        2. For each subsequent message:
-           - Compute time gap from previous message
-           - If gap > time_gap_hours: start new segment
-           - Otherwise: add to current segment
-        3. Return list of segments
-
-        TODO for participants: Implement segmentation logic
+        Uses the imported segment_by_time_gaps function (from exercises or solutions).
         """
-        raise NotImplementedError(
-            "Participants implement this. "
-            "Hint: Use message.timestamp to compute time deltas, "
-            "and datetime.timedelta for threshold comparison."
-        )
+        return segment_by_time_gaps(messages, self.params.time_gap_hours)
 
     def chunk_messages(self, messages: Sequence[WhatsappMessage]) -> Sequence[ChunkObject]:
         """
@@ -148,18 +147,40 @@ class SegmentingChunker:
             - message_ids: Indices in original message list
             - metadata: start_idx, end_idx, timestamps, speakers, segment_id
 
-        Implementation steps:
-        1. Segment messages by time gaps
-        2. For each segment:
-           - Apply message-count chunking (sliding window)
-           - Add segment_id to metadata
-        3. Ensure overlap does NOT cross segment boundaries
-        4. Track global message_ids (not segment-local indices)
-
-        TODO for participants: Implement full pipeline
+        Uses the imported functions (from exercises or solutions):
+        1. segment_by_time_gaps() to split into conversation segments
+        2. chunk_segments() to apply sliding-window chunking within each segment
         """
-        raise NotImplementedError(
-            "Extension for advanced participants. "
-            "Hint: Reuse MessageCountChunker logic but apply per-segment, "
-            "and track global message indices across segments."
+        if not messages:
+            return []
+
+        # Segment by time gaps
+        segments = self._segment_by_time_gaps(messages)
+
+        # Chunk within each segment
+        return chunk_segments(
+            messages=messages,
+            segments=segments,
+            chunk_length=self.params.chunk_length,
+            chunk_overlap=self.params.chunk_overlap,
+        )
+
+    def get_chunk_boundaries(self, num_messages: int) -> List[Tuple[int, int]]:
+        """
+        Get chunk boundaries for preview visualization.
+
+        Note: This is an approximation that doesn't account for time-gap segmentation,
+        since we don't have access to actual timestamps here. It uses simple
+        sliding-window boundaries for UI preview purposes.
+
+        Args:
+            num_messages: Total number of messages in conversation
+
+        Returns:
+            List of (start_idx, end_idx) tuples for each chunk
+        """
+        return compute_sliding_window_boundaries(
+            num_messages,
+            self.params.chunk_length,
+            self.params.chunk_overlap,
         )

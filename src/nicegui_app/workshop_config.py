@@ -17,11 +17,15 @@ How to use:
 4. GUI will render the appropriate hyperparameters automatically
 
 Workshop Progression:
-- Phase 1: MessageCountChunker + NaiveContextEngine (baseline)
-- Phase 2: SentenceBoundaryChunker + NaiveContextEngine (better chunking)
-- Phase 3: MessageCountChunker + SimilarityContextEngine (better retrieval)
-- Phase 4: MessageCountChunker + RAGContextEngine (production-grade)
-- Extensions: SemanticChunker, SegmentingChunker, ContextualChunker
+- Phase 1: MessageCountChunker + NaiveContextEngine (baseline + exploration)
+- Phase 2: SimilarityContextEngine (embedding-based retrieval)
+  Exercise: exercises/similarity.py - cosine_similarity(), get_top_k()
+- Phase 3: RAGContextEngine + Prompt Engineering (ANN search + generation)
+  Exercise: exercises/reranking.py - rerank()
+  Exercise: exercises/prompting.py - system prompt, context formatting
+- Phase 4: SegmentingChunker (time-gap segmentation)
+  Exercise: exercises/segmenting.py - segment_by_time_gaps(), chunk_segments()
+- Extensions: SemanticChunker, ContextualChunker
 """
 
 # ============================================================================
@@ -52,43 +56,54 @@ CHUNKER_DEFAULTS = {
 }
 
 # ============================================================================
-# Phase 2: Naive-Similarity engine (embedding-based retrieval)
+# Phase 2: Similarity engine (embedding-based retrieval with NumPy)
 # ============================================================================
-# Note: embed_fn is injected automatically from Hydra config (models.embedding_llm)
+# Note: embedder is injected automatically from Hydra config (models.embedding_llm)
 
 # from workshop.rag.engines import SimilarityContextEngine
-
+#
 # CHUNKER_CLASS = MessageCountChunker
 # ENGINE_CLASS = SimilarityContextEngine
-
+#
 # ENGINE_KWARGS = {
 #     "similarity_threshold": 0.0,
+#     "top_k": 10,
 # }
-
+#
 # CHUNKER_DEFAULTS = {
 #     "chunk_length": 6,
 #     "chunk_overlap": 4,
 # }
 
 # ============================================================================
-# Phase 3: RAG engine (Qdrant with ANN search)
+# Phase 3: RAG engine (Qdrant with ANN search + re-ranking + prompting)
 # ============================================================================
-# Note: embed_fn is injected automatically from Hydra config (models.embedding_llm)
+# Note: embedder is injected automatically from Hydra config (models.embedding_llm)
+#
+# Exercises for Phase 3:
+# 1. exercises/reranking.py - Implement rerank() for two-stage retrieval
+# 2. exercises/prompting.py - Design system prompts and context formatting
+#
+# Toggle solutions in:
+# - src/workshop/rag/engines/qdrant.py: USE_SOLUTIONS = True/False
+# - src/workshop/llm.py: USE_PROMPT_SOLUTIONS = True/False
 
-from workshop.rag.engines import RAGContextEngine
-
-CHUNKER_CLASS = MessageCountChunker
-ENGINE_CLASS = RAGContextEngine
-
-ENGINE_KWARGS = {
-    "db_path": ".qdrant",
-    "collection_name": "workshop_chunks",
-}
-
-CHUNKER_DEFAULTS = {
-    "chunk_length": 6,
-    "chunk_overlap": 4,
-}
+# from workshop.rag.engines import RAGContextEngine
+#
+# CHUNKER_CLASS = MessageCountChunker
+# ENGINE_CLASS = RAGContextEngine
+#
+# ENGINE_KWARGS = {
+#     "db_path": ".qdrant",
+#     "collection_name": "workshop_chunks",
+#     "top_k": 10,
+#     "rerank_candidates": 50,  # Retrieve 50 candidates, re-rank to top_k
+# }
+#
+# CHUNKER_DEFAULTS = {
+#     "chunk_length": 6,
+#     "chunk_overlap": 4,
+# }
 
 # ============================================================================
 # Phase 4: Sentence-boundary chunker (participants implement)

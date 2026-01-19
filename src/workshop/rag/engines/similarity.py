@@ -18,11 +18,20 @@ Workshop participants implement this after NaiveContextEngine to learn about:
 from typing import List, Optional, Sequence
 
 import numpy as np
-from numpy.typing import NDArray
 from pydantic_ai import Embedder
 
 from workshop.llm import get_embeddings_sync
 from workshop.rag.engines.types import ChunkEmbedding, ChunkObject
+
+# Toggle between exercise stubs and solutions:
+# - Use exercises for workshop participants to implement
+# - Use solutions for working reference implementation
+USE_SOLUTIONS = True
+
+if USE_SOLUTIONS:
+    from workshop.rag.solutions.similarity import cosine_similarity, get_top_k
+else:
+    from workshop.rag.exercises.similarity import cosine_similarity, get_top_k
 
 
 class SimilarityContextEngine:
@@ -46,6 +55,7 @@ class SimilarityContextEngine:
         embedder: Optional[Embedder] = None,
         similarity_threshold: float = 0.0,
         max_tokens: int = 8192,
+        top_k: int = 10,
     ):
         """
         Initialize similarity engine.
@@ -54,6 +64,7 @@ class SimilarityContextEngine:
             embedder: Pydantic-AI Embedder instance for generating embeddings
             similarity_threshold: Minimum similarity score (0-1) for retrieval
             max_tokens: Maximum number of tokens for the embedding model
+            top_k: Default number of results to return (can be overridden per query)
         """
         if embedder is None:
             raise ValueError(
@@ -66,6 +77,7 @@ class SimilarityContextEngine:
         self._similarity_threshold = similarity_threshold
         self._embedder = embedder
         self._max_tokens = max_tokens
+        self._top_k = top_k
 
     def _embed_sync(self, texts: List[str], input_type: str = "document") -> List[List[float]]:
         """
@@ -94,13 +106,13 @@ class SimilarityContextEngine:
         self._chunks.extend(context)
         self._embeddings.extend(embeddings)
 
-    def get_relevant_context(self, query: str, top_k: int = 10) -> Sequence[ChunkObject]:
+    def get_relevant_context(self, query: str, top_k: Optional[int] = None) -> Sequence[ChunkObject]:
         """
         Retrieve chunks using cosine similarity.
 
         Args:
             query: User query text
-            top_k: Maximum number of chunks to return
+            top_k: Maximum number of chunks to return (defaults to instance top_k)
 
         Returns:
             Top-k most similar chunks above similarity_threshold
@@ -108,44 +120,17 @@ class SimilarityContextEngine:
         if not self._chunks:
             return []
 
+        if top_k is None:
+            top_k = self._top_k
+
         query_embedding = np.array(self._embed_sync([query], input_type="query")[0])
         embeddings_matrix = np.array(self._embeddings)
 
-        similarities = self._cosine_similarity(query_embedding, embeddings_matrix)
-
-        mask = similarities >= self._similarity_threshold
-        filtered_indices = np.where(mask)[0]
-
-        if len(filtered_indices) == 0:
-            return []
-
-        filtered_similarities = similarities[filtered_indices]
-        sorted_indices = filtered_indices[np.argsort(-filtered_similarities)]
-        top_indices = sorted_indices[:top_k]
+        # Use imported functions (from exercises or solutions)
+        similarities = cosine_similarity(query_embedding, embeddings_matrix)
+        top_indices = get_top_k(similarities, self._similarity_threshold, top_k)
 
         return [self._chunks[i] for i in top_indices]
-
-    def _cosine_similarity(self, query_vec: NDArray, chunk_vecs: NDArray) -> NDArray:
-        """
-        Compute cosine similarity between query and all chunk vectors.
-
-        Args:
-            query_vec: Query embedding vector (shape: [dim])
-            chunk_vecs: Chunk embedding matrix (shape: [num_chunks, dim])
-
-        Returns:
-            Similarity scores array (shape: [num_chunks])
-        """
-        query_norm = np.linalg.norm(query_vec)
-        chunk_norms = np.linalg.norm(chunk_vecs, axis=1)
-
-        if query_norm == 0:
-            return np.zeros(len(chunk_vecs))
-
-        dot_products = np.dot(chunk_vecs, query_vec)
-        similarities = dot_products / (query_norm * chunk_norms + 1e-10)
-
-        return similarities
 
     @property
     def context(self) -> Sequence[ChunkObject]:

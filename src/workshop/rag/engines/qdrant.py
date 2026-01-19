@@ -12,6 +12,7 @@ Workshop participants implement this after SimilarityContextEngine to learn abou
 - Vector database architecture
 - Approximate Nearest Neighbor (ANN) search
 - Persistent storage and indexing
+- Two-stage retrieval with re-ranking
 """
 
 import shutil
@@ -24,6 +25,16 @@ from qdrant_client.models import Distance, PointStruct, VectorParams
 
 from workshop.llm import get_embeddings_sync
 from workshop.rag.engines.types import ChunkEmbedding, ChunkObject
+
+# Toggle between exercise stubs and solutions:
+# - Use exercises for workshop participants to implement
+# - Use solutions for working reference implementation (naive baseline)
+USE_SOLUTIONS = True
+
+if USE_SOLUTIONS:
+    from workshop.rag.solutions.reranking import rerank
+else:
+    from workshop.rag.exercises.reranking import rerank
 
 
 class RAGContextEngine:
@@ -46,6 +57,8 @@ class RAGContextEngine:
         db_path: str = ".qdrant",
         collection_name: str = "chunks",
         max_tokens: int = 8192,
+        top_k: int = 10,
+        rerank_candidates: int = 50,
     ):
         """
         Initialize Qdrant engine.
@@ -55,6 +68,8 @@ class RAGContextEngine:
             db_path: Path to Qdrant database directory
             collection_name: Name of the collection to store chunks
             max_tokens: Maximum number of tokens for the embedding model
+            top_k: Default number of results to return after re-ranking
+            rerank_candidates: Number of candidates to retrieve before re-ranking
         """
         if embedder is None:
             raise ValueError(
@@ -64,6 +79,8 @@ class RAGContextEngine:
 
         self._embedder = embedder
         self._max_tokens = max_tokens
+        self._top_k = top_k
+        self._rerank_candidates = rerank_candidates
         # Qdrant local mode - file-based, no server needed
         self._db_path = db_path
         self._client = QdrantClient(path=db_path)
@@ -131,16 +148,19 @@ class RAGContextEngine:
 
         self._client.upsert(collection_name=self._collection_name, points=points)
 
-    def get_relevant_context(self, query: str, top_k: int = 10) -> Sequence[ChunkObject]:
+    def get_relevant_context(self, query: str, top_k: Optional[int] = None) -> Sequence[ChunkObject]:
         """
-        Retrieve chunks using Qdrant ANN search.
+        Retrieve chunks using two-stage retrieval: ANN search + re-ranking.
+
+        Stage 1: Fast ANN search retrieves rerank_candidates chunks
+        Stage 2: Re-ranker scores candidates and returns top_k
 
         Args:
             query: User query text
-            top_k: Maximum number of chunks to return
+            top_k: Maximum number of chunks to return after re-ranking
 
         Returns:
-            Top-k most similar chunks from ANN search
+            Top-k most relevant chunks after re-ranking
         """
         if not self._client.collection_exists(self._collection_name):
             return []
@@ -149,15 +169,25 @@ class RAGContextEngine:
         if info.points_count == 0:
             return []
 
+        if top_k is None:
+            top_k = self._top_k
+
         query_vec = self._embed_sync([query], input_type="query")[0]
 
+        # Stage 1: Retrieve more candidates than needed for re-ranking
         results = self._client.query_points(
             collection_name=self._collection_name,
             query=query_vec,
-            limit=top_k,
+            limit=self._rerank_candidates,
         )
 
-        return [ChunkObject.model_validate_json(hit.payload["chunk_json"]) for hit in results.points]  # pyright: ignore[reportOptionalSubscript]
+        candidates = [
+            ChunkObject.model_validate_json(hit.payload["chunk_json"])  # pyright: ignore[reportOptionalSubscript]
+            for hit in results.points
+        ]
+
+        # Stage 2: Re-rank candidates and return top_k
+        return rerank(query, candidates, top_k)
 
     def clear(self) -> None:
         """Clear all stored chunks by deleting and recreating collection."""
