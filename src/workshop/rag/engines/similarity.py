@@ -45,6 +45,7 @@ class SimilarityContextEngine:
         self,
         embedder: Optional[Embedder] = None,
         similarity_threshold: float = 0.0,
+        max_tokens: int = 8192,
     ):
         """
         Initialize similarity engine.
@@ -52,6 +53,7 @@ class SimilarityContextEngine:
         Args:
             embedder: Pydantic-AI Embedder instance for generating embeddings
             similarity_threshold: Minimum similarity score (0-1) for retrieval
+            max_tokens: Maximum number of tokens for the embedding model
         """
         if embedder is None:
             raise ValueError(
@@ -63,6 +65,7 @@ class SimilarityContextEngine:
         self._embeddings: List[ChunkEmbedding] = []
         self._similarity_threshold = similarity_threshold
         self._embedder = embedder
+        self._max_tokens = max_tokens
 
     def _embed_sync(self, texts: List[str], input_type: str = "document") -> List[List[float]]:
         """
@@ -71,7 +74,7 @@ class SimilarityContextEngine:
         This provides consistent batching and error handling across all engines,
         and works correctly in both sync and async contexts (like NiceGUI).
         """
-        return get_embeddings_sync(self._embedder, texts, input_type)
+        return get_embeddings_sync(self._embedder, texts, self.max_tokens, input_type)
 
     def add_context(
         self, context: Sequence[ChunkObject], embeddings: Optional[Sequence[ChunkEmbedding]] = None
@@ -171,3 +174,8 @@ class SimilarityContextEngine:
         """Clear all stored chunks and embeddings."""
         self._chunks = []
         self._embeddings = []
+
+    @property
+    def max_tokens(self) -> int:
+        """Get the maximum number of tokens for the embedding model."""
+        return self._max_tokens

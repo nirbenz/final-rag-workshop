@@ -45,6 +45,7 @@ class RAGContextEngine:
         embedder: Optional[Embedder] = None,
         db_path: str = ".qdrant",
         collection_name: str = "chunks",
+        max_tokens: int = 8192,
     ):
         """
         Initialize Qdrant engine.
@@ -53,6 +54,7 @@ class RAGContextEngine:
             embedder: Pydantic-AI Embedder instance for generating embeddings
             db_path: Path to Qdrant database directory
             collection_name: Name of the collection to store chunks
+            max_tokens: Maximum number of tokens for the embedding model
         """
         if embedder is None:
             raise ValueError(
@@ -61,7 +63,7 @@ class RAGContextEngine:
             )
 
         self._embedder = embedder
-
+        self._max_tokens = max_tokens
         # Qdrant local mode - file-based, no server needed
         self._db_path = db_path
         self._client = QdrantClient(path=db_path)
@@ -75,7 +77,7 @@ class RAGContextEngine:
         This provides consistent batching and error handling across all engines,
         and works correctly in both sync and async contexts (like NiceGUI).
         """
-        return get_embeddings_sync(self._embedder, texts, input_type)
+        return get_embeddings_sync(self._embedder, texts, self.max_tokens, input_type)
 
     def _ensure_collection(self, dim: int) -> None:
         """Create collection if it doesn't exist or has wrong dimensions."""
@@ -216,3 +218,19 @@ class RAGContextEngine:
         # Skip the offset records and take only limit
         page_records = records[offset : offset + limit]
         return [ChunkObject.model_validate_json(r.payload["chunk_json"]) for r in page_records]  # pyright: ignore[reportOptionalSubscript]
+
+    @property
+    def max_tokens(self) -> int:
+        """Get the maximum number of tokens for the embedding model."""
+
+        # TODO don't use model's max tokens, use the max tokens passed to the engine
+        # if self._max_tokens is not None:
+        #     # Check model's maximum input tokens (returns None if unknown)
+        #     async def async_task() -> int | None:
+        #         max_tokens = await self._embedder.max_input_tokens()
+        #         return max_tokens
+
+        #     max_tokens = asyncio.run(async_task())
+        #     self._max_tokens = max_tokens
+
+        return self._max_tokens

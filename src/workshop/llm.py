@@ -182,7 +182,9 @@ def get_embedding_model(model_config: LLMConfig) -> Embedder:
     return Embedder(model=model_config["model_name"], settings=settings)
 
 
-async def get_embeddings(embedder: Embedder, texts: List[str], input_type: str = "document") -> List[List[float]]:
+async def get_embeddings(
+    embedder: Embedder, texts: List[str], max_tokens: int, input_type: str = "document"
+) -> List[List[float]]:
     """
     Get embeddings for a list of texts (async version).
 
@@ -207,9 +209,6 @@ async def get_embeddings(embedder: Embedder, texts: List[str], input_type: str =
         token_counts.append((text, token_count))
 
     total_token_counts = sum(token_count for _, token_count in token_counts)
-
-    # Check model's maximum input tokens (returns None if unknown)
-    max_tokens = await embedder.max_input_tokens()
 
     if max_tokens is None:
         raise ValueError("Model does not support maximum input tokens")
@@ -257,7 +256,9 @@ async def get_embeddings(embedder: Embedder, texts: List[str], input_type: str =
     return results
 
 
-def get_embeddings_sync(embedder: Embedder, texts: List[str], input_type: str = "document") -> List[List[float]]:
+def get_embeddings_sync(
+    embedder: Embedder, texts: List[str], max_tokens: int, input_type: str = "document"
+) -> List[List[float]]:
     """
     Get embeddings for a list of texts (sync version).
 
@@ -280,7 +281,7 @@ def get_embeddings_sync(embedder: Embedder, texts: List[str], input_type: str = 
 
     def run_async() -> None:
         nonlocal result
-        result = asyncio.run(get_embeddings(embedder, texts, input_type))
+        result = asyncio.run(get_embeddings(embedder, texts, max_tokens, input_type))
 
     thread = threading.Thread(target=run_async, daemon=True)
     thread.start()
