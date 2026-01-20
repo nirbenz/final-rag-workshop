@@ -66,10 +66,7 @@ def render_default_context(
         context: Chat context with messages
         rtl_mode: RTL display mode
     """
-    full_text = "\n".join(
-        getattr(msg, "timed_form", lambda: str(msg))()
-        for msg in context.context
-    )
+    full_text = "\n".join(getattr(msg, "timed_form", lambda: str(msg))() for msg in context.context)
     direction = get_text_direction(full_text, rtl_mode)
     dir_classes = get_direction_classes(direction)
 
@@ -94,10 +91,7 @@ def render_chunks_view(
         get_boundaries: Function to get chunk boundaries
         rtl_mode: RTL display mode
     """
-    messages_text = [
-        getattr(msg, "timed_form", lambda: str(msg))()
-        for msg in context.context
-    ]
+    messages_text = [getattr(msg, "timed_form", lambda: str(msg))() for msg in context.context]
     num_messages = len(messages_text)
 
     boundaries = get_boundaries(num_messages)
@@ -176,7 +170,7 @@ def render_vectordb_view(state: Any, on_page_change: Callable[[], Any]) -> None:
         on_page_change: Callback to refresh the view when page changes
     """
     # Import lazily to avoid circular imports
-    from nicegui_app.vectordb_view import render_vectordb_header, render_vectordb_content
+    from nicegui_app.vectordb_view import render_vectordb_content, render_vectordb_header
 
     has_chunks = render_vectordb_header(state, on_page_change)
     if has_chunks:

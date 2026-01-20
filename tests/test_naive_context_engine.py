@@ -1,6 +1,5 @@
 """Tests for NaiveContextEngine implementation."""
 
-
 from workshop.rag.chunkers import MessageCountChunker
 from workshop.rag.engines import NaiveContextEngine
 

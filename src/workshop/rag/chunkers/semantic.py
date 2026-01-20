@@ -105,7 +105,7 @@ class SemanticChunker:
         This provides consistent batching and error handling across all components,
         and works correctly in both sync and async contexts (like NiceGUI).
         """
-        return get_embeddings_sync(self._embedder, texts, input_type="document")
+        return get_embeddings_sync(self._embedder, texts, max_tokens=self.params.max_tokens, input_type="document")
 
     def _embed_texts(self, texts: Sequence[str]) -> NDArray:
         """Embed multiple texts, returns matrix of shape [num_texts, dim]."""

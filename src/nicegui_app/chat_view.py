@@ -403,13 +403,10 @@ def create_chat_view(
 
             try:
                 if use_streaming:
-                    await handle_streaming_response(
-                        state, message_list, scroll, page_state, chat_message_class
-                    )
+                    await handle_streaming_response(state, message_list, scroll, page_state, chat_message_class)
                 else:
                     await handle_batch_response(
-                        state, query, message_list, scroll, page_state,
-                        chat_message_class, extract_llm_response
+                        state, query, message_list, scroll, page_state, chat_message_class, extract_llm_response
                     )
 
             except Exception:

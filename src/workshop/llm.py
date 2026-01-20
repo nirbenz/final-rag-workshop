@@ -284,7 +284,7 @@ async def get_embeddings(
     total_texts = sum(len(batch) for batch in text_batches)
     logger.info(f"Prepared {len(text_batches)} batches with {total_texts} texts")
 
-    model_name = str(embedder.model_name) if hasattr(embedder, "model_name") else "unknown"
+    model_name = str(embedder.model_name) if hasattr(embedder, "model_name") else "unknown"  # pyright: ignore[reportAttributeAccessIssue]
 
     results = []
     cache_hits = 0
@@ -328,8 +328,7 @@ async def get_embeddings(
     save_cache()
 
     logger.info(
-        f"Got {len(results)} embeddings for {len(texts)} texts "
-        f"(cache: {cache_hits} hits, {cache_misses} misses)"
+        f"Got {len(results)} embeddings for {len(texts)} texts " f"(cache: {cache_hits} hits, {cache_misses} misses)"
     )
     return results
 

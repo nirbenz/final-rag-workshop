@@ -22,6 +22,8 @@ pandas==2.2.2
     # via rag-workshop (pyproject.toml)
 plotly==6.5.0
     # via rag-workshop (pyproject.toml:visualization)
+pre-commit==4.5.1
+    # via rag-workshop (pyproject.toml:dev)
 pydantic==2.12.5
     # via rag-workshop (pyproject.toml)
 pydantic-ai==1.44.0

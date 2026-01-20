@@ -1,7 +1,5 @@
 """Tests for chunker parameter classes."""
 
-
-
 from workshop.rag.chunkers import MessageCountParams
 from workshop.rag.types import BaseChunkerParams
 

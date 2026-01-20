@@ -176,9 +176,7 @@ def chunk_messages_sliding_window(
     if not messages:
         return []
 
-    boundaries = compute_sliding_window_boundaries(
-        len(messages), chunk_length, chunk_overlap
-    )
+    boundaries = compute_sliding_window_boundaries(len(messages), chunk_length, chunk_overlap)
 
     chunks: List[ChunkObject] = []
     for idx, (start, end) in enumerate(boundaries):

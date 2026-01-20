@@ -1,6 +1,5 @@
 """Tests for MessageCountChunker implementation."""
 
-
 from workshop.rag.chunkers import MessageCountChunker, MessageCountParams
 
 
@@ -31,9 +30,7 @@ def test_chunk_metadata(test_messages):
 
 def test_custom_chunking_params(small_test_messages):
     """Test custom chunk_length and overlap."""
-    chunker = MessageCountChunker(
-        params=MessageCountParams(chunk_length=3, chunk_overlap=1)
-    )
+    chunker = MessageCountChunker(params=MessageCountParams(chunk_length=3, chunk_overlap=1))
     chunks = chunker.chunk_messages(small_test_messages)
 
     # With length=3, overlap=1, stride=2: [0:3], [2:5], [4:7], [6:9], [8:10]
@@ -42,9 +39,7 @@ def test_custom_chunking_params(small_test_messages):
 
 def test_chunk_overlap(small_test_messages):
     """Test that overlap works correctly."""
-    chunker = MessageCountChunker(
-        params=MessageCountParams(chunk_length=3, chunk_overlap=1)
-    )
+    chunker = MessageCountChunker(params=MessageCountParams(chunk_length=3, chunk_overlap=1))
     chunks = chunker.chunk_messages(small_test_messages)
 
     second_chunk = chunks[1]
@@ -53,9 +48,7 @@ def test_chunk_overlap(small_test_messages):
 
 def test_get_chunk_boundaries():
     """Test get_chunk_boundaries for preview."""
-    chunker = MessageCountChunker(
-        params=MessageCountParams(chunk_length=5, chunk_overlap=2)
-    )
+    chunker = MessageCountChunker(params=MessageCountParams(chunk_length=5, chunk_overlap=2))
 
     boundaries = chunker.get_chunk_boundaries(12)
 

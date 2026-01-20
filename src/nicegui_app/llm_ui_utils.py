@@ -678,10 +678,7 @@ def group_indices_to_regions(
     regions.append((region_start, region_end))
 
     # Add padding and clamp to bounds
-    padded_regions = [
-        (max(0, start - padding), min(total_messages, end + padding))
-        for start, end in regions
-    ]
+    padded_regions = [(max(0, start - padding), min(total_messages, end + padding)) for start, end in regions]
 
     # Merge overlapping regions
     if not padded_regions:
@@ -822,6 +819,7 @@ def render_messages_with_collapsible_highlights(
                             def handler():
                                 expanded_gaps.discard(key)
                                 render_content.refresh()
+
                             return handler
 
                         with ui.row().classes("w-full items-center gap-2 my-2"):
@@ -845,12 +843,17 @@ def render_messages_with_collapsible_highlights(
                             def handler():
                                 expanded_gaps.add(key)
                                 render_content.refresh()
+
                             return handler
 
-                        with ui.row().classes(
-                            "w-full items-center justify-center gap-2 my-2 py-2 "
-                            "border-y border-gray-600 cursor-pointer hover:bg-gray-800 rounded"
-                        ).on("click", make_expand_handler(gap_key)):
+                        with (
+                            ui.row()
+                            .classes(
+                                "w-full items-center justify-center gap-2 my-2 py-2 "
+                                "border-y border-gray-600 cursor-pointer hover:bg-gray-800 rounded"
+                            )
+                            .on("click", make_expand_handler(gap_key))
+                        ):
                             ui.icon("unfold_more").classes("text-gray-500")
                             ui.label(f"Show {gap_count} hidden messages").classes("text-xs text-gray-500")
 
@@ -913,7 +916,9 @@ def render_chunk_preview_with_boundaries(
                 direction = get_text_direction(preview_text, rtl_mode)
                 dir_classes = get_direction_classes(direction)
 
-                ui.label(preview_text).classes(f"text-xs whitespace-pre-wrap break-words {dir_classes}").props(f'dir="{direction}"')
+                ui.label(preview_text).classes(f"text-xs whitespace-pre-wrap break-words {dir_classes}").props(
+                    f'dir="{direction}"'
+                )
 
 
 def render_chunk_preview(

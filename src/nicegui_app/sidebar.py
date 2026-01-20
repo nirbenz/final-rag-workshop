@@ -244,9 +244,8 @@ def create_vectordb_card(
 
                         # Run chunking in thread pool to avoid blocking
                         import asyncio
-                        chunks = await asyncio.to_thread(
-                            state.chunker.chunk_messages, messages
-                        )
+
+                        chunks = await asyncio.to_thread(state.chunker.chunk_messages, messages)
 
                         status_label.set_text(f"Embedding {len(chunks)} chunks...")
 
@@ -277,7 +276,11 @@ def create_vectordb_card(
                     finally:
                         update_btn.props(remove="loading")
 
-            update_btn = ui.button("Update Database", on_click=update_engine_db, icon="sync").props("color=green").classes("w-full")
+            update_btn = (
+                ui.button("Update Database", on_click=update_engine_db, icon="sync")
+                .props("color=green")
+                .classes("w-full")
+            )
             status_label = ui.label("").classes("text-xs text-gray-400 mt-1")
 
             ui.separator().classes("my-2")
@@ -299,7 +302,9 @@ def create_vectordb_card(
                     ui.button("Cancel", on_click=confirm_dialog.close).props("flat")
                     ui.button("Clear", on_click=lambda: (clear_engine_db(), confirm_dialog.close())).props("color=red")
 
-            ui.button("Clear Database", on_click=confirm_dialog.open, icon="delete").props("color=red outline").classes("w-full")
+            ui.button("Clear Database", on_click=confirm_dialog.open, icon="delete").props("color=red outline").classes(
+                "w-full"
+            )
         else:
             ui.label("No engine loaded").classes("text-gray-500 italic text-sm")
 

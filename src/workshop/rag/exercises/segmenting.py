@@ -23,7 +23,6 @@ Implementation tips:
 - Use the shared utils for sliding-window chunking within segments
 """
 
-from datetime import timedelta
 from typing import List, Sequence
 
 from workshop.chat import WhatsappMessage
