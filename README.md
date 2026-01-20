@@ -71,12 +71,12 @@ Place the exported text file at `chats/default_chat.txt` or use the included `ch
 
 A progressive, hands-on workshop where participants implement core RAG components:
 
-| Phase | Duration | What You Build |
-|-------|----------|----------------|
-| **Phase 1** | 35 min | Explore baseline system (no coding) |
-| **Phase 2** | 55 min | Cosine similarity & top-k retrieval |
-| **Phase 3** | 60 min | ANN search, re-ranking & prompt engineering |
-| **Phase 4** | 45 min | Time-gap based conversation segmentation |
+| Phase       | Duration | What You Build                              |
+| ----------- | -------- | ------------------------------------------- |
+| **Phase 1** | 35 min   | Explore baseline system (no coding)         |
+| **Phase 2** | 55 min   | Cosine similarity & top-k retrieval         |
+| **Phase 3** | 60 min   | ANN search, re-ranking & prompt engineering |
+| **Phase 4** | 45 min   | Time-gap based conversation segmentation    |
 
 ### Exercise Files
 
@@ -99,10 +99,6 @@ Edit `src/nicegui_app/workshop_config.py` to switch between phases.
 See [WORKSHOP.md](WORKSHOP.md) for the detailed instructor guide with timing, discussion points, and common issues.
 
 ---
-
-## Further Reading
-
-See [ADVANCED.md](ADVANCED.md) for architecture details, production usage, and scaling considerations.
 
 ## License
 
