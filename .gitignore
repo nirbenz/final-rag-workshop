@@ -209,3 +209,6 @@ private_scripts
 
 # Embedding cache
 .embedding_cache
+
+# Pre-commit cache
+.pre-commit-cache/

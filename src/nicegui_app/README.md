@@ -72,7 +72,7 @@ class LLMKwargs(BaseModel):
             "ui_type": "slider",   # Use slider instead of number input
         }
     )
-    
+
     internal_field: str = Field(
         default="hidden",
         json_schema_extra={"hidden": True}  # Skip in UI
@@ -156,7 +156,7 @@ from nicegui_app import ChunkCoordinates
 # Option 1: Class with get_chunks method
 class SemanticChunker:
     """Custom chunker that uses semantic boundaries."""
-    
+
     def get_chunks(self, text: str) -> ChunkCoordinates:
         # Return list of (start, end) indices
         return [(0, 100), (80, 200), (180, 300)]

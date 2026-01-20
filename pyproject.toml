@@ -33,6 +33,7 @@ dev = [
     "watchdog>=6.0.0",
     "ruff==0.8.4",
     "pre-commit>=4.5.1",
+    "pytest-cov>=7.0.0",
 ]
 text = [
     "bs4==0.0.2",

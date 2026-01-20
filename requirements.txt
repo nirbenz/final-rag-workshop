@@ -34,6 +34,8 @@ pytest==8.4.2
     # via rag-workshop (pyproject.toml:dev)
 pytest-asyncio==1.2.0
     # via rag-workshop (pyproject.toml:dev)
+pytest-cov==7.0.0
+    # via rag-workshop (pyproject.toml:dev)
 python-dateutil==2.9.0.post0
     # via rag-workshop (pyproject.toml)
 python-dotenv==1.1.0

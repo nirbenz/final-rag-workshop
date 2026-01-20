@@ -3,4 +3,3 @@ model_name: ${.model}
 kwargs:
   task_type: RETRIEVAL_QUERY
   output_dimensionality: 768
-  

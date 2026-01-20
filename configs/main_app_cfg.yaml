@@ -7,5 +7,5 @@ defaults:
   - hydra_cfg
   - _self_
 
-paths: 
+paths:
   chat_export_path: "./chats/example_chat.txt"
