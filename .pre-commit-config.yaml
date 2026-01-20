@@ -1,0 +1,30 @@
+repos:
+  - repo: local
+    hooks:
+      # Ruff - linting and formatting
+      - id: ruff
+        name: Ruff linting
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: Ruff formatting
+        entry: uv run ruff format
+        language: system
+        types: [python]
+
+      # Pyright - type checking
+      - id: pyright
+        name: Pyright type checking
+        entry: uv run pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+      # Update requirements.txt from pyproject.toml
+      - id: update-requirements
+        name: Update requirements.txt
+        entry: ./.github/scripts/update-requirements.sh
+        language: system
+        files: ^pyproject\.toml$
+        pass_filenames: false
