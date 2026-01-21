@@ -212,3 +212,4 @@ private_scripts
 
 # Pre-commit cache
 .pre-commit-cache/
+WORKSHOP.md
