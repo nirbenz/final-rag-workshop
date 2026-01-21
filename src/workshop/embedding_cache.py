@@ -46,7 +46,7 @@ def _ensure_loaded() -> Dict[str, List[float]]:
 def _cache_key(model_name: str, text: str) -> str:
     """Create cache key from model + text hash."""
     content = f"{model_name}:{text}"
-    return hashlib.sha256(content.encode()).hexdigest()[:16]
+    return hashlib.sha256(content.encode()).hexdigest()[:32]
 
 
 def get_cached_embedding(model_name: str, text: str) -> Optional[List[float]]:

@@ -13,8 +13,8 @@ The GUI automatically adapts based on these selections.
 How to use:
 1. Uncomment the chunker/engine you want to test
 2. Comment out the others
-3. Restart the app
-4. GUI will render the appropriate hyperparameters automatically
+3. Edit src/workshop/exercise_settings.py: set USE_SOLUTIONS to False for exercises
+4. Restart the app
 
 Workshop Progression:
 - Phase 1: MessageCountChunker + NaiveContextEngine (baseline + exploration)
@@ -27,6 +27,25 @@ Workshop Progression:
   Exercise: exercises/segmenting.py - segment_by_time_gaps(), chunk_segments()
 - Extensions: SemanticChunker, ContextualChunker
 """
+
+# ============================================================================
+# Per-Exercise Solution Toggles
+# ============================================================================
+# Edit exercise_toggles.py to switch between exercises and solutions.
+# Toggles are in a separate file to avoid circular imports.
+#
+# Exercise descriptions:
+# - USE_SIMILARITY_SOLUTION: cosine_similarity() and get_top_k() for Phase 2 engine
+# - USE_RERANKING_SOLUTION: rerank() for Phase 3 two-stage retrieval
+# - USE_PROMPTING_SOLUTION: build_full_prompt() for RAG system prompt design
+# - USE_SEGMENTING_SOLUTION: segment_by_time_gaps() and chunk_segments() for Phase 4 chunker
+
+from workshop.exercise_toggles import (  # noqa: F401
+    USE_PROMPTING_SOLUTION,
+    USE_RERANKING_SOLUTION,
+    USE_SEGMENTING_SOLUTION,
+    USE_SIMILARITY_SOLUTION,
+)
 
 # ============================================================================
 # Engine initialization kwargs (optional) - default to empty (override by uncommenting)
@@ -83,10 +102,6 @@ CHUNKER_DEFAULTS = {
 # Exercises for Phase 3:
 # 1. exercises/reranking.py - Implement rerank() for two-stage retrieval
 # 2. exercises/prompting.py - Design system prompts and context formatting
-#
-# Toggle solutions in:
-# - src/workshop/rag/engines/qdrant.py: USE_SOLUTIONS = True/False
-# - src/workshop/llm.py: USE_PROMPT_SOLUTIONS = True/False
 
 # from workshop.rag.engines import RAGContextEngine
 #

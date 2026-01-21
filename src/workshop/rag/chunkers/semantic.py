@@ -23,7 +23,7 @@ from pydantic import Field
 from pydantic_ai import Embedder
 
 from workshop.chat import WhatsappMessage
-from workshop.llm import get_embeddings_sync
+from workshop.embeddings import get_embeddings_sync
 from workshop.rag.chunkers.types import BaseChunkerParams
 from workshop.rag.engines.types import ChunkObject
 

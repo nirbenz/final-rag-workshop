@@ -20,16 +20,14 @@ from typing import List, Optional, Sequence, Tuple
 from pydantic import Field
 
 from workshop.chat import WhatsappMessage
+
+# Import per-exercise toggle (separate file to avoid circular imports)
+from workshop.exercise_toggles import USE_SEGMENTING_SOLUTION
 from workshop.rag.chunkers.types import BaseChunkerParams
 from workshop.rag.chunkers.utils import compute_sliding_window_boundaries
 from workshop.rag.engines.types import ChunkObject
 
-# Toggle between exercise stubs and solutions:
-# - Use exercises for workshop participants to implement
-# - Use solutions for working reference implementation
-USE_SOLUTIONS = True
-
-if USE_SOLUTIONS:
+if USE_SEGMENTING_SOLUTION:
     from workshop.rag.solutions.segmenting import chunk_segments, segment_by_time_gaps
 else:
     from workshop.rag.exercises.segmenting import chunk_segments, segment_by_time_gaps

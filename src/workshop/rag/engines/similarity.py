@@ -20,15 +20,13 @@ from typing import List, Optional, Sequence
 import numpy as np
 from pydantic_ai import Embedder
 
-from workshop.llm import get_embeddings_sync
+from workshop.embeddings import get_embeddings_sync
+
+# Import per-exercise toggle (separate file to avoid circular imports)
+from workshop.exercise_toggles import USE_SIMILARITY_SOLUTION
 from workshop.rag.engines.types import ChunkEmbedding, ChunkObject
 
-# Toggle between exercise stubs and solutions:
-# - Use exercises for workshop participants to implement
-# - Use solutions for working reference implementation
-USE_SOLUTIONS = True
-
-if USE_SOLUTIONS:
+if USE_SIMILARITY_SOLUTION:
     from workshop.rag.solutions.similarity import cosine_similarity, get_top_k
 else:
     from workshop.rag.exercises.similarity import cosine_similarity, get_top_k

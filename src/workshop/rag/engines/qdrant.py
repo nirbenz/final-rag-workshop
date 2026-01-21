@@ -23,15 +23,13 @@ from pydantic_ai import Embedder
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 
-from workshop.llm import get_embeddings_sync
+from workshop.embeddings import get_embeddings_sync
+
+# Import per-exercise toggle (separate file to avoid circular imports)
+from workshop.exercise_toggles import USE_RERANKING_SOLUTION
 from workshop.rag.engines.types import ChunkEmbedding, ChunkObject
 
-# Toggle between exercise stubs and solutions:
-# - Use exercises for workshop participants to implement
-# - Use solutions for working reference implementation (naive baseline)
-USE_SOLUTIONS = True
-
-if USE_SOLUTIONS:
+if USE_RERANKING_SOLUTION:
     from workshop.rag.solutions.reranking import rerank
 else:
     from workshop.rag.exercises.reranking import rerank

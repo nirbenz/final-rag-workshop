@@ -26,7 +26,7 @@ from nicegui_app.state import (
     get_or_create_state,
 )
 from workshop.chat import ChatContext, naive_token_counter
-from workshop.structured_types import RetrievalCoT
+from workshop.structured_types import RAGResponse
 
 
 class PageState:
@@ -70,7 +70,7 @@ def apply_context_params(state) -> None:  # type: ignore[no-untyped-def]
 
 def _create_llm_wrapper(model_config: Config) -> Optional[object]:
     """Create LLM wrapper with structured output type."""
-    return get_llm_wrapper(model_config, RetrievalCoT)
+    return get_llm_wrapper(model_config, RAGResponse)
 
 
 def initialize_workshop_components(state: AppState) -> None:

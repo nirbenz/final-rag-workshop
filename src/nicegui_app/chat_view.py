@@ -21,7 +21,6 @@ class ChatMessage(Protocol):
     role: str
     content: str
     is_streaming: bool
-    context_used: Optional[str]
     retrieved_message_ids: Optional[List[int]]
 
     def get_reasoning(self) -> Optional[str]: ...
@@ -35,7 +34,6 @@ class ChatMessage(Protocol):
         cls,
         content: str,
         raw_output: Any = None,
-        context_used: Optional[str] = None,
         retrieved_message_ids: Optional[List[int]] = None,
     ) -> "ChatMessage": ...
 
@@ -182,104 +180,45 @@ def retrieve_context(engine: Any, query: str, top_k: int = 10) -> tuple[str, Lis
     return context_text, unique_message_ids
 
 
-async def handle_streaming_response(
-    state: AppStateProtocol,
-    message_list: Any,
-    scroll: Any,
-    page_state: RefreshablePageState,
-    chat_message_class: type,
-) -> None:
+def _handle_llm_error(error: Exception, state: AppStateProtocol, message_list: Any) -> None:
     """
-    Handle LLM response with streaming.
-
-    Uses pydantic-ai's run_stream with output_type=str override for token-by-token display.
-    Streaming mode disables structured output (no reasoning/CoT).
+    Handle LLM errors with user-friendly notifications.
 
     Args:
-        state: Application state
-        message_list: Refreshable message list UI element
-        scroll: Scroll area UI element
-        page_state: Page state with LLM wrapper
-        chat_message_class: Class to create chat messages
+        error: The exception that occurred
+        state: Application state (to remove placeholder message)
+        message_list: Message list UI element to refresh
     """
-    placeholder = chat_message_class.streaming_placeholder()
-    state.messages = state.messages + [placeholder]
+    state.messages = state.messages[:-1]
     message_list.refresh()
 
-    try:
-        history = get_message_history(state.messages[:-1])
-        query = state.messages[-2].content
-        model_settings = {s: v for s, v in state.llm_kwargs.model_dump(mode="json").items() if v is not None}
-
-        context_text, retrieved_message_ids = retrieve_context(state.engine, query)
-
-        async with page_state.llm_wrapper.run_stream(
-            query,
-            output_type=str,
-            deps={"context": context_text},
-            message_history=history,
-            model_settings=model_settings,
-        ) as stream:
-            async for cumulative_text in stream.stream_text(delta=False):
-                state.messages[-1].content = cumulative_text
-                message_list.refresh()
-                scroll.scroll_to(percent=1.0)
-
-                if state.streaming.chunk_delay_ms > 0:
-                    await asyncio.sleep(state.streaming.chunk_delay_ms / 1000)
-
-            final_content = await stream.get_output()
-            usage = stream.usage()
-
-        final_msg = chat_message_class.assistant(
-            content=final_content,
-            raw_output=None,
-            context_used=None,
-            retrieved_message_ids=retrieved_message_ids,
-        )
-        state.messages[-1] = final_msg
-
-        if usage:
-            state.usage_maps[state.current_model_name].append(usage)
-            page_state.refresh_usage()
-
-        message_list.refresh()
-        page_state.refresh_context()
-
-    except RuntimeError as e:
-        # Retrieval errors - user-friendly message
-        state.messages = state.messages[:-1]
-        message_list.refresh()
-        ui.notify(str(e), type="negative")
-        logger.error(f"Streaming retrieval error: {e}")
-        raise
-    except Exception as e:
-        state.messages = state.messages[:-1]
-        message_list.refresh()
-        error_msg = str(e)
-        if "rate limit" in error_msg.lower():
-            ui.notify("Rate limit reached. Please wait a moment and try again.", type="warning")
-        elif "api key" in error_msg.lower() or "authentication" in error_msg.lower():
-            ui.notify("API authentication error. Check your API keys.", type="negative")
-        else:
-            ui.notify(f"LLM error: {error_msg[:100]}", type="negative")
-        logger.error(f"Streaming error: {e}")
-        raise
+    error_msg = str(error)
+    if isinstance(error, RuntimeError):
+        ui.notify(error_msg, type="negative")
+    elif "rate limit" in error_msg.lower():
+        ui.notify("Rate limit reached. Please wait a moment and try again.", type="warning")
+    elif "api key" in error_msg.lower() or "authentication" in error_msg.lower():
+        ui.notify("API authentication error. Check your API keys.", type="negative")
+    else:
+        ui.notify(f"LLM error: {error_msg[:100]}", type="negative")
 
 
-async def handle_batch_response(
+async def handle_llm_response(
     state: AppStateProtocol,
     query: str,
     message_list: Any,
     scroll: Any,
     page_state: RefreshablePageState,
     chat_message_class: type,
-    extract_llm_response: Callable[[Any], tuple[str, Optional[str]]],
+    extract_llm_response: Callable[[Any], str],
+    use_streaming: bool = False,
 ) -> None:
     """
-    Handle LLM response in batch mode (non-streaming).
+    Handle LLM response (streaming or batch mode).
 
-    Uses pydantic-ai's run with structured output for reasoning/CoT.
+    Unified handler that supports both streaming and batch responses.
+    Streaming mode uses output_type=str for token-by-token display.
+    Batch mode uses structured output for reasoning/CoT.
 
     Args:
         state: Application state
@@ -289,6 +228,7 @@ async def handle_batch_response(
         page_state: Page state with LLM wrapper
         chat_message_class: Class to create chat messages
         extract_llm_response: Function to extract content from structured output
+        use_streaming: Whether to use streaming mode
     """
     placeholder = chat_message_class.streaming_placeholder()
     state.messages = state.messages + [placeholder]
@@ -298,52 +238,61 @@ async def handle_batch_response(
     try:
         history = get_message_history(state.messages[:-1])
         model_settings = {k: v for k, v in state.llm_kwargs.model_dump(mode="json").items() if v is not None}
-
         context_text, retrieved_message_ids = retrieve_context(state.engine, query)
 
-        result = await page_state.llm_wrapper.run(
-            query,
-            deps={"context": context_text},
-            message_history=history,
-            model_settings=model_settings,
-        )
+        if use_streaming:
+            async with page_state.llm_wrapper.run_stream(
+                query,
+                output_type=str,
+                deps={"context": context_text},
+                message_history=history,
+                model_settings=model_settings,
+            ) as stream:
+                async for cumulative_text in stream.stream_text(delta=False):
+                    state.messages[-1].content = cumulative_text
+                    message_list.refresh()
+                    scroll.scroll_to(percent=1.0)
 
-        content, context_used = extract_llm_response(result.output)
-        usage = result.usage()
+                    if state.streaming.chunk_delay_ms > 0:
+                        await asyncio.sleep(state.streaming.chunk_delay_ms / 1000)
 
-        state.usage_maps[state.current_model_name].append(usage)
+                final_content = await stream.get_output()
+                usage = stream.usage()
 
-        msg = chat_message_class.assistant(
-            content=content,
-            raw_output=result.output,
-            context_used=context_used,
-            retrieved_message_ids=retrieved_message_ids,
-        )
+            msg = chat_message_class.assistant(
+                content=final_content,
+                raw_output=None,
+                retrieved_message_ids=retrieved_message_ids,
+            )
+        else:
+            result = await page_state.llm_wrapper.run(
+                query,
+                deps={"context": context_text},
+                message_history=history,
+                model_settings=model_settings,
+            )
+            content = extract_llm_response(result.output)
+            usage = result.usage()
+
+            msg = chat_message_class.assistant(
+                content=content,
+                raw_output=result.output,
+                retrieved_message_ids=retrieved_message_ids,
+            )
+
         state.messages[-1] = msg
+
+        if usage:
+            state.usage_maps[state.current_model_name].append(usage)
+            page_state.refresh_usage()
 
         message_list.refresh()
         page_state.refresh_context()
-        page_state.refresh_usage()
         scroll.scroll_to(percent=1.0)
 
-    except RuntimeError as e:
-        # Retrieval errors - user-friendly message
-        state.messages = state.messages[:-1]
-        message_list.refresh()
-        ui.notify(str(e), type="negative")
-        logger.error(f"Batch retrieval error: {e}")
-        raise
     except Exception as e:
-        state.messages = state.messages[:-1]
-        message_list.refresh()
-        error_msg = str(e)
-        if "rate limit" in error_msg.lower():
-            ui.notify("Rate limit reached. Please wait a moment and try again.", type="warning")
-        elif "api key" in error_msg.lower() or "authentication" in error_msg.lower():
-            ui.notify("API authentication error. Check your API keys.", type="negative")
-        else:
-            ui.notify(f"LLM error: {error_msg[:100]}", type="negative")
-        logger.error(f"Batch response error: {e}")
+        _handle_llm_error(e, state, message_list)
+        logger.error(f"LLM response error: {e}")
         raise
 
 
@@ -351,7 +300,7 @@ def create_chat_view(
     state: AppStateProtocol,
     page_state: RefreshablePageState,
     chat_message_class: type,
-    extract_llm_response: Callable[[Any], tuple[str, Optional[str]]],
+    extract_llm_response: Callable[[Any], str],
 ) -> None:
     """
     Create the chat interface with message history and input.
@@ -399,15 +348,17 @@ def create_chat_view(
                 ui.notify("No retrieval engine configured", type="warning")
                 return
 
-            use_streaming = state.streaming.enabled
-
             try:
-                if use_streaming:
-                    await handle_streaming_response(state, message_list, scroll, page_state, chat_message_class)
-                else:
-                    await handle_batch_response(
-                        state, query, message_list, scroll, page_state, chat_message_class, extract_llm_response
-                    )
+                await handle_llm_response(
+                    state=state,
+                    query=query,
+                    message_list=message_list,
+                    scroll=scroll,
+                    page_state=page_state,
+                    chat_message_class=chat_message_class,
+                    extract_llm_response=extract_llm_response,
+                    use_streaming=state.streaming.enabled,
+                )
 
             except Exception:
                 # Error already logged and notified in handler functions

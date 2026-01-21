@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, List, Literal, Optional, Protocol, Tuple
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_ai import RunUsage
 
-from workshop.structured_types import RetrievalCoT
+from workshop.structured_types import RAGResponse
 
 # Config type - plain dict after OmegaConf.to_container()
 Config = Dict[str, Any]
@@ -150,8 +150,7 @@ class ChatMessage(BaseModel):
         role: "user" or "assistant"
         content: The display content (final answer for assistant)
         raw_output: The full structured output from LLM (for inspection/debugging)
-        context_used: Context chunks used (for highlighting via text matching - fallback)
-        retrieved_message_ids: Message indices from retrieval (for exact highlighting - preferred)
+        retrieved_message_ids: Message indices from retrieval (for exact highlighting)
         is_streaming: Whether this message is currently being streamed
     """
 
@@ -159,35 +158,39 @@ class ChatMessage(BaseModel):
 
     role: str  # "user" or "assistant"
     content: str
-    raw_output: Optional[RetrievalCoT] = None
-    context_used: Optional[str] = None
+    raw_output: Optional[RAGResponse] = None
     retrieved_message_ids: Optional[List[int]] = None  # Exact indices from retrieval
     is_streaming: bool = Field(default=False, exclude=True)  # Runtime only
 
     @field_validator("raw_output", mode="before")
     @classmethod
-    def validate_raw_output(cls, v: Any) -> Optional[RetrievalCoT]:
+    def validate_raw_output(cls, v: Any) -> Optional[RAGResponse]:
         """
-        Reconstruct RetrievalCoT from dict after JSON serialization.
+        Reconstruct RAGResponse from dict after JSON serialization.
 
         When ChatMessage is serialized to JSON (via NiceGUI storage or transmission),
         raw_output becomes a plain dict. This validator reconstructs the Pydantic model.
         """
         if v is None:
             return None
-        if isinstance(v, RetrievalCoT):
+        if isinstance(v, RAGResponse):
             return v
         if isinstance(v, dict):
-            return RetrievalCoT.model_validate(v)
+            return RAGResponse.model_validate(v)
         return v
 
     def get_reasoning(self) -> Optional[str]:
-        """Get the full reasoning/chain-of-thought if available."""
+        """Get the reasoning/chain-of-thought if available."""
         if self.raw_output is None:
             return None
-        if hasattr(self.raw_output, "to_message"):
-            return self.raw_output.to_message()
-        return str(self.raw_output)
+        return self.raw_output.reasoning
+
+    @property
+    def context_used(self) -> Optional[str]:
+        """Get context_used from raw_output (for UI highlighting fallback)."""
+        if self.raw_output is None:
+            return None
+        return self.raw_output.context_used
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dict for message history (minimal format for LLM)."""
@@ -202,8 +205,7 @@ class ChatMessage(BaseModel):
     def assistant(
         cls,
         content: str,
-        raw_output: Optional[RetrievalCoT] = None,
-        context_used: Optional[str] = None,
+        raw_output: Optional[RAGResponse] = None,
         retrieved_message_ids: Optional[List[int]] = None,
     ) -> ChatMessage:
         """Create an assistant message from LLM response."""
@@ -211,7 +213,6 @@ class ChatMessage(BaseModel):
             role="assistant",
             content=content,
             raw_output=raw_output,
-            context_used=context_used,
             retrieved_message_ids=retrieved_message_ids,
         )
 
@@ -221,107 +222,80 @@ class ChatMessage(BaseModel):
         return cls(role="assistant", content="", is_streaming=True)
 
 
-def extract_llm_response(response_output: Any) -> tuple[str, Optional[str]]:
+def extract_llm_response(response_output: Any) -> str:
     """
-    Extract display content and context_used from any LLM response type.
+    Extract display content from LLM response.
 
-    Handles (in order of priority):
-    - Plain strings
-    - BaseModel with .output attribute (OneStageAnswer, etc.)
-    - Nested structures with .output.output (RetrievalResult inside ComplexAnswer)
-    - context_used field for highlighting (from RetrievalResult or RAG)
-
-    Fallback chain:
-    1. to_message() method if available
-    2. JSON serialization for Pydantic models
-    3. str() as last resort
-
-    Returns:
-        Tuple of (display_content, context_used or None)
-    """
-    context_used = None
-
-    # Extract context_used from response or nested output (for highlighting)
-    # Check both field names for compatibility
-    if hasattr(response_output, "context_used"):
-        context_used = response_output.context_used
-
-    # Extract the final answer
-    if isinstance(response_output, str):
-        return response_output, context_used
-
-    # Handle nested .output (ComplexAnswer style)
-    if hasattr(response_output, "output"):
-        inner = response_output.output
-
-        # Check nested output for context_used (RetrievalResult inside ComplexAnswer)
-        if context_used is None:
-            if hasattr(inner, "context_used"):
-                context_used = inner.context_used
-
-        # Extract the actual answer
-        if hasattr(inner, "output"):
-            # RetrievalResult.output
-            return inner.output, context_used
-        elif hasattr(inner, "answer"):
-            return inner.answer, context_used
-        elif isinstance(inner, str):
-            return inner, context_used
-        else:
-            # Inner object doesn't have output/answer - try JSON then str
-            return _format_unknown_response(inner), context_used
-
-    # Fallback chain: to_message() -> JSON -> str()
-    if hasattr(response_output, "to_message"):
-        return response_output.to_message(), context_used
-
-    return _format_unknown_response(response_output), context_used
-
-
-def _format_unknown_response(response: Any) -> str:
-    """
-    Format an unknown response type for display.
-
-    Tries JSON serialization first (for Pydantic models and dicts),
-    falls back to str() representation.
+    Simple extraction logic:
+    1. If string, return as-is
+    2. If has .output attribute, return that
+    3. Fall back to JSON or str() representation
 
     Args:
-        response: Unknown response object
+        response_output: Raw output from LLM (string, RAGResponse, or other)
 
     Returns:
-        Formatted string representation
+        Display content string
+    """
+    # Plain string - return as-is
+    if isinstance(response_output, str):
+        return response_output
+
+    # Has .output attribute (RAGResponse or similar)
+    if hasattr(response_output, "output"):
+        output = response_output.output
+        if isinstance(output, str):
+            return output
+        # Nested .output (shouldn't happen with simplified types, but handle it)
+        if hasattr(output, "output"):
+            return str(output.output)
+
+    # Fallback: format as JSON or string
+    return _format_as_json(response_output)
+
+
+def _format_as_json(response: Any) -> str:
+    """
+    Format response as JSON for display.
+
+    Tries Pydantic serialization first, then regular JSON, then str().
+
+    Args:
+        response: Response object to format
+
+    Returns:
+        JSON string or str() representation
     """
     import json
 
-    # Try Pydantic model serialization first
+    # Pydantic v2
     if hasattr(response, "model_dump_json"):
         try:
             return response.model_dump_json(indent=2)
         except Exception:
             pass
 
-    # Try Pydantic v1 style
+    # Pydantic v1
     if hasattr(response, "json"):
         try:
             return response.json(indent=2)
         except Exception:
             pass
 
-    # Try dict-like objects
+    # Dict-like with model_dump
     if hasattr(response, "model_dump"):
         try:
             return json.dumps(response.model_dump(), indent=2, default=str)
         except Exception:
             pass
 
-    # Try regular dict
+    # Plain dict
     if isinstance(response, dict):
         try:
             return json.dumps(response, indent=2, default=str)
         except Exception:
             pass
 
-    # Last resort: str()
     return str(response)
 
 
