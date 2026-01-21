@@ -49,9 +49,9 @@ The renderer inspects Pydantic field metadata to determine the appropriate contr
 | `float`             | `ge`, `le`           | Slider                  |
 | `int` / `float`     | + `ui_type="number"` | Number input (override) |
 | `int` / `float`     | + `ui_type="slider"` | Slider (override)       |
-| `bool`              | —                    | Toggle switch           |
-| `str`               | —                    | Text input              |
-| `Literal["a", "b"]` | —                    | Dropdown select         |
+| `bool`              | -                    | Toggle switch           |
+| `str`               | -                    | Text input              |
+| `Literal["a", "b"]` | -                    | Dropdown select         |
 
 ### Field Metadata
 
