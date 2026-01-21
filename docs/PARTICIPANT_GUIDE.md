@@ -535,6 +535,95 @@ USE_PROMPT_SOLUTIONS = False  # Use your prompts
 
 Test with a fresh chat history (clear previous messages).
 
+### 3B.5 Stretch Goals: Advanced Prompting Techniques
+
+For participants who finish early, explore these advanced patterns:
+
+#### Chain-of-Thought (CoT) Prompting
+
+Make the LLM reason step-by-step before answering:
+
+```python
+def get_system_prompt() -> str:
+    return """You are a helpful assistant answering questions about conversations.
+
+Before answering, follow these steps:
+1. Identify which chunks are most relevant to the question
+2. Extract the key information from those chunks
+3. Synthesize a clear answer based on the evidence
+
+Think through your reasoning before providing the final answer."""
+```
+
+#### Confidence Calibration
+
+Ask the LLM to express uncertainty:
+
+```python
+def get_output_instructions() -> str:
+    return """After your answer, rate your confidence:
+- HIGH: Answer is directly stated in context
+- MEDIUM: Answer requires some inference
+- LOW: Context is ambiguous or incomplete
+
+Format: [Answer] (Confidence: HIGH/MEDIUM/LOW)"""
+```
+
+#### Few-Shot Prompting
+
+Provide example Q&A pairs to guide the format:
+
+```python
+def get_system_prompt() -> str:
+    return """You answer questions about WhatsApp conversations.
+
+Example:
+Q: When did they plan to meet?
+A: They planned to meet on Friday at 3pm [1]. Sarah confirmed the time works for her.
+
+Q: Who suggested the restaurant?
+A: John suggested Italian food [2], and the group agreed.
+
+Now answer the user's question using the same format."""
+```
+
+#### Structured Output with Custom Pydantic Models
+
+The workshop uses `RetrievalCoT` for structured responses. Try creating your own:
+
+```python
+# In src/workshop/structured_types.py
+from pydantic import BaseModel, Field
+from typing import List, Literal
+
+
+class MyCustomResponse(BaseModel):
+    """Custom structured response for RAG."""
+
+    # Required: 'output' field is used for display
+    output: str = Field(description="The answer to display")
+
+    # Add your own fields:
+    confidence: Literal["high", "medium", "low"] = Field(
+        description="How confident are you in this answer?"
+    )
+    sources: List[int] = Field(
+        description="Which chunk numbers support this answer?"
+    )
+    reasoning: str = Field(
+        description="Brief explanation of your reasoning"
+    )
+```
+
+Then use it in `workshop_config.py` or modify `main.py`:
+
+```python
+# The extract_llm_response function in state.py handles any BaseModel
+# with an 'output' field - everything else becomes raw_output for debugging
+```
+
+**Key Insight:** Structured outputs make LLM responses predictable and parseable. The `output` field becomes the displayed answer; other fields are available in `raw_output` for debugging.
+
 ---
 
 ## Phase 4: Advanced Chunking Strategies (45 minutes)
