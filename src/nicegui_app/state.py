@@ -225,11 +225,16 @@ def extract_llm_response(response_output: Any) -> tuple[str, Optional[str]]:
     """
     Extract display content and context_used from any LLM response type.
 
-    Handles:
+    Handles (in order of priority):
     - Plain strings
     - BaseModel with .output attribute (OneStageAnswer, etc.)
     - Nested structures with .output.output (RetrievalResult inside ComplexAnswer)
     - context_used field for highlighting (from RetrievalResult or RAG)
+
+    Fallback chain:
+    1. to_message() method if available
+    2. JSON serialization for Pydantic models
+    3. str() as last resort
 
     Returns:
         Tuple of (display_content, context_used or None)
@@ -263,13 +268,61 @@ def extract_llm_response(response_output: Any) -> tuple[str, Optional[str]]:
         elif isinstance(inner, str):
             return inner, context_used
         else:
-            return str(inner), context_used
+            # Inner object doesn't have output/answer - try JSON then str
+            return _format_unknown_response(inner), context_used
 
-    # Fallback: use to_message() or str()
+    # Fallback chain: to_message() -> JSON -> str()
     if hasattr(response_output, "to_message"):
         return response_output.to_message(), context_used
 
-    return str(response_output), context_used
+    return _format_unknown_response(response_output), context_used
+
+
+def _format_unknown_response(response: Any) -> str:
+    """
+    Format an unknown response type for display.
+
+    Tries JSON serialization first (for Pydantic models and dicts),
+    falls back to str() representation.
+
+    Args:
+        response: Unknown response object
+
+    Returns:
+        Formatted string representation
+    """
+    import json
+
+    # Try Pydantic model serialization first
+    if hasattr(response, "model_dump_json"):
+        try:
+            return response.model_dump_json(indent=2)
+        except Exception:
+            pass
+
+    # Try Pydantic v1 style
+    if hasattr(response, "json"):
+        try:
+            return response.json(indent=2)
+        except Exception:
+            pass
+
+    # Try dict-like objects
+    if hasattr(response, "model_dump"):
+        try:
+            return json.dumps(response.model_dump(), indent=2, default=str)
+        except Exception:
+            pass
+
+    # Try regular dict
+    if isinstance(response, dict):
+        try:
+            return json.dumps(response, indent=2, default=str)
+        except Exception:
+            pass
+
+    # Last resort: str()
+    return str(response)
 
 
 class AppState(BaseModel):
