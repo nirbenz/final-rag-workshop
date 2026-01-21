@@ -13,7 +13,7 @@ The GUI automatically adapts based on these selections.
 How to use:
 1. Uncomment the chunker/engine you want to test
 2. Comment out the others
-3. Edit src/workshop/exercise_settings.py: set USE_SOLUTIONS to False for exercises
+3. Edit src/workshop/exercise_toggles.py: set USE_*_SOLUTION to False for exercises
 4. Restart the app
 
 Workshop Progression:
