@@ -14,7 +14,7 @@ Workshop participants implement this to learn about:
 - Overlap by sentence count rather than message count
 """
 
-from typing import Optional, Sequence
+from typing import List, Optional, Sequence, Tuple
 
 from pydantic import Field
 
@@ -114,4 +114,24 @@ class SentenceBoundaryChunker:
             "Participants implement this. "
             "Hints: Use spacy.load('en_core_web_sm') for sentence segmentation, "
             "tiktoken for token counting, and track message_ids for each sentence."
+        )
+
+    def get_chunk_boundaries(self, num_messages: int) -> List[Tuple[int, int]]:
+        """
+        Get chunk boundaries for preview visualization.
+
+        Note: This method requires actual message content for sentence segmentation,
+        so a lightweight preview is not possible. Participants should implement this
+        alongside chunk_messages().
+
+        Args:
+            num_messages: Total number of messages in conversation
+
+        Returns:
+            List of (start_idx, end_idx) tuples for each chunk
+        """
+        raise NotImplementedError(
+            "Participants implement this alongside chunk_messages(). "
+            "Hint: Consider caching boundaries from the last chunk_messages() call, "
+            "or provide an approximation based on average sentence density."
         )

@@ -48,6 +48,8 @@ class SimilarityContextEngine:
     - Returns top-k most similar chunks above threshold
     """
 
+    requires_embedder: bool = True
+
     def __init__(
         self,
         embedder: Optional[Embedder] = None,

@@ -13,7 +13,6 @@ import hydra
 from loguru import logger
 from nicegui import app, ui
 from omegaconf import DictConfig, OmegaConf
-from pydantic_ai import Embedder
 
 from nicegui_app.chat_view import create_chat_view
 from nicegui_app.context_view import create_context_view
@@ -73,6 +72,36 @@ def _create_llm_wrapper(model_config: Config) -> Optional[object]:
     return get_llm_wrapper(model_config, RAGResponse)
 
 
+def _get_embedder_kwargs(cls: type, state: AppState) -> Dict[str, Any]:
+    """
+    Get embedder kwarg if class requires it (declarative dependency injection).
+
+    Classes declare their dependency via `requires_embedder = True` class attribute.
+    This enables Open/Closed principle: new components declare needs without
+    modifying initialization code.
+
+    Args:
+        cls: Component class to check for embedder requirement
+        state: Application state with config for embedder creation
+
+    Returns:
+        Dict with 'embedder' key if required, empty dict otherwise
+
+    Raises:
+        ValueError: If embedder is required but creation fails
+    """
+    if not getattr(cls, "requires_embedder", False):
+        return {}
+
+    embedding_llm_config = state.config.get("models", {}).get("embedding_llm", {})
+    embedder = get_embedder(embedding_llm_config)
+
+    if embedder is None:
+        raise ValueError(f"{cls.__name__} requires embedder but failed to create one")
+
+    return {"embedder": embedder}
+
+
 def initialize_workshop_components(state: AppState) -> None:
     """
     Initialize chunker and engine from workshop_config.
@@ -80,45 +109,37 @@ def initialize_workshop_components(state: AppState) -> None:
     Participants edit workshop_config.py to select which chunker and engine
     implementations to use. This function instantiates them and attaches to state.
 
+    Uses declarative dependency injection: components declare `requires_embedder = True`
+    class attribute if they need an embedder, eliminating string-based type checking.
+
     Args:
         state: Application state to populate with chunker and engine
     """
     try:
         from nicegui_app import workshop_config
 
-        def _get_embedder_if_needed() -> Optional[Embedder]:
-            embedding_llm_config = state.config.get("models", {}).get("embedding_llm", {})
-            return get_embedder(embedding_llm_config)
-
+        # Initialize chunker if not already set
         if state.chunker is None:
+            chunker_cls = workshop_config.CHUNKER_CLASS
             chunker_kwargs = getattr(workshop_config, "CHUNKER_KWARGS", {})
 
-            if workshop_config.CHUNKER_CLASS.__name__ == "SemanticChunker":
-                embedder = _get_embedder_if_needed()
-                if embedder is None:
-                    logger.error("Failed to create embedder for SemanticChunker")
-                    return
-                state.chunker = workshop_config.CHUNKER_CLASS(embedder=embedder, **chunker_kwargs)  # pyright: ignore[reportCallIssue]
-            else:
-                state.chunker = workshop_config.CHUNKER_CLASS(**chunker_kwargs)
+            embedder_kwargs = _get_embedder_kwargs(chunker_cls, state)
+            state.chunker = chunker_cls(**embedder_kwargs, **chunker_kwargs)
 
+        # Initialize engine if not already set
         if state.engine is None:
+            engine_cls = workshop_config.ENGINE_CLASS
             engine_kwargs = getattr(workshop_config, "ENGINE_KWARGS", {})
 
-            engine_name = workshop_config.ENGINE_CLASS.__name__
-            if engine_name in ("RAGContextEngine", "SimilarityContextEngine"):
-                embedder = _get_embedder_if_needed()
-                if embedder is None:
-                    logger.error(f"Failed to create embedder for {engine_name}")
-                    return
-                state.engine = workshop_config.ENGINE_CLASS(embedder=embedder, **engine_kwargs)  # pyright: ignore[reportCallIssue, reportArgumentType]
-            else:
-                state.engine = workshop_config.ENGINE_CLASS(**engine_kwargs)
+            embedder_kwargs = _get_embedder_kwargs(engine_cls, state)
+            state.engine = engine_cls(**embedder_kwargs, **engine_kwargs)
 
         logger.info(f"Workshop components initialized: {type(state.chunker).__name__}, {type(state.engine).__name__}")
 
     except ImportError as e:
         logger.warning(f"Failed to import workshop_config: {e}")
+    except ValueError as e:
+        logger.error(f"Failed to initialize workshop components: {e}")
     except Exception as e:
         logger.error(f"Failed to initialize workshop components: {e}")
 

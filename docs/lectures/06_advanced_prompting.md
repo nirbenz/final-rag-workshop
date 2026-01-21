@@ -85,15 +85,13 @@ LLMs are confidently wrong. They don't naturally express uncertainty.
 
 **The Solution: Explicit Confidence Instructions**
 
-```python
-def get_output_instructions() -> str:
-    return """After your answer, rate your confidence:
+In the system prompt, include clear guidance on confidence levels:
 
+```
+When responding, rate your confidence:
 - HIGH: The answer is directly and clearly stated in the context
 - MEDIUM: The answer requires reasonable inference from the context
 - LOW: The context is ambiguous, incomplete, or potentially outdated
-
-If confidence is LOW, explain what additional information would help."""
 ```
 
 **Example Output:**
@@ -226,20 +224,21 @@ print(result.output.confidence)    # "high"
 print(result.output.source_chunks) # [2, 3]
 ```
 
-**The Workshop's RetrievalCoT Model:**
+**The Workshop's RAGResponse Model:**
 
 ```python
-# Already defined in src/workshop/structured_types.py
+# Defined in src/workshop/structured_types.py
 
-class RetrievalResult(BaseModel):
-    query: str       # Rephrased question
-    output: str      # The answer
-    explanation: str # Why this answer
-    context_used: str # Which context was relevant
+class ReasoningStep(BaseModel):
+    thought: str     # What you are checking
+    observation: str # What you found
 
-class RetrievalCoT(ComplexAnswer[RetrievalResult]):
-    # Includes reasoning stages + final RetrievalResult
-    pass
+class RAGResponse(BaseModel):
+    query_understanding: str           # Restate the question
+    reasoning_steps: List[ReasoningStep]  # Step-by-step analysis
+    context_used: List[str]            # Exact quotes from context
+    output: str                        # Final answer
+    confidence: Literal["high", "medium", "low"]
 ```
 
 **Custom Model Integration:**
@@ -250,40 +249,53 @@ The `extract_llm_response()` function in `state.py` handles any Pydantic model:
 2. Falls back to JSON serialization
 3. Falls back to `str()` as last resort
 
+`RAGResponse` also provides a `__str__()` method that formats the full response as
+readable markdown for debugging and inspection.
+
 **Design Tip:** Always include an `output: str` field for the displayable answer.
 
 ---
 
 ## Combining Techniques
 
-**The Ultimate RAG Prompt:**
+**The Workshop's Prompt Structure:**
+
+The prompting module exports a single function:
 
 ```python
-def build_full_prompt(context: str) -> str:
-    return f"""You are a helpful assistant answering questions about conversations.
+def get_system_prompt() -> str:
+    """
+    Returns the system prompt template with {context} placeholder.
+    This is displayed in the UI sidebar for inspection.
+    """
+    return """You are a helpful assistant that answers questions...
 
-## Instructions
-1. First, identify which chunks are relevant to the question
-2. Extract key evidence from those chunks
-3. Synthesize a clear, cited answer
-4. Rate your confidence based on evidence quality
-
-## Examples
-Q: Who organized the event?
-A: Sarah organized the birthday party [1][3]. She coordinated with
-   John for decorations [2]. (Confidence: HIGH)
-
-Q: What was decided about the budget?
-A: The context discusses budget concerns [4] but no final decision
-   is shown. (Confidence: LOW - need more recent messages)
-
-## Context
+<context>
 {context}
+</context>
 
-## Response Format
-Provide your answer with [chunk numbers] citations, followed by
-your confidence level (HIGH/MEDIUM/LOW)."""
+When responding, you must provide:
+1. query_understanding: Restate what the user is asking
+2. reasoning_steps: Your step-by-step analysis
+3. context_used: List of exact quotes from the context
+4. output: Your final answer to the question
+5. confidence: "high", "medium", or "low" """
 ```
+
+**Context Injection:**
+
+The `{context}` placeholder is filled in by `llm.py` at runtime:
+
+```python
+# In llm.py - get_pydantic_agent()
+@agent.instructions
+def system_prompt_input(ctx: RunContext[Any]) -> str:
+    context = ctx.deps.get("context", "No context available.")
+    return get_system_prompt().format(context=context)
+```
+
+This keeps the prompting module focused on prompt design while `llm.py` handles
+the integration with pydantic-ai.
 
 ---
 

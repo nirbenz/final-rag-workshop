@@ -19,9 +19,9 @@ from workshop.exercise_toggles import USE_PROMPTING_SOLUTION
 from workshop.types import LLMConfig
 
 if USE_PROMPTING_SOLUTION:
-    from workshop.rag.solutions.prompting import build_full_prompt
+    from workshop.rag.solutions.prompting import get_system_prompt
 else:
-    from workshop.rag.exercises.prompting import build_full_prompt
+    from workshop.rag.exercises.prompting import get_system_prompt
 
 # Re-export embedding functions for backward compatibility
 # Import from workshop.embeddings for new code
@@ -116,7 +116,8 @@ def get_pydantic_agent(
     Create an agent with a context-aware system prompt for RAG.
 
     This is the main entry point for workshop participants.
-    The system prompt is built using prompts from exercises/solutions.
+    The system prompt template is loaded from exercises/solutions, and
+    the context is injected here at runtime.
 
     Args:
         model_config: LLM configuration
@@ -131,6 +132,7 @@ def get_pydantic_agent(
     def system_prompt_input(ctx: RunContext[Any]) -> str:
         deps = ctx.deps or {}
         context = deps.get("context", "No context available.")
-        return build_full_prompt(context)
+        # Get the template and inject context here
+        return get_system_prompt().format(context=context)
 
     return agent

@@ -145,13 +145,14 @@ Sarah: Sure, that works for me.
 
 ```python
 class RAGResponse(BaseModel):
-    answer: str
+    query_understanding: str  # Restate the question
+    reasoning_steps: List[ReasoningStep]  # Step-by-step analysis
+    context_used: List[str]  # Exact quotes from context
+    output: str  # Final answer
     confidence: Literal["high", "medium", "low"]
-    sources: List[int]  # Chunk IDs used
-    reasoning: str  # Chain-of-thought
 ```
 
-**The Workshop Uses:** `RetrievalCoT` model for structured responses.
+**The Workshop Uses:** `RAGResponse` model for structured chain-of-thought responses.
 
 ---
 

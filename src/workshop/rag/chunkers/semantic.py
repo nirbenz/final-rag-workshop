@@ -15,7 +15,7 @@ Workshop participants implement this to learn about:
 - Dynamic chunk sizing based on content
 """
 
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -76,6 +76,8 @@ class SemanticChunker:
     - Create chunks and merge small ones
     - Track message_ids for traceability
     """
+
+    requires_embedder: bool = True
 
     def __init__(
         self,
@@ -140,4 +142,24 @@ class SemanticChunker:
             "Hints: Use self._embed_texts() to get embeddings, "
             "compute cosine similarity between consecutive messages, "
             "and use a simple greedy merging strategy for small chunks."
+        )
+
+    def get_chunk_boundaries(self, num_messages: int) -> List[Tuple[int, int]]:
+        """
+        Get chunk boundaries for preview visualization.
+
+        Note: Semantic chunking requires actual message content and embeddings,
+        so a lightweight preview is not possible without the full computation.
+        Participants should implement this alongside chunk_messages().
+
+        Args:
+            num_messages: Total number of messages in conversation
+
+        Returns:
+            List of (start_idx, end_idx) tuples for each chunk
+        """
+        raise NotImplementedError(
+            "Participants implement this alongside chunk_messages(). "
+            "Hint: Consider caching the boundaries from the last chunk_messages() call, "
+            "or recompute using the same similarity-based boundary detection."
         )

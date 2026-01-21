@@ -49,6 +49,8 @@ class RAGContextEngine:
     - Persistent storage survives process restart
     """
 
+    requires_embedder: bool = True
+
     def __init__(
         self,
         embedder: Optional[Embedder] = None,

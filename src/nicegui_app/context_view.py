@@ -112,6 +112,7 @@ def render_highlights_view(
     context: ChatContextProtocol,
     messages: List[Any],
     rtl_mode: str,
+    highlight_source: str = "retrieval",
 ) -> None:
     """
     Render highlights mode showing retrieved/used context.
@@ -120,6 +121,7 @@ def render_highlights_view(
         context: Chat context
         messages: Chat message history
         rtl_mode: RTL display mode
+        highlight_source: "retrieval" for message_ids, "model" for context_used
     """
     if not messages:
         ui.label("No highlighted context available").classes("text-gray-400 italic")
@@ -133,8 +135,21 @@ def render_highlights_view(
         return
 
     try:
-        # Prefer exact highlighting via retrieved_message_ids (from chunk-based retrieval)
-        # Uses collapsible view to show only relevant chunks with expandable gaps
+        if highlight_source == "model":
+            # Use context_used from model's structured output (now a List[str])
+            if hasattr(last_msg, "context_used") and last_msg.context_used:
+                render_with_highlights(
+                    context.text_context,
+                    last_msg.context_used,  # Already a list
+                    rtl_mode=rtl_mode,
+                )
+                return
+            else:
+                ui.label("Model did not report context_used").classes("text-amber-400 italic")
+                ui.label("The model's structured output has no context_used field").classes("text-gray-500 text-sm")
+                return
+
+        # Default: use retrieved_message_ids from retrieval engine
         if hasattr(last_msg, "retrieved_message_ids") and last_msg.retrieved_message_ids:
             render_messages_with_collapsible_highlights(
                 context.context,
@@ -143,22 +158,14 @@ def render_highlights_view(
             )
             return
 
-        # Fallback: text matching via context_used (from naive engine / full context)
-        if hasattr(last_msg, "context_used") and last_msg.context_used:
-            chunks = [c.strip() for c in last_msg.context_used.split("\n") if c.strip()]
-            render_with_highlights(
-                context.text_context,
-                chunks,
-                rtl_mode=rtl_mode,
-            )
-            return
+        # Fallback if retrieval returned empty
+        ui.label("No context was retrieved for this query").classes("text-amber-400 italic")
+        ui.label("The retrieval engine returned no matching chunks").classes("text-gray-500 text-sm")
+        return
 
     except Exception as e:
         logger.warning(f"Highlighting failed: {e}")
         ui.label(f"Highlighting failed: {e}").classes("text-red-400 text-sm")
-
-    ui.label("No highlighted context available").classes("text-gray-400 italic")
-    ui.label("Send a message to see retrieved context").classes("text-gray-500 text-sm")
 
 
 def render_vectordb_view(state: Any, on_page_change: Callable[[], Any]) -> None:
@@ -195,18 +202,36 @@ def create_context_view(
         page_state: Page state with refresh callbacks
     """
     with ui.card().classes("w-full h-full flex flex-col"):
-        with ui.row().classes("items-center justify-between mb-2 flex-none"):
+        with ui.row().classes("items-center justify-between mb-2 flex-none gap-2"):
             ui.label("Context").classes("text-xl font-bold")
 
-            def on_mode_change(e):
-                state.display.context_view_mode = e.value
-                context_display.refresh()
+            with ui.row().classes("items-center gap-2"):
 
-            ui.select(
-                options=["default", "chunks", "highlights", "vectordb"],
-                value=state.display.context_view_mode,
-                on_change=on_mode_change,
-            ).props("dense outlined").classes("w-40")
+                def on_mode_change(e):
+                    state.display.context_view_mode = e.value
+                    highlight_source_select.set_visibility(e.value == "highlights")
+                    context_display.refresh()
+
+                ui.select(
+                    options=["default", "chunks", "highlights", "vectordb"],
+                    value=state.display.context_view_mode,
+                    on_change=on_mode_change,
+                ).props("dense outlined").classes("w-32")
+
+                def on_highlight_source_change(e):
+                    state.display.highlight_source = e.value
+                    context_display.refresh()
+
+                highlight_source_select = (
+                    ui.select(
+                        options=["retrieval", "model"],
+                        value=state.display.highlight_source,
+                        on_change=on_highlight_source_change,
+                    )
+                    .props("dense outlined")
+                    .classes("w-28")
+                )
+                highlight_source_select.set_visibility(state.display.context_view_mode == "highlights")
 
         with ui.scroll_area().classes("flex-grow w-full overflow-x-hidden"):
 
@@ -236,6 +261,7 @@ def create_context_view(
                         context=state.context,
                         messages=state.messages,
                         rtl_mode=state.display.rtl_mode,
+                        highlight_source=state.display.highlight_source,
                     )
                     return
 

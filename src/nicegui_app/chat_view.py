@@ -23,7 +23,7 @@ class ChatMessage(Protocol):
     is_streaming: bool
     retrieved_message_ids: Optional[List[int]]
 
-    def get_reasoning(self) -> Optional[str]: ...
+    def get_raw_output_display(self) -> Optional[str]: ...
     def to_dict(self) -> Dict[str, str]: ...
 
     @classmethod
@@ -119,10 +119,10 @@ def render_message(msg: Any, rtl_mode: str) -> None:
             else:
                 ui.markdown(msg.content)
 
-        # Show reasoning/chain-of-thought for assistant messages
-        if not is_user and (reasoning := msg.get_reasoning()):
-            with ui.expansion("Reasoning", icon="psychology").classes("text-xs mt-1 break-words"):
-                ui.markdown(reasoning)
+        # Show full structured output for assistant messages (when available)
+        if not is_user and (raw_output_md := msg.get_raw_output_display()):
+            with ui.expansion("Full Response", icon="data_object").classes("text-xs mt-1"):
+                ui.markdown(raw_output_md).classes("break-words whitespace-pre-wrap")
 
 
 def get_message_history(messages: Sequence[Any]) -> List[Dict[str, str]]:

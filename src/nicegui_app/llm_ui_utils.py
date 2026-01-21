@@ -384,10 +384,12 @@ def create_model_selector(
     llm_key: str = "conversation_llm",
 ) -> None:
     """
-    Create a model selector dropdown.
+    Create a model selector dropdown, or just display the model if only one is configured.
 
     This is a pure UI component that doesn't manage state internally.
     The caller provides the current selection and a callback for changes.
+
+    When only a single model is configured, no dropdown is shown - just the model name.
 
     Args:
         config: Configuration dict containing models
@@ -401,13 +403,6 @@ def create_model_selector(
         return
 
     model_configs = parse_model_configs(config, llm_key)
-    options = {cfg["model_name"]: idx for idx, cfg in enumerate(model_configs)}
-
-    def handle_change(e):
-        idx = options[e.value]
-        logger.info(f"Selected model: {e.value}")
-        on_select(idx, e.value, model_configs[idx])
-
     initial_value = model_configs[selected_idx]["model_name"]
 
     # Always init on render - page_state.llm_wrapper is fresh on each page load
@@ -416,12 +411,22 @@ def create_model_selector(
     with ui.column().classes("w-full gap-2"):
         ui.label("Model").classes("font-semibold text-gray-300")
 
-        ui.select(
-            options=list(options.keys()),
-            value=initial_value,
-            on_change=handle_change,
-        ).classes("w-full").props("outlined dense")
+        # Only show dropdown if multiple models are configured
+        if len(model_configs) > 1:
+            options = {cfg["model_name"]: idx for idx, cfg in enumerate(model_configs)}
 
+            def handle_change(e):
+                idx = options[e.value]
+                logger.info(f"Selected model: {e.value}")
+                on_select(idx, e.value, model_configs[idx])
+
+            ui.select(
+                options=list(options.keys()),
+                value=initial_value,
+                on_change=handle_change,
+            ).classes("w-full").props("outlined dense")
+
+        # Show current model badge
         with ui.row().classes("items-center gap-2 bg-gray-700 rounded px-2 py-1"):
             ui.icon("smart_toy").classes("text-blue-400 text-sm")
             ui.label(current_model_name).classes("text-blue-300 font-mono text-xs")

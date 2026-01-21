@@ -5,78 +5,49 @@
 """
 Prompt Engineering - Reference Solutions
 
-These are working implementations for the prompting exercise.
-The solutions are intentionally simple baselines that participants can improve.
+The system prompt defines how the LLM should behave when answering questions.
+It includes:
+- Role and task description
+- Instructions for using context
+- Output format requirements (aligned with RAGResponse structured output)
 
-Design philosophy:
-- Minimal but functional (not over-engineered)
-- Clear structure that's easy to modify
-- Demonstrates key concepts without complexity
+The {context} placeholder is filled with retrieved chunks at runtime by llm.py.
 """
-
-from typing import List
 
 
 def get_system_prompt() -> str:
     """
-    Baseline system prompt for RAG assistant.
+    System prompt template for RAG assistant.
 
-    This prompt is intentionally simple - participants should improve it
-    based on their specific use case (WhatsApp chat analysis).
+    This prompt guides the LLM to:
+    1. Use only the provided context
+    2. Think step-by-step through the context
+    3. Quote relevant parts as evidence
+    4. Provide a clear answer with confidence level
+
+    The {context} placeholder will be filled with retrieved chunks by llm.py.
+
+    Returns:
+        System prompt template string with {context} placeholder
     """
     return """You are a helpful assistant that answers questions based on conversation history.
 
+Your task is to analyze the provided context and answer the user's question.
+
 Instructions:
 - Use ONLY the provided context to answer questions
-- If the context doesn't contain relevant information, say "I don't have enough information in the conversation history to answer that"
-- Be concise but complete
-- When referring to specific conversations, mention who said what
+- Think step-by-step through the context to find relevant information
+- Always quote the specific parts that support your answer
+- If the context doesn't contain relevant information, say so honestly
+- Be direct and conversational in your responses
 
 <context>
 {context}
-</context>"""
+</context>
 
-
-def format_context(chunks_text: List[str]) -> str:
-    """
-    Baseline context formatter with numbered chunks.
-
-    Numbers help the LLM reference specific chunks and help users
-    understand which parts of the conversation were used.
-    """
-    if not chunks_text:
-        return "No relevant conversation history found."
-
-    formatted_parts = []
-    for i, text in enumerate(chunks_text, 1):
-        formatted_parts.append(f"[Chunk {i}]\n{text}")
-
-    return "\n\n---\n\n".join(formatted_parts)
-
-
-def get_output_instructions() -> str:
-    """
-    Baseline output instructions.
-
-    Kept minimal so participants can experiment with different styles.
-    """
-    return """When answering:
-- Be direct and conversational
-- If you quote from the context, indicate which chunk it came from
-- If the answer involves multiple people, clarify who said what"""
-
-
-def build_full_prompt(context: str) -> str:
-    """
-    Combine prompt components into final system message.
-
-    Note: context is already formatted when passed here.
-    """
-    system = get_system_prompt()
-    instructions = get_output_instructions()
-
-    # Insert context into the system prompt template
-    prompt_with_context = system.format(context=context)
-
-    # Append output instructions
-    return f"{prompt_with_context}\n\n{instructions}"
+When responding, you must provide:
+1. query_understanding: Restate what the user is asking in your own words
+2. reasoning_steps: Your step-by-step analysis (at least one step with thought and observation)
+3. context_used: List of exact quotes from the context that support your answer
+4. output: Your final answer to the question
+5. confidence: "high" if context directly answers, "medium" if inferred, "low" if uncertain"""

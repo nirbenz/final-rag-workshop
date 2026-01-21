@@ -103,7 +103,9 @@ def create_chat_loader_card(
             try:
                 temp_dir = Path(tempfile.gettempdir()) / "nicegui_chat"
                 temp_dir.mkdir(exist_ok=True)
-                temp_path = temp_dir / f"upload_{e.file.name}"
+                # Sanitize filename to prevent path traversal attacks
+                safe_filename = Path(e.file.name).name
+                temp_path = temp_dir / f"upload_{safe_filename}"
 
                 await e.file.save(temp_path)
 
@@ -322,6 +324,31 @@ def create_llm_controls_card(state: AppStateProtocol) -> None:
             model=state.llm_kwargs,
             title="LLM Generation",
         )
+
+        ui.separator().classes("my-2")
+
+        with ui.dialog() as prompt_dialog, ui.card().classes("w-[600px] max-w-[90vw]"):
+            ui.label("System Prompt").classes("text-lg font-semibold mb-2")
+            try:
+                from workshop.exercise_toggles import USE_PROMPTING_SOLUTION
+
+                if USE_PROMPTING_SOLUTION:
+                    from workshop.rag.solutions.prompting import get_system_prompt
+                else:
+                    from workshop.rag.exercises.prompting import get_system_prompt
+
+                with ui.element("pre").classes(
+                    "text-sm max-h-[60vh] overflow-auto whitespace-pre-wrap bg-gray-100 dark:bg-gray-800 p-3 rounded"
+                ):
+                    ui.label(get_system_prompt()).classes("font-mono")
+            except Exception as e:
+                ui.label(f"Could not load prompt: {e}").classes("text-red-400")
+
+            ui.button("Close", on_click=prompt_dialog.close).props("flat").classes("mt-2")
+
+        ui.button("View System Prompt", icon="description", on_click=prompt_dialog.open).props(
+            "flat dense size=sm"
+        ).classes("w-full")
 
 
 def create_display_controls_card(

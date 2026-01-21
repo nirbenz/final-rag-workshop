@@ -114,6 +114,7 @@ class DisplayConfig(BaseModel):
         context_view_mode: How to display context (default, chunks, highlights, vectordb)
             Note: This field is excluded from sidebar rendering since it has a dedicated
             dropdown selector at the top of the context panel.
+        highlight_source: Source for highlights - retrieval (message_ids) or model (context_used)
         vectordb_page: Current page in vectordb view (0-indexed)
         vectordb_page_size: Number of chunks per page in vectordb view
     """
@@ -125,6 +126,10 @@ class DisplayConfig(BaseModel):
     context_view_mode: Literal["default", "chunks", "highlights", "vectordb"] = Field(
         default="default",
         json_schema_extra={"label": "Context View", "exclude_from_form": True},
+    )
+    highlight_source: Literal["retrieval", "model"] = Field(
+        default="retrieval",
+        json_schema_extra={"label": "Highlight Source", "exclude_from_form": True},
     )
     vectordb_page: int = Field(
         default=0,
@@ -158,39 +163,82 @@ class ChatMessage(BaseModel):
 
     role: str  # "user" or "assistant"
     content: str
-    raw_output: Optional[RAGResponse] = None
+    raw_output: Optional[Any] = None  # RAGResponse or str (non-structured)
     retrieved_message_ids: Optional[List[int]] = None  # Exact indices from retrieval
     is_streaming: bool = Field(default=False, exclude=True)  # Runtime only
 
     @field_validator("raw_output", mode="before")
     @classmethod
-    def validate_raw_output(cls, v: Any) -> Optional[RAGResponse]:
+    def validate_raw_output(cls, v: Any) -> Optional[Any]:
         """
         Reconstruct RAGResponse from dict after JSON serialization.
 
-        When ChatMessage is serialized to JSON (via NiceGUI storage or transmission),
-        raw_output becomes a plain dict. This validator reconstructs the Pydantic model.
+        Handles:
+        - None: Returns None
+        - RAGResponse: Returns as-is
+        - dict: Attempts to reconstruct as RAGResponse
+        - str: Returns as-is (non-structured output)
+        - Other: Returns as-is
         """
         if v is None:
             return None
         if isinstance(v, RAGResponse):
             return v
         if isinstance(v, dict):
-            return RAGResponse.model_validate(v)
+            try:
+                return RAGResponse.model_validate(v)
+            except Exception:
+                return v  # Return dict as-is if validation fails
         return v
 
-    def get_reasoning(self) -> Optional[str]:
-        """Get the reasoning/chain-of-thought if available."""
+    def get_raw_output_display(self) -> Optional[str]:
+        """
+        Get the full structured output as formatted markdown for display.
+
+        Returns None if raw_output is None (e.g., streaming mode).
+        Uses str() which leverages RAGResponse.__str__() for nice formatting.
+        For non-RAGResponse outputs, falls back to string representation.
+        """
         if self.raw_output is None:
             return None
-        return self.raw_output.reasoning
+
+        # For RAGResponse, str() uses its __str__ method which formats nicely
+        # For other types, str() gives a reasonable fallback
+        result = str(self.raw_output)
+
+        # If it's a RAGResponse, remove the Output section since it's shown as message content
+        if isinstance(self.raw_output, RAGResponse):
+            # Remove the "## Output" section from the display
+            lines = result.split("\n")
+            filtered_lines = []
+            skip_until_next_header = False
+            for line in lines:
+                if line.startswith("## Output"):
+                    skip_until_next_header = True
+                    continue
+                if skip_until_next_header and line.startswith("## "):
+                    skip_until_next_header = False
+                if not skip_until_next_header:
+                    filtered_lines.append(line)
+            result = "\n".join(filtered_lines).strip()
+
+        return result if result else None
 
     @property
-    def context_used(self) -> Optional[str]:
-        """Get context_used from raw_output (for UI highlighting fallback)."""
+    def context_used(self) -> Optional[List[str]]:
+        """Get context_used from raw_output (for UI highlighting)."""
         if self.raw_output is None:
             return None
-        return self.raw_output.context_used
+        if isinstance(self.raw_output, RAGResponse):
+            return self.raw_output.context_used
+        if hasattr(self.raw_output, "context_used"):
+            ctx = self.raw_output.context_used
+            # Handle both list and string formats
+            if isinstance(ctx, list):
+                return ctx
+            if isinstance(ctx, str):
+                return [c.strip() for c in ctx.split("\n") if c.strip()]
+        return None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dict for message history (minimal format for LLM)."""

@@ -424,94 +424,45 @@ Great retrieval means nothing with bad prompts. Now we optimize the "G" in RAG.
 
 Open `src/workshop/rag/exercises/prompting.py`:
 
+The prompting module exports a single function:
+
 ```python
-from typing import List
-
-
 def get_system_prompt() -> str:
     """
-    Design a system prompt for the RAG assistant.
+    Design a system prompt template for the RAG assistant.
 
-    Include:
-        - Role assignment ("You are...")
-        - Task description ("Answer questions based on...")
-        - Constraints ("Only use information from...")
-        - Fallback behavior ("If the context doesn't help...")
+    The prompt should:
+    1. Define the assistant's role (helpful, factual, grounded in context)
+    2. Explain how to use the <context>...</context> block
+    3. Specify the output format to match RAGResponse:
+       - query_understanding: Restate the question
+       - reasoning_steps: List of {thought, observation} steps
+       - context_used: List of exact quotes from context
+       - output: The final answer
+       - confidence: high/medium/low
+    4. Handle cases where context is insufficient
 
-    Returns:
-        The system prompt string
-    """
-    # YOUR CODE HERE
-    return """You are a helpful assistant that answers questions about conversations.
-
-Use ONLY the provided context to answer. If the context does not contain
-relevant information, say "I don't have enough information to answer that."
-
-Be concise and cite specific parts of the conversation when possible."""
-
-
-def format_context(chunks_text: List[str]) -> str:
-    """
-    Format retrieved chunks for inclusion in the prompt.
-
-    Args:
-        chunks_text: List of chunk text strings
+    The {context} placeholder will be replaced with retrieved chunks by llm.py.
 
     Returns:
-        Formatted context string
-
-    Options to try:
-        - Numbered list (enables citations)
-        - XML tags for clear boundaries
-        - With/without metadata (timestamps, speakers)
+        System prompt string with {context} placeholder
     """
     # YOUR CODE HERE
-    # Simple numbered format:
-    formatted_chunks = []
-    for i, text in enumerate(chunks_text, 1):
-        formatted_chunks.append(f"[{i}] {text}")
-
-    return "\n---\n".join(formatted_chunks)
-
-
-def get_output_instructions() -> str:
-    """
-    Define how the LLM should structure its response.
-
-    Options:
-        - Length constraints ("2-3 sentences")
-        - Citation requirements ("Quote relevant parts")
-        - Confidence indicators ("High/Medium/Low confidence")
-    """
-    # YOUR CODE HERE
-    return "Respond in 2-3 sentences. If quoting, use quotation marks."
-
-
-def build_full_prompt(query: str, retrieved_chunks: List[str]) -> str:
-    """
-    Combine all components into the final prompt.
-
-    Args:
-        query: User's question
-        retrieved_chunks: List of relevant chunk texts
-
-    Returns:
-        Complete prompt ready to send to LLM
-    """
-    system = get_system_prompt()
-    context = format_context(retrieved_chunks)
-    instructions = get_output_instructions()
-
-    return f"""{system}
-
-<context>
-{context}
-</context>
-
-{instructions}
-
-Question: {query}"""
+    raise NotImplementedError("Implement get_system_prompt")
 ```
+
+**How Context Injection Works:**
+
+Your `get_system_prompt()` returns a template with `{context}` placeholder.
+The `llm.py` module handles injecting the actual context at runtime:
+
+```python
+# In llm.py - this is done for you
+return get_system_prompt().format(context=context)
+```
+
+This keeps the prompting module focused on prompt design while `llm.py` handles
+integration with pydantic-ai.
 
 #### 3B.3 Experiment with Prompts
 
@@ -529,8 +480,8 @@ Try different prompt variations and observe how responses change:
 #### 3B.4 Enable Your Prompts
 
 ```python
-# In src/workshop/llm.py
-USE_PROMPT_SOLUTIONS = False  # Use your prompts
+# In src/workshop/exercise_toggles.py
+USE_PROMPTING_SOLUTION = False  # Use your prompts (True = use solution)
 ```
 
 Test with a fresh chat history (clear previous messages).
@@ -589,40 +540,37 @@ Now answer the user's question using the same format."""
 
 #### Structured Output with Custom Pydantic Models
 
-The workshop uses `RetrievalCoT` for structured responses. Try creating your own:
+The workshop uses `RAGResponse` for structured chain-of-thought responses:
 
 ```python
-# In src/workshop/structured_types.py
+# Defined in src/workshop/structured_types.py
 from pydantic import BaseModel, Field
 from typing import List, Literal
 
 
-class MyCustomResponse(BaseModel):
-    """Custom structured response for RAG."""
+class ReasoningStep(BaseModel):
+    thought: str     # What you are checking
+    observation: str # What you found
 
-    # Required: 'output' field is used for display
-    output: str = Field(description="The answer to display")
 
-    # Add your own fields:
-    confidence: Literal["high", "medium", "low"] = Field(
-        description="How confident are you in this answer?"
-    )
-    sources: List[int] = Field(
-        description="Which chunk numbers support this answer?"
-    )
-    reasoning: str = Field(
-        description="Brief explanation of your reasoning"
-    )
+class RAGResponse(BaseModel):
+    query_understanding: str           # Restate the question
+    reasoning_steps: List[ReasoningStep]  # Step-by-step analysis
+    context_used: List[str]            # Exact quotes from context
+    output: str                        # Final answer
+    confidence: Literal["high", "medium", "low"]
 ```
 
-Then use it in `workshop_config.py` or modify `main.py`:
+The `extract_llm_response()` function in `state.py` handles any Pydantic model
+with an `output` field - the `output` becomes the displayed answer, and the full
+response is available in `raw_output` for debugging.
 
-```python
-# The extract_llm_response function in state.py handles any BaseModel
-# with an 'output' field - everything else becomes raw_output for debugging
-```
+`RAGResponse` also provides a `__str__()` method that formats the full response
+as readable markdown, shown in the "Raw Output" section of the UI.
 
-**Key Insight:** Structured outputs make LLM responses predictable and parseable. The `output` field becomes the displayed answer; other fields are available in `raw_output` for debugging.
+**Key Insight:** Structured outputs make LLM responses predictable and parseable.
+The chain-of-thought fields (`reasoning_steps`, `context_used`) help with debugging
+and traceability.
 
 ---
 
@@ -830,14 +778,15 @@ be found    vectors      search
 
 ### Getting Unstuck
 
-Each exercise has a reference solution. Enable it by setting `USE_SOLUTIONS = True` in the relevant file:
+Each exercise has a reference solution. Enable it by setting the toggle in `src/workshop/exercise_toggles.py`:
 
-| Exercise   | File                                      | Toggle                 |
-| ---------- | ----------------------------------------- | ---------------------- |
-| Similarity | `src/workshop/rag/engines/similarity.py`  | `USE_SOLUTIONS`        |
-| Re-ranking | `src/workshop/rag/engines/qdrant.py`      | `USE_SOLUTIONS`        |
-| Prompting  | `src/workshop/llm.py`                     | `USE_PROMPT_SOLUTIONS` |
-| Segmenting | `src/workshop/rag/chunkers/segmenting.py` | `USE_SOLUTIONS`        |
+| Exercise   | Toggle Variable              |
+| ---------- | ---------------------------- |
+| Similarity | `USE_SIMILARITY_SOLUTION`    |
+| Prompting  | `USE_PROMPTING_SOLUTION`     |
+| Chunkers   | `USE_CHUNKER_SOLUTION`       |
+
+All toggles are centralized in `exercise_toggles.py` to avoid circular imports.
 
 ---
 
