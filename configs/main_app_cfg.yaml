@@ -6,7 +6,7 @@ defaults:
   # - models@models.conversation_llm: openai_gpt52_base
   - models@models.conversation_llm: litellm_claude_sonnet_45_base
   # - models@models.embedding_llm: openai_text_embedding_3_small
-  # - models@models.embedding_llm: litellm_amazon_titan_embedding  # Disabled - not available on proxy
+  - models@models.embedding_llm: litellm_amazon_titan_embedding
   - hydra_cfg
   - _self_
 

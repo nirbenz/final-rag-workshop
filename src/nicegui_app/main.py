@@ -6,6 +6,11 @@
 
 # pyright: reportOptionalMemberAccess=false
 
+# Apply SSL bypass early, before any network-related imports
+from workshop.ssl_utils import apply_ssl_bypass
+
+apply_ssl_bypass()
+
 from typing import Any, Callable, Dict, Optional
 
 from dotenv import load_dotenv

@@ -70,7 +70,7 @@ export ANTHROPIC_API_KEY="your-key-here"        # For Anthropic
 
 # LiteLLM Proxy Configuration (if using a proxy)
 export OPENAI_API_BASE="https://your-litellm-proxy:port"  # LiteLLM proxy endpoint
-export SSL_VERIFY="false"                        # Set to "false" to disable SSL verification (use with run_app.py)
+export SSL_VERIFY="false"                        # Set to "false" to disable SSL verification
 ```
 
 ## LiteLLM Support
@@ -84,8 +84,8 @@ The workshop now supports [LiteLLM](https://docs.litellm.ai/) as a proxy for acc
 
 Models are configured via Hydra configs in `configs/models/`. To use LiteLLM:
 1. Set `OPENAI_API_BASE` to your LiteLLM proxy endpoint
-2. Configure models using the `openai:` prefix (e.g., `openai:global.anthropic.claude-sonnet-4-5-20250929-v1:0`)
-3. If using self-signed certificates, use `run_app.py` instead of `nicegui_app.main`
+2. Configure models using the `litellm:` prefix (e.g., `litellm:global.anthropic.claude-sonnet-4-5-20250929-v1:0`)
+3. If using self-signed certificates, set `SSL_VERIFY="false"` environment variable
 
 ## Exporting WhatsApp Chat
 

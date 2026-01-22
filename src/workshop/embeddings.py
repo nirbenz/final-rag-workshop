@@ -1,33 +1,10 @@
 # Workshop embeddings module
 # Embedding generation and caching utilities
 
-import os
 import textwrap
 from typing import List
 
 from loguru import logger
-import httpx
-
-# Monkey-patch OpenAI to disable SSL verification if needed (for embeddings)
-if os.getenv("SSL_VERIFY", "true").lower() == "false":
-    import openai
-
-    # Patch sync client
-    _original_init = openai.OpenAI.__init__
-    def _patched_init(self, *args, **kwargs):
-        if "http_client" not in kwargs:
-            kwargs["http_client"] = httpx.Client(verify=False)
-        return _original_init(self, *args, **kwargs)
-    openai.OpenAI.__init__ = _patched_init
-
-    # Patch async client (used by Pydantic-AI)
-    _original_async_init = openai.AsyncOpenAI.__init__
-    def _patched_async_init(self, *args, **kwargs):
-        if "http_client" not in kwargs:
-            kwargs["http_client"] = httpx.AsyncClient(verify=False)
-        return _original_async_init(self, *args, **kwargs)
-    openai.AsyncOpenAI.__init__ = _patched_async_init
-
 import pydantic_ai
 from pydantic_ai import Embedder
 import tqdm
