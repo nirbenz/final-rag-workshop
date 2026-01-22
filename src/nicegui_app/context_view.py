@@ -55,25 +55,73 @@ class RefreshablePageState(Protocol):
     refresh_context: Callable[[], object]
 
 
+def _format_whatsapp_text(text: str) -> str:
+    """
+    Convert WhatsApp formatting to HTML.
+
+    Supports: *bold*, _italic_, ~strikethrough~, ```monospace```
+    """
+    import re
+
+    text = re.sub(r"\*([^*]+)\*", r"<strong>\1</strong>", text)
+    text = re.sub(r"_([^_]+)_", r"<em>\1</em>", text)
+    text = re.sub(r"~([^~]+)~", r"<del>\1</del>", text)
+    text = re.sub(r"```([^`]+)```", r"<code>\1</code>", text)
+    return text
+
+
+# Color palette for different senders
+SENDER_COLORS = [
+    "text-blue-400",
+    "text-green-400",
+    "text-purple-400",
+    "text-orange-400",
+    "text-pink-400",
+    "text-teal-400",
+    "text-yellow-400",
+    "text-red-400",
+]
+
+
 def render_default_context(
     context: ChatContextProtocol,
     rtl_mode: str,
 ) -> None:
     """
-    Render all messages in default view mode.
+    Render all messages in default view mode with colored senders.
 
     Args:
         context: Chat context with messages
         rtl_mode: RTL display mode
     """
+    import html
+
     full_text = "\n".join(getattr(msg, "timed_form", lambda: str(msg))() for msg in context.context)
     direction = get_text_direction(full_text, rtl_mode)
     dir_classes = get_direction_classes(direction)
 
+    sender_color_map: dict[str, str] = {}
+
     with ui.element("div").classes(f"{dir_classes} break-all").props(f'dir="{direction}"'):
         for msg in context.context:
-            msg_text = getattr(msg, "timed_form", lambda: str(msg))()
-            ui.markdown(msg_text).classes("break-all")
+            timestamp = getattr(msg, "timestamp", None)
+            user = getattr(msg, "user", None)
+            text = getattr(msg, "text", str(msg))
+
+            if user and user not in sender_color_map:
+                sender_color_map[user] = SENDER_COLORS[len(sender_color_map) % len(SENDER_COLORS)]
+
+            time_str = timestamp.strftime("%y-%m-%d %H:%M") if timestamp else ""
+            sender_color = sender_color_map.get(user, "text-gray-400") if user else ""
+
+            formatted_text = _format_whatsapp_text(html.escape(text))
+
+            with ui.row().classes("gap-2 items-baseline mb-1 flex-wrap"):
+                if time_str:
+                    ui.label(time_str).classes("text-xs text-gray-500 font-mono shrink-0")
+                if user:
+                    ui.label(f"{user}:").classes(f"text-sm font-semibold {sender_color} shrink-0")
+                ui.html(f'<span class="text-sm break-all">{formatted_text}</span>', sanitize=False)
 
 
 def render_chunks_view(
