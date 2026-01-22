@@ -902,7 +902,7 @@ def render_chunk_preview_with_boundaries(
         ui.label("No messages to preview").classes("text-gray-500 italic")
         return
 
-    with ui.column().classes("w-full gap-1"):
+    with ui.column().classes("w-full min-w-0 gap-1"):
         ui.label(f"Chunks: {len(boundaries)} | Length: {chunk_length} | Overlap: {overlap}").classes(
             "text-xs text-gray-400 mb-2"
         )
@@ -910,7 +910,7 @@ def render_chunk_preview_with_boundaries(
         for chunk_idx, (start, end) in enumerate(boundaries):
             color = CHUNK_COLORS[chunk_idx % len(CHUNK_COLORS)]
 
-            with ui.card().classes(f"w-full p-2 {color}"):
+            with ui.card().classes(f"w-full min-w-0 overflow-hidden p-2 {color}"):
                 ui.label(f"Chunk {chunk_idx + 1} (msgs {start + 1}-{end})").classes("text-xs font-semibold mb-1")
 
                 chunk_messages = messages[start:end]
@@ -921,7 +921,7 @@ def render_chunk_preview_with_boundaries(
                 direction = get_text_direction(preview_text, rtl_mode)
                 dir_classes = get_direction_classes(direction)
 
-                ui.label(preview_text).classes(f"text-xs whitespace-pre-wrap break-words {dir_classes}").props(
+                ui.label(preview_text).classes(f"text-xs whitespace-pre-wrap break-all {dir_classes}").props(
                     f'dir="{direction}"'
                 )
 

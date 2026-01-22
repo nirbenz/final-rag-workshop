@@ -10,3 +10,6 @@ defaults:
 
 paths:
   chat_export_path: "./chats/example_chat.txt"
+
+app:
+  single_client: false  # When true, only one browser tab can connect

@@ -144,11 +144,22 @@ def initialize_workshop_components(state: AppState) -> None:
         logger.error(f"Failed to initialize workshop components: {e}")
 
 
-def create_chat_page() -> None:
+def create_chat_page(single_client: bool = False) -> None:
     """Register the main chat page route."""
+    connected_clients: set[str] = set()
 
     @ui.page("/")
-    def chat_page():
+    async def chat_page():
+        client = ui.context.client
+
+        # Single-client mode: reject additional connections
+        if single_client:
+            if connected_clients:
+                ui.label("App is already open in another tab.").classes("text-xl text-red-400 m-8")
+                return
+            connected_clients.add(client.id)
+            client.on_disconnect(lambda: connected_clients.discard(client.id))
+
         config: Config = app.state.config
         state = get_or_create_state(app.storage.user, config)
         page_state = PageState()
@@ -195,7 +206,7 @@ def create_chat_page() -> None:
 
         # Main content
         with ui.row().classes("w-full h-[calc(100vh-8rem)] p-4 gap-4"):
-            with ui.column().classes("flex-1 h-full"):
+            with ui.column().classes("flex-1 h-full min-w-0 overflow-hidden"):
                 create_chat_view(
                     state=state,
                     page_state=page_state,
@@ -203,7 +214,7 @@ def create_chat_page() -> None:
                     extract_llm_response=extract_llm_response,
                 )
 
-            with ui.column().classes("flex-1 h-full"):
+            with ui.column().classes("flex-1 h-full min-w-0 overflow-hidden"):
                 create_context_view(state, page_state)
 
         # Footer
@@ -254,22 +265,36 @@ def main(cfg: DictConfig) -> None:
     logger.info("=" * 50)
     app.state.config = config
 
+    import os
+
     paths = config.get("paths", {})
-    if paths.get("chat_export_path"):
-        logger.info(f"Pre-loading chat context from: {paths['chat_export_path']}")
+    chat_path = os.getenv("CHAT_FILE_PATH") or paths.get("chat_export_path")
+
+    if chat_path:
+        logger.info(f"Pre-loading chat context from: {chat_path}")
         app.state.initial_context = ChatContext(
-            chat_path=paths["chat_export_path"],
+            chat_path=chat_path,
             token_counter=naive_token_counter,
         )
 
-    create_chat_page()
+    single_client = config.get("app", {}).get("single_client", False)
+    create_chat_page(single_client=single_client)
 
-    ui.run(
-        title="Retrieval Playground - Chat With Your Data",
-        storage_secret="retrieval-playground-nicegui-secret",
-        dark=True,
-        reload=False,
-    )
+    def cleanup():
+        logger.info("Shutting down gracefully...")
+
+    app.on_shutdown(cleanup)
+
+    try:
+        ui.run(
+            title="Retrieval Playground - Chat With Your Data",
+            storage_secret="retrieval-playground-nicegui-secret",
+            dark=True,
+            reload=False,
+            show=False,  # Don't auto-open browser; participants click the link
+        )
+    except KeyboardInterrupt:
+        logger.info("Received interrupt signal, exiting...")
 
 
 if __name__ == "__main__":

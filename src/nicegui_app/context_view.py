@@ -70,10 +70,10 @@ def render_default_context(
     direction = get_text_direction(full_text, rtl_mode)
     dir_classes = get_direction_classes(direction)
 
-    with ui.element("div").classes(dir_classes).props(f'dir="{direction}"'):
+    with ui.element("div").classes(f"{dir_classes} break-all").props(f'dir="{direction}"'):
         for msg in context.context:
             msg_text = getattr(msg, "timed_form", lambda: str(msg))()
-            ui.markdown(msg_text)
+            ui.markdown(msg_text).classes("break-all")
 
 
 def render_chunks_view(
@@ -201,7 +201,7 @@ def create_context_view(
         state: Application state
         page_state: Page state with refresh callbacks
     """
-    with ui.card().classes("w-full h-full flex flex-col"):
+    with ui.card().classes("w-full h-full flex flex-col min-w-0 overflow-hidden"):
         with ui.row().classes("items-center justify-between mb-2 flex-none gap-2"):
             ui.label("Context").classes("text-xl font-bold")
 
