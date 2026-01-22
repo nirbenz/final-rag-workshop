@@ -15,6 +15,9 @@ uv sync
 
 # Run the workshop application
 uv run python -m nicegui_app.main
+
+# Alternative: For environments with self-signed certificates (e.g., corporate proxies)
+uv run python run_app.py
 ```
 
 ### Linux/WSL
@@ -31,6 +34,9 @@ uv sync
 
 # Run the workshop application
 uv run python -m nicegui_app.main
+
+# Alternative: For environments with self-signed certificates
+uv run python run_app.py
 ```
 
 ### Windows (Non-WSL)
@@ -46,6 +52,9 @@ uv sync
 
 # Run the workshop application
 uv run python -m nicegui_app.main
+
+# Alternative: For environments with self-signed certificates
+uv run python run_app.py
 ```
 
 ## Environment Variables
@@ -58,7 +67,25 @@ export GOOGLE_CLOUD_PROJECT="your-project"      # For Vertex AI
 export GOOGLE_CLOUD_LOCATION="us-central1"      # For Vertex AI
 export OPENAI_API_KEY="your-key-here"           # For OpenAI
 export ANTHROPIC_API_KEY="your-key-here"        # For Anthropic
+
+# LiteLLM Proxy Configuration (if using a proxy)
+export OPENAI_API_BASE="https://your-litellm-proxy:port"  # LiteLLM proxy endpoint
+export SSL_VERIFY="false"                        # Set to "false" to disable SSL verification
 ```
+
+## LiteLLM Support
+
+The workshop now supports [LiteLLM](https://docs.litellm.ai/) as a proxy for accessing multiple LLM providers through a unified OpenAI-compatible API. This is useful for:
+- Corporate environments with centralized LLM access
+- Cost tracking and rate limiting across teams
+- Environments requiring SSL inspection bypass
+
+### Configuration
+
+Models are configured via Hydra configs in `configs/models/`. To use LiteLLM:
+1. Set `OPENAI_API_BASE` to your LiteLLM proxy endpoint
+2. Configure models using the `litellm:` prefix (e.g., `litellm:global.anthropic.claude-sonnet-4-5-20250929-v1:0`)
+3. If using self-signed certificates, set `SSL_VERIFY="false"` environment variable
 
 ## Exporting WhatsApp Chat
 

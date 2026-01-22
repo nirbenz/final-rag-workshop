@@ -1,4 +1,0 @@
-model: "gateway/bedrock/amazon.titan-embed-text-v2:0"
-model_name: ${.model}
-kwargs:
-  dim: 1536

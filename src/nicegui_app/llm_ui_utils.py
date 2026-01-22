@@ -476,7 +476,7 @@ def create_usage_stats(usage_maps: Dict[str, List[RunUsage]]) -> None:
 
         total_usage = sum_usages(usages)
         last_usage = usages[-1]
-        provider_id, model_ref = model_name.split(":") if ":" in model_name else (None, model_name)
+        provider_id, model_ref = model_name.split(":", 1) if ":" in model_name else (None, model_name)
 
         # Try to calculate cost, fallback to tokens-only if model not in price database
         try:

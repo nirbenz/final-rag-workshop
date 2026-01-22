@@ -1,4 +1,7 @@
+# or without the global prefix
+# model: "litellm:amazon.titan-embed-text-v2:0"
 model: "litellm:global.amazon.titan-embed-text-v2:0"
 model_name: ${.model}
 kwargs:
-  dim: 1536
+  dimensions: 1024
+  normalize: true

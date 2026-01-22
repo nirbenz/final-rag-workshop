@@ -98,6 +98,7 @@ def create_agent(
         APIInitializationError: If model initialization fails
     """
     model_settings = pydantic_ai.ModelSettings(**model_config.get("kwargs", {}))
+
     agent = pydantic_ai.Agent(
         model=model_config["model_name"],
         model_settings=model_settings,

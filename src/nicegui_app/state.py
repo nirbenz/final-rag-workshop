@@ -68,11 +68,11 @@ class LLMKwargs(BaseModel):
         le=65536,
         json_schema_extra={"step": 256, "label": "Max Tokens", "tooltip": "Response length limit"},
     )
-    top_p: float = Field(
-        default=1.0,
+    top_p: Optional[float] = Field(
+        default=None,
         ge=0.0,
         le=1.0,
-        json_schema_extra={"step": 0.05, "label": "Top P", "tooltip": "Nucleus sampling threshold"},
+        json_schema_extra={"step": 0.05, "label": "Top P", "tooltip": "Nucleus sampling threshold (leave empty if using temperature)"},
     )
 
 
@@ -462,6 +462,11 @@ def get_or_create_state(storage: Dict[str, Any], config: Config) -> AppState:
     # Inject runtime objects (excluded from persistence)
     state.config = config
     state.context = None  # Will be reconstructed from chat_path in chat_page()
+
+    # Fix: Reset top_p to None if it has a value (to avoid conflicts with temperature)
+    # This handles cached browser state from before the fix
+    if state.llm_kwargs.top_p is not None:
+        state.llm_kwargs.top_p = None
 
     # Ensure usage_maps is a defaultdict (lost during JSON serialization)
     if not isinstance(state.usage_maps, defaultdict):
