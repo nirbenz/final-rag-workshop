@@ -1,0 +1,24 @@
+name: "CodeQL Config"
+
+# Query suites to run
+queries:
+  # Extended security queries (more comprehensive than default)
+  - uses: security-extended
+  # Additional quality queries (style, maintainability, potential bugs)
+  - uses: security-and-quality
+
+# Paths to exclude from analysis
+paths-ignore:
+  - tests/
+  - data/
+  - out/
+  - examples/
+  - chats/
+  - docs/
+  - "**/test_*.py"
+  - "**/conftest.py"
+  - "**/*.md"
+
+# Paths to explicitly include (if specified, only these are analyzed)
+# paths:
+#   - src/
