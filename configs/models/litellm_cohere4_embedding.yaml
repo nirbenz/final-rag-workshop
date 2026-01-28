@@ -1,0 +1,6 @@
+model: "litellm:cohere.embed-v4:0"
+model_name: ${.model}
+kwargs:
+  input_type: "search_document"
+  output_dimensions: 512
+  embedding_types: "float"
