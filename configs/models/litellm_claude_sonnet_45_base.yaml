@@ -8,7 +8,6 @@ cost_map:
   reasoning_tokens: 0 # to keep track of reasoning tokens
 kwargs:
   max_tokens: 16384
-  top_p: 0.8
   top_k: 40
   streaming: false
   temperature: 0.0

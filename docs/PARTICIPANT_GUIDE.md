@@ -104,6 +104,12 @@ GOOGLE_CLOUD_LOCATION=us-central1
 uv run python -m nicegui_app.main
 ```
 
+or
+
+```bash
+python -m nicegui_app.main
+```
+
 Open your browser to `http://localhost:8080`. You should see the workshop interface.
 
 ---
@@ -780,11 +786,11 @@ be found    vectors      search
 
 Each exercise has a reference solution. Enable it by setting the toggle in `src/workshop/exercise_toggles.py`:
 
-| Exercise   | Toggle Variable              |
-| ---------- | ---------------------------- |
-| Similarity | `USE_SIMILARITY_SOLUTION`    |
-| Prompting  | `USE_PROMPTING_SOLUTION`     |
-| Chunkers   | `USE_CHUNKER_SOLUTION`       |
+| Exercise   | Toggle Variable           |
+| ---------- | ------------------------- |
+| Similarity | `USE_SIMILARITY_SOLUTION` |
+| Prompting  | `USE_PROMPTING_SOLUTION`  |
+| Chunkers   | `USE_CHUNKER_SOLUTION`    |
 
 All toggles are centralized in `exercise_toggles.py` to avoid circular imports.
 
