@@ -203,6 +203,7 @@ chats
 .nicegui
 !chats/example_chat.txt
 private_scripts
+*.bak
 
 # Vector DB storage
 .qdrant
