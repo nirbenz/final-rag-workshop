@@ -60,10 +60,11 @@ CHUNKER_KWARGS = {}
 # ============================================================================
 
 from workshop.rag.chunkers import MessageCountChunker
-from workshop.rag.engines import NaiveContextEngine
+from workshop.rag.engines import NaiveContextEngine, SimilarityContextEngine
 
 CHUNKER_CLASS = MessageCountChunker
-ENGINE_CLASS = NaiveContextEngine
+# ENGINE_CLASS = NaiveContextEngine
+ENGINE_CLASS = SimilarityContextEngine
 
 CHUNKER_DEFAULTS = {
     # Conversation windowing (inherited from BaseChunkerParams)
@@ -79,20 +80,20 @@ CHUNKER_DEFAULTS = {
 # ============================================================================
 # Note: embedder is injected automatically from Hydra config (models.embedding_llm)
 
-# from workshop.rag.engines import SimilarityContextEngine
-#
-# CHUNKER_CLASS = MessageCountChunker
-# ENGINE_CLASS = SimilarityContextEngine
-#
-# ENGINE_KWARGS = {
-#     "similarity_threshold": 0.0,
-#     "top_k": 10,
-# }
-#
-# CHUNKER_DEFAULTS = {
-#     "chunk_length": 6,
-#     "chunk_overlap": 4,
-# }
+from workshop.rag.engines import SimilarityContextEngine
+
+CHUNKER_CLASS = MessageCountChunker
+ENGINE_CLASS = SimilarityContextEngine
+
+ENGINE_KWARGS = {
+    "similarity_threshold": 0.0,
+    "top_k": 10,
+}
+
+CHUNKER_DEFAULTS = {
+    "chunk_length": 6,
+    "chunk_overlap": 4,
+}
 
 # ============================================================================
 # Phase 3: RAG engine (Qdrant with ANN search + re-ranking + prompting)

@@ -31,12 +31,32 @@ def get_embedding_model(model_config: LLMConfig) -> Embedder:
     Raises:
         APIInitializationError: If model name format is invalid
     """
+    import os
+
     if ":" not in model_config["model_name"]:
         raise APIInitializationError(
             f"Model name {model_config['model_name']} must be in format <provider>:<model_name>"
         )
 
-    settings = pydantic_ai.EmbeddingSettings(**model_config.get("kwargs", {}))
+    # Debug: Log API key status
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    base_url = os.getenv("OPENAI_BASE_URL", "")
+    logger.info(f"Creating embedder with model={model_config['model_name']}")
+    logger.info(f"OPENAI_API_KEY={'set ('+api_key[:10]+'...)' if api_key else 'NOT SET'}")
+    logger.info(f"OPENAI_BASE_URL={base_url or 'NOT SET'}")
+
+    # Get embedding settings from config
+    settings_dict = model_config.get("kwargs", {}).copy()
+
+    # For litellm: models, explicitly set the base_url and api_key
+    if model_config["model_name"].startswith("litellm:"):
+        if base_url:
+            settings_dict["base_url"] = base_url
+        if api_key:
+            settings_dict["api_key"] = api_key
+            logger.info(f"Explicitly passing API key to Embedder for litellm model")
+
+    settings = pydantic_ai.EmbeddingSettings(**settings_dict)
 
     return Embedder(model=model_config["model_name"], settings=settings)
 
@@ -111,7 +131,11 @@ async def _count_tokens(embedder: Embedder, texts: List[str]) -> List[int]:
     """
     counts = []
     for text in texts:
-        count = await embedder.count_tokens(text)
+        try:
+            count = await embedder.count_tokens(text)
+        except Exception:
+            # Fallback for non-OpenAI models: approximate 4 chars per token
+            count = len(text) // 4
         counts.append(count)
     return counts
 
