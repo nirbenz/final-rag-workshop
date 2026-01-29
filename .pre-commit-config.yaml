@@ -8,14 +8,14 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: ["--maxkb=1000"]
 
   # Detect secrets
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        args: ['--baseline', '.github/.secrets.baseline']
+        args: ["--baseline", ".github/.secrets.baseline"]
 
   # Local hooks
   - repo: local
@@ -41,10 +41,18 @@ repos:
         types: [python]
         pass_filenames: false
 
+      # Check for non-ASCII characters introduced by LLMs
+      - id: check-llm-chars
+        name: Check LLM characters
+        entry: python .github/scripts/check_llm_chars.py
+        language: system
+        types: [text]
+        files: \.(py|md|txt|json|mdc)$
+
       # Update requirements.txt from pyproject.toml
       - id: update-requirements
         name: Update requirements.txt
-        entry: ./.github/scripts/update-requirements.sh
+        entry: .github/scripts/update-requirements.sh
         language: system
         files: ^pyproject\.toml$
         pass_filenames: false
