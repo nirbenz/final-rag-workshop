@@ -13,19 +13,11 @@ from pathlib import Path
 import re
 import sys
 
-KNOWN_ISSUES = {
-    "\u2192": "->",
-    "\u2014": "-",
-    "\u201c": '"',
-    "\u201d": '"',
-    "\u2018": "'",
-    "\u2019": "'",
-    "\u2026": "...",
-    "\u00b7": " ",
-    "\u2022": " ",
-}
+KNOWN_ISSUES = {"→": "->", "—": "-", "“": '"', "”": '"', "‘": "'", "’": "'", "…": "...", "·": " ", "•": " ", "×": "x"}
 
-KNOWN_IGNORES = {"\u251c", "\u2500", "\u2514", "\u2502"}
+KNOWN_IGNORES = ["├", "─", "└", "│", "┘", "┐", "┬", "┤", "┌", "┬", "┌"]  # used by tree/visualizations
+KNOWN_IGNORES += ["✓", "❌"]  # used by pytest
+KNOWN_IGNORES += ["▌"]  # generally cute
 
 NON_ASCII_RE = re.compile(r"[^\x00-\x7f]")
 

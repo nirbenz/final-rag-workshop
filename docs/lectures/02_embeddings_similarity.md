@@ -45,20 +45,21 @@ Neural networks compress meaning into dense vectors:
 **The Formula:**
 
 ```
-cos(θ) = (A · B) / (||A|| × ||B||)
+cos(\theta) = (A   B) / (||A|| x ||B||)
 ```
 
 Where:
-- `A · B` is the dot product
+
+- `A   B` is the dot product
 - `||A||` is the magnitude (L2 norm) of A
 
 **Why Cosine?**
 
-| Property | Benefit |
-|----------|---------|
-| Normalized | Scale-invariant (vector length doesn't matter) |
-| Range [-1, 1] | Easy to interpret |
-| Efficient | Just dot product after normalization |
+| Property      | Benefit                                        |
+| ------------- | ---------------------------------------------- |
+| Normalized    | Scale-invariant (vector length doesn't matter) |
+| Range [-1, 1] | Easy to interpret                              |
+| Efficient     | Just dot product after normalization           |
 
 **Alternatives:**
 
@@ -68,9 +69,9 @@ Where:
 **Intuition:** Cosine measures the angle between vectors, not the distance.
 
 ```
-cos(0°) = 1.0   → Identical direction (most similar)
-cos(90°) = 0.0  → Perpendicular (unrelated)
-cos(180°) = -1.0 → Opposite direction (most dissimilar)
+cos(0) = 1.0   -> Identical direction (most similar)
+cos(90) = 0.0  -> Perpendicular (unrelated)
+cos(180) = -1.0 -> Opposite direction (most dissimilar)
 ```
 
 ---
@@ -126,10 +127,10 @@ cos(180°) = -1.0 → Opposite direction (most dissimilar)
 
 **Parameters:**
 
-| Parameter | Purpose | Typical Value |
-|-----------|---------|---------------|
-| `threshold` | Minimum relevance | 0.2 - 0.5 |
-| `k` | Maximum results | 5 - 20 |
+| Parameter   | Purpose           | Typical Value |
+| ----------- | ----------------- | ------------- |
+| `threshold` | Minimum relevance | 0.2 - 0.5     |
+| `k`         | Maximum results   | 5 - 20        |
 
 **Question:** This is still O(n) - how do we scale to millions of documents?
 

@@ -186,9 +186,9 @@ After top-k retrieval:
 
 ```
 BM25 (keyword match) + Semantic Search
-↓
+
 Reciprocal Rank Fusion
-↓
+
 Combined results
 ```
 

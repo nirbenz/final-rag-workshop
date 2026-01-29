@@ -47,7 +47,8 @@ repos:
         entry: python .github/scripts/check_llm_chars.py
         language: system
         types: [text]
-        files: \.(py|md|txt|json|mdc)$
+        files: \.(py|md|txt|json|mdc|sh)$
+        exclude: ^(\.devconfig/|\.github/scripts/check_llm_chars\.py$)
 
       # Update requirements.txt from pyproject.toml
       - id: update-requirements

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Test script for RAG workshop pipeline
-# Tests: chunker → engine pipeline with Phase 1 components
+# Tests: chunker -> engine pipeline with Phase 1 components
 
 from datetime import datetime
 from pathlib import Path
@@ -24,7 +24,7 @@ def test_base_chunker_params():
     assert params.max_tokens == 25_000, "Default max_tokens should be 25,000"
     assert params.max_days == 25, "Default max_days should be 25"
 
-    print("✓ BaseChunkerParams defaults are correct")
+    print(" BaseChunkerParams defaults are correct")
 
     # Test with custom values
     custom_params = BaseChunkerParams(
@@ -34,7 +34,7 @@ def test_base_chunker_params():
     assert custom_params.max_tokens == 50_000
     assert custom_params.max_days == 30
 
-    print("✓ BaseChunkerParams accepts custom values")
+    print(" BaseChunkerParams accepts custom values")
 
 
 def test_message_count_params_inheritance():
@@ -51,7 +51,7 @@ def test_message_count_params_inheritance():
     assert hasattr(params, "chunk_length"), "Should have chunk_length"
     assert hasattr(params, "chunk_overlap"), "Should have chunk_overlap"
 
-    print("✓ MessageCountParams correctly inherits from BaseChunkerParams")
+    print(" MessageCountParams correctly inherits from BaseChunkerParams")
 
     # Test with mixed values
     mixed_params = MessageCountParams(
@@ -65,7 +65,7 @@ def test_message_count_params_inheritance():
     assert mixed_params.chunk_length == 10
     assert mixed_params.chunk_overlap == 3
 
-    print("✓ MessageCountParams accepts both inherited and own fields")
+    print(" MessageCountParams accepts both inherited and own fields")
 
 
 def create_test_messages(count: int = 20) -> List[WhatsappMessage]:
@@ -91,7 +91,7 @@ def test_message_count_chunker():
     chunker = MessageCountChunker()
     chunks = chunker.chunk_messages(messages)
 
-    print(f"✓ Created {len(chunks)} chunks from {len(messages)} messages")
+    print(f" Created {len(chunks)} chunks from {len(messages)} messages")
 
     # Verify chunk structure
     first_chunk = chunks[0]
@@ -100,7 +100,7 @@ def test_message_count_chunker():
     assert hasattr(first_chunk, "message_ids"), "Chunk should have message_ids"
     assert hasattr(first_chunk, "metadata"), "Chunk should have metadata"
 
-    print("✓ Chunks have correct structure")
+    print(" Chunks have correct structure")
 
     # Verify metadata
     assert "start_idx" in first_chunk.metadata
@@ -109,7 +109,7 @@ def test_message_count_chunker():
     assert "end_time" in first_chunk.metadata
     assert "speakers" in first_chunk.metadata
 
-    print("✓ Chunk metadata is complete")
+    print(" Chunk metadata is complete")
 
     # Test with custom params (chunk_length=3, overlap=1)
     custom_chunker = MessageCountChunker(params=MessageCountParams(chunk_length=3, chunk_overlap=1))
@@ -119,13 +119,13 @@ def test_message_count_chunker():
     expected_count = 5
     assert len(custom_chunks) == expected_count, f"Expected {expected_count} chunks, got {len(custom_chunks)}"
 
-    print(f"✓ Custom chunking (length=3, overlap=1) creates correct number of chunks")
+    print(f" Custom chunking (length=3, overlap=1) creates correct number of chunks")
 
     # Verify overlap
     second_chunk = custom_chunks[1]
     assert 2 in second_chunk.message_ids, "Second chunk should include message 2 (overlap)"
 
-    print("✓ Overlap works correctly")
+    print(" Overlap works correctly")
 
 
 def test_get_chunk_boundaries():
@@ -141,8 +141,8 @@ def test_get_chunk_boundaries():
     expected = [(0, 5), (3, 8), (6, 11), (9, 12)]
     assert boundaries == expected, f"Expected {expected}, got {boundaries}"
 
-    print(f"✓ Chunk boundaries: {boundaries}")
-    print("✓ get_chunk_boundaries works correctly")
+    print(f" Chunk boundaries: {boundaries}")
+    print(" get_chunk_boundaries works correctly")
 
 
 def test_naive_context_engine():
@@ -160,28 +160,28 @@ def test_naive_context_engine():
     # Add chunks
     engine.add_context(chunks)
 
-    print(f"✓ Added {len(chunks)} chunks to engine")
+    print(f" Added {len(chunks)} chunks to engine")
 
     # Verify storage
     stored_chunks = engine.context
     assert len(stored_chunks) == len(chunks), "All chunks should be stored"
 
-    print("✓ Engine correctly stores chunks")
+    print(" Engine correctly stores chunks")
 
     # Test retrieval
     retrieved = engine.get_relevant_context("test query", top_k=5)
     assert len(retrieved) == len(chunks), "NaiveContextEngine should return all chunks"
 
-    print("✓ get_relevant_context returns all chunks (naive behavior)")
+    print(" get_relevant_context returns all chunks (naive behavior)")
 
 
 def test_full_pipeline():
-    """Test complete pipeline: messages → chunker → engine → retrieval."""
+    """Test complete pipeline: messages -> chunker -> engine -> retrieval."""
     print("\n=== Testing Full Pipeline ===")
 
     # 1. Create messages
     messages = create_test_messages(30)
-    print(f"✓ Created {len(messages)} test messages")
+    print(f" Created {len(messages)} test messages")
 
     # 2. Initialize chunker
     chunker = MessageCountChunker(
@@ -192,36 +192,36 @@ def test_full_pipeline():
             chunk_overlap=2,
         )
     )
-    print("✓ Initialized MessageCountChunker")
+    print(" Initialized MessageCountChunker")
 
     # 3. Chunk messages
     chunks = chunker.chunk_messages(messages)
-    print(f"✓ Chunked into {len(chunks)} chunks")
+    print(f" Chunked into {len(chunks)} chunks")
 
     # 4. Initialize engine
     engine = NaiveContextEngine()
-    print("✓ Initialized NaiveContextEngine")
+    print(" Initialized NaiveContextEngine")
 
     # 5. Load chunks into engine
     engine.add_context(chunks)
-    print(f"✓ Loaded {len(chunks)} chunks into engine")
+    print(f" Loaded {len(chunks)} chunks into engine")
 
     # 6. Verify storage
     stored = engine.context
     assert len(stored) == len(chunks)
-    print(f"✓ Engine contains {len(stored)} chunks")
+    print(f" Engine contains {len(stored)} chunks")
 
     # 7. Test retrieval
     query = "test query"
     retrieved = engine.get_relevant_context(query, top_k=10)
     assert len(retrieved) > 0
-    print(f"✓ Retrieved {len(retrieved)} chunks for query: '{query}'")
+    print(f" Retrieved {len(retrieved)} chunks for query: '{query}'")
 
     # 8. Verify chunk traceability
     first_chunk = retrieved[0]
     reconstructed_messages = first_chunk.get_messages(messages)
     assert len(reconstructed_messages) > 0
-    print(f"✓ Can reconstruct {len(reconstructed_messages)} original messages from chunk")
+    print(f" Can reconstruct {len(reconstructed_messages)} original messages from chunk")
 
     print("\n=== PIPELINE TEST PASSED ===")
 
@@ -236,7 +236,7 @@ def test_workshop_config_loading():
     assert hasattr(workshop_config, "ENGINE_CLASS"), "Should have ENGINE_CLASS"
     assert hasattr(workshop_config, "CHUNKER_DEFAULTS"), "Should have CHUNKER_DEFAULTS"
 
-    print("✓ workshop_config.py imports successfully")
+    print(" workshop_config.py imports successfully")
 
     # Test instantiation with defaults
     # Need to create params object from CHUNKER_DEFAULTS
@@ -259,14 +259,14 @@ def test_workshop_config_loading():
     else:
         engine = workshop_config.ENGINE_CLASS(**engine_kwargs)
 
-    print(f"✓ Created chunker: {type(chunker).__name__}")
-    print(f"✓ Created engine: {type(engine).__name__}")
+    print(f" Created chunker: {type(chunker).__name__}")
+    print(f" Created engine: {type(engine).__name__}")
 
     # Verify defaults match workshop_config.CHUNKER_DEFAULTS
     assert chunker.params.chunk_length == 6
     assert chunker.params.chunk_overlap == 4
 
-    print("✓ CHUNKER_DEFAULTS correctly applied")
+    print(" CHUNKER_DEFAULTS correctly applied")
 
 
 def main():
@@ -285,7 +285,7 @@ def main():
         test_workshop_config_loading()
 
         print("\n" + "=" * 60)
-        print("ALL TESTS PASSED ✓")
+        print("ALL TESTS PASSED ")
         print("=" * 60)
         print("\nPhase 1 (MessageCountChunker + NaiveEngine) is ready!")
         print("\nNext steps:")
@@ -300,10 +300,10 @@ def main():
         return 0
 
     except AssertionError as e:
-        print(f"\n❌ TEST FAILED: {e}")
+        print(f"\n TEST FAILED: {e}")
         return 1
     except Exception as e:
-        print(f"\n❌ ERROR: {e}")
+        print(f"\n ERROR: {e}")
         import traceback
 
         traceback.print_exc()

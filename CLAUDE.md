@@ -65,8 +65,8 @@ chats/                   # Sample WhatsApp chat data
 
 **Data Flow**:
 ```
-Messages → ChatContext (windowing) → Chunker → ChunkObjects →
-Engine (storage/indexing) → get_relevant_context() → Retrieved chunks → LLM
+Messages -> ChatContext (windowing) -> Chunker -> ChunkObjects ->
+Engine (storage/indexing) -> get_relevant_context() -> Retrieved chunks -> LLM
 ```
 
 ### Key Entry Points

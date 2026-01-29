@@ -72,7 +72,11 @@ class LLMKwargs(BaseModel):
         default=None,
         ge=0.0,
         le=1.0,
-        json_schema_extra={"step": 0.05, "label": "Top P", "tooltip": "Nucleus sampling threshold (leave empty if using temperature)"},
+        json_schema_extra={
+            "step": 0.05,
+            "label": "Top P",
+            "tooltip": "Nucleus sampling threshold (leave empty if using temperature)",
+        },
     )
 
 
