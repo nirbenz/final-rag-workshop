@@ -113,3 +113,59 @@ def _patch_openai_clients() -> None:
         return _original_async_init(self, *args, **kwargs)
 
     openai.AsyncOpenAI.__init__ = _patched_async_init
+
+    # Patch the AsyncAPIClient._build_request to intercept body before serialization
+    from openai._base_client import AsyncAPIClient
+    _original_build_request = AsyncAPIClient._build_request
+
+    def _patched_build_request(self, *args, **kwargs):
+        # Get the options object which contains json_data
+        options = kwargs.get("options") if "options" in kwargs else (args[0] if args else None)
+
+        if options and hasattr(options, "json_data") and isinstance(options.json_data, dict):
+            model = options.json_data.get("model", "")
+            if ("cohere" in model.lower() or model.startswith("litellm:")) and "encoding_format" in options.json_data:
+                original_format = options.json_data["encoding_format"]
+                # Remove encoding_format entirely - Cohere/Bedrock doesn't support it at all
+                del options.json_data["encoding_format"]
+                logger.info(f"[BUILD_REQUEST PATCH] Removed encoding_format='{original_format}' for model: {model}")
+
+        return _original_build_request(self, *args, **kwargs)
+
+    AsyncAPIClient._build_request = _patched_build_request
+    logger.info("Patched AsyncAPIClient._build_request to remove encoding_format for Cohere")
+
+    # Patch embeddings.create to strip encoding_format for Cohere models
+    try:
+        from openai.resources.embeddings import AsyncEmbeddings
+        _original_async_create = AsyncEmbeddings.create
+
+        async def _patched_async_create(self, **kwargs):
+            model = kwargs.get("model", "")
+            logger.debug(f"[PATCH] AsyncEmbeddings.create - model={model}")
+            logger.debug(f"[PATCH] kwargs keys: {list(kwargs.keys())}")
+            logger.debug(f"[PATCH] has encoding_format in kwargs: {('encoding_format' in kwargs)}")
+            if "extra_body" in kwargs:
+                logger.debug(f"[PATCH] extra_body: {kwargs.get('extra_body')}")
+
+            # Strip encoding_format for Cohere/LiteLLM models
+            if model.startswith("litellm:") or "cohere" in model.lower():
+                logger.info(f"[PATCH] Processing Cohere/LiteLLM model: {model}")
+
+                # Check direct kwargs
+                if "encoding_format" in kwargs:
+                    logger.info(f"[PATCH] Stripping encoding_format from kwargs for model: {model}")
+                    kwargs.pop("encoding_format")
+
+                # Check extra_body
+                if "extra_body" in kwargs and isinstance(kwargs["extra_body"], dict):
+                    if "encoding_format" in kwargs["extra_body"]:
+                        logger.info(f"[PATCH] Stripping encoding_format from extra_body for model: {model}")
+                        kwargs["extra_body"].pop("encoding_format")
+
+            return await _original_async_create(self, **kwargs)
+
+        AsyncEmbeddings.create = _patched_async_create
+        logger.info("Patched AsyncEmbeddings.create to strip encoding_format for Cohere/LiteLLM")
+    except Exception as e:
+        logger.warning(f"Could not patch AsyncEmbeddings.create: {e}")
