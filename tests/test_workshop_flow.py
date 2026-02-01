@@ -34,6 +34,15 @@ HAS_OPENAI_KEY = bool(os.environ.get("OPENAI_API_KEY"))
 HAS_ANTHROPIC_KEY = bool(os.environ.get("ANTHROPIC_API_KEY"))
 HAS_GOOGLE_KEY = bool(os.environ.get("GOOGLE_API_KEY"))
 HAS_ANY_LLM_KEY = HAS_OPENAI_KEY or HAS_ANTHROPIC_KEY or HAS_GOOGLE_KEY
+IS_CI = bool(os.environ.get("CI"))
+
+if IS_CI and not HAS_ANY_LLM_KEY:
+    pytest.fail(
+        "CI environment detected but no LLM API key found. "
+        "Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GOOGLE_API_KEY "
+        "as repository secrets.",
+        pytrace=False,
+    )
 
 requires_llm_key = pytest.mark.skipif(
     not HAS_ANY_LLM_KEY,
@@ -496,19 +505,19 @@ class TestIntegrationWithLLM:
         """Pick an available LLM based on environment variables."""
         if HAS_OPENAI_KEY:
             return {
-                "model_name": "openai:gpt-4o-mini",
+                "model_name": "openai:gpt-5-nano-2025-08-07",
                 "kwargs": {"temperature": 0.3},
                 "structured_output_type": None,
             }
         if HAS_ANTHROPIC_KEY:
             return {
-                "model_name": "anthropic:claude-3-haiku-20240307",
+                "model_name": "anthropic:claude-haiku-4-5-20251001",
                 "kwargs": {"temperature": 0.3},
                 "structured_output_type": None,
             }
         if HAS_GOOGLE_KEY:
             return {
-                "model_name": "google-gla:gemini-2.0-flash",
+                "model_name": "google-gla:gemini-2.5-flash",
                 "kwargs": {"temperature": 0.3},
                 "structured_output_type": None,
             }
@@ -541,6 +550,195 @@ class TestIntegrationWithLLM:
         )
 
         assert isinstance(result.output, RAGResponse)
+        assert result.output.query_understanding
         assert result.output.output
         assert result.output.confidence in ("high", "medium", "low")
         assert len(result.output.reasoning_steps) >= 1
+        assert len(result.output.context_used) >= 1
+
+    @requires_llm_key
+    def test_real_llm_prompting_exercise_raises(self, example_chunks: List[ChunkObject]) -> None:
+        """
+        With prompting=False, the LLM agent raises NotImplementedError.
+
+        The exercise get_system_prompt() stub raises before any LLM API
+        call is made, validating that the toggle correctly blocks the
+        agent path when the participant has not yet implemented the prompt.
+        """
+        set_toggles(prompting=False)
+
+        from workshop.llm import get_pydantic_agent
+        from workshop.rag.engines.naive import NaiveContextEngine
+        from workshop.structured_types import RAGResponse
+
+        config: LLMConfig = self._get_llm_config()
+        agent = get_pydantic_agent(config, structured_output_type=RAGResponse)
+
+        engine = NaiveContextEngine()
+        engine.add_context(example_chunks[:3])
+        context_text = "\n\n---\n\n".join(chunk.text for chunk in engine.get_relevant_context("test"))
+
+        with pytest.raises(NotImplementedError):
+            agent.run_sync(
+                "What topics were discussed?",
+                deps={"context": context_text},
+            )
+
+    @requires_llm_key
+    def test_real_llm_with_similarity_engine(
+        self,
+        example_chunks: List[ChunkObject],
+        mock_embedder: Embedder,
+    ) -> None:
+        """
+        Phase 2 end-to-end: SimilarityContextEngine retrieval feeds a real LLM.
+
+        Validates the full Phase 2 flow: embed chunks, compute cosine
+        similarity, retrieve top-k, format context, and produce a
+        structured RAGResponse.
+        """
+        set_toggles(prompting=True, similarity=True)
+
+        from workshop.llm import get_pydantic_agent
+        from workshop.rag.engines.similarity import SimilarityContextEngine
+        from workshop.structured_types import RAGResponse
+
+        engine = SimilarityContextEngine(
+            embedder=mock_embedder,
+            similarity_threshold=0.0,
+            top_k=3,
+        )
+        engine.add_context(example_chunks)
+
+        results = engine.get_relevant_context("chunking strategies")
+        assert len(results) > 0
+
+        context_text = "\n\n---\n\n".join(chunk.text for chunk in results)
+
+        config: LLMConfig = self._get_llm_config()
+        agent = get_pydantic_agent(config, structured_output_type=RAGResponse)
+
+        result = agent.run_sync(
+            "What topics were discussed?",
+            deps={"context": context_text},
+        )
+
+        assert isinstance(result.output, RAGResponse)
+        assert result.output.query_understanding
+        assert result.output.output
+        assert result.output.confidence in ("high", "medium", "low")
+        assert len(result.output.reasoning_steps) >= 1
+        assert len(result.output.context_used) >= 1
+
+    @requires_llm_key
+    def test_real_llm_with_rag_engine(
+        self,
+        example_chunks: List[ChunkObject],
+        mock_embedder: Embedder,
+        tmp_path: Path,
+    ) -> None:
+        """
+        Phase 3/4 end-to-end: RAGContextEngine (ANN + BM25) feeds a real LLM.
+
+        Validates the full Phase 3/4 flow: Qdrant ANN search, BM25
+        re-ranking, context formatting, and structured RAGResponse
+        generation.
+        """
+        set_toggles(prompting=True, reranking=True)
+
+        from workshop.llm import get_pydantic_agent
+        from workshop.rag.engines.qdrant import RAGContextEngine
+        from workshop.structured_types import RAGResponse
+
+        db_path = str(tmp_path / "qdrant_llm_rag")
+        engine = RAGContextEngine(
+            embedder=mock_embedder,
+            db_path=db_path,
+            top_k=3,
+            rerank_candidates=10,
+        )
+        try:
+            engine.add_context(example_chunks)
+            results = engine.get_relevant_context("chunking strategies")
+            assert len(results) > 0
+
+            context_text = "\n\n---\n\n".join(chunk.text for chunk in results)
+
+            config: LLMConfig = self._get_llm_config()
+            agent = get_pydantic_agent(config, structured_output_type=RAGResponse)
+
+            result = agent.run_sync(
+                "What topics were discussed?",
+                deps={"context": context_text},
+            )
+
+            assert isinstance(result.output, RAGResponse)
+            assert result.output.query_understanding
+            assert result.output.output
+            assert result.output.confidence in ("high", "medium", "low")
+            assert len(result.output.reasoning_steps) >= 1
+            assert len(result.output.context_used) >= 1
+        finally:
+            engine.delete_storage()
+
+    @requires_llm_key
+    def test_real_llm_full_pipeline(
+        self,
+        mock_embedder: Embedder,
+        tmp_path: Path,
+    ) -> None:
+        """
+        Connected pipeline: chat file -> chunk -> retrieve -> LLM response.
+
+        Walks the entire workshop pipeline from a raw WhatsApp chat export
+        through to a structured LLM response, validating that every stage
+        produces output and the final RAGResponse is well-formed.
+        """
+        set_toggles(prompting=True, similarity=True, reranking=True)
+
+        from workshop.llm import get_pydantic_agent
+        from workshop.rag.chunkers import MessageCountChunker, MessageCountParams
+        from workshop.rag.engines.qdrant import RAGContextEngine
+        from workshop.structured_types import RAGResponse
+
+        messages = load_whatsapp_chat(EXAMPLE_CHAT_PATH)
+        assert len(messages) > 0
+
+        chunker: Any = MessageCountChunker(
+            params=MessageCountParams(chunk_length=5, chunk_overlap=2),
+        )
+        chunks = chunker.chunk_messages(messages)
+        assert len(chunks) > 0
+
+        db_path = str(tmp_path / "qdrant_pipeline")
+        engine = RAGContextEngine(
+            embedder=mock_embedder,
+            db_path=db_path,
+            top_k=3,
+            rerank_candidates=10,
+        )
+        try:
+            engine.add_context(chunks)
+            assert engine.context_count == len(chunks)
+
+            results = engine.get_relevant_context("What chunking strategies were discussed?")
+            assert 0 < len(results) <= 3
+
+            context_text = "\n\n---\n\n".join(chunk.text for chunk in results)
+
+            config: LLMConfig = self._get_llm_config()
+            agent = get_pydantic_agent(config, structured_output_type=RAGResponse)
+
+            result = agent.run_sync(
+                "What chunking strategies were discussed?",
+                deps={"context": context_text},
+            )
+
+            assert isinstance(result.output, RAGResponse)
+            assert result.output.query_understanding
+            assert result.output.output
+            assert result.output.confidence in ("high", "medium", "low")
+            assert len(result.output.reasoning_steps) >= 1
+            assert len(result.output.context_used) >= 1
+        finally:
+            engine.delete_storage()
