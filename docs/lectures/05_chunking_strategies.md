@@ -1,7 +1,7 @@
 # Lecture 05: Advanced Chunking Strategies
 
 > **Duration:** 15 minutes
-> **Phase:** Phase 4 - Data-Aware Chunking
+> **Phase:** Optional / Take-Home - Data-Aware Chunking
 
 ---
 

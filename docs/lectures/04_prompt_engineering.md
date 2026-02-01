@@ -1,7 +1,7 @@
 # Lecture 04: Prompt Engineering for RAG
 
 > **Duration:** 10 minutes
-> **Phase:** Phase 3B - The "G" in RAG
+> **Phase:** Phase 2 - The "G" in RAG
 
 ---
 

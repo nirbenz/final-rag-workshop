@@ -7,25 +7,19 @@
 """
 Workshop Configuration File
 
-Participants edit this file to select chunker and engine implementations.
-The GUI automatically adapts based on these selections.
-
-How to use:
-1. Uncomment the chunker/engine you want to test
-2. Comment out the others
-3. Edit src/workshop/exercise_toggles.py: set USE_*_SOLUTION to False for exercises
-4. Restart the app
+Change PHASE below to advance through the workshop.
+Edit exercise_toggles.py to switch between your code and reference solutions.
+Restart the app after changes.
 
 Workshop Progression:
-- Phase 1: MessageCountChunker + NaiveContextEngine (baseline + exploration)
-- Phase 2: SimilarityContextEngine (embedding-based retrieval)
+- Phase 1: NaiveContextEngine (baseline exploration)
+- Phase 2: Prompt engineering exercise (still NaiveContextEngine)
+  Exercise: exercises/prompting.py - get_system_prompt()
+- Phase 3: SimilarityContextEngine (NumPy in-memory retrieval)
   Exercise: exercises/similarity.py - cosine_similarity(), get_top_k()
-- Phase 3: RAGContextEngine + Prompt Engineering (ANN search + generation)
+- Phase 4: RAGContextEngine (Qdrant ANN + BM25 re-ranking)
   Exercise: exercises/reranking.py - rerank()
-  Exercise: exercises/prompting.py - system prompt, context formatting
-- Phase 4: SegmentingChunker (time-gap segmentation)
-  Exercise: exercises/segmenting.py - segment_by_time_gaps(), chunk_segments()
-- Extensions: SemanticChunker, ContextualChunker
+- Optional: SegmentingChunker, SentenceBoundaryChunker, SemanticChunker
 """
 
 # ============================================================================
@@ -34,11 +28,10 @@ Workshop Progression:
 # Edit exercise_toggles.py to switch between exercises and solutions.
 # Toggles are in a separate file to avoid circular imports.
 #
-# Exercise descriptions:
-# - USE_SIMILARITY_SOLUTION: cosine_similarity() and get_top_k() for Phase 2 engine
-# - USE_RERANKING_SOLUTION: rerank() for Phase 3 two-stage retrieval
-# - USE_PROMPTING_SOLUTION: build_full_prompt() for RAG system prompt design
-# - USE_SEGMENTING_SOLUTION: segment_by_time_gaps() and chunk_segments() for Phase 4 chunker
+# - USE_PROMPTING_SOLUTION: get_system_prompt() for RAG prompt design (Phase 2)
+# - USE_SIMILARITY_SOLUTION: cosine_similarity() and get_top_k() (Phase 3)
+# - USE_RERANKING_SOLUTION: rerank() for two-stage retrieval (Phase 4)
+# - USE_SEGMENTING_SOLUTION: segment_by_time_gaps() + chunk_segments() (optional)
 
 from workshop.exercise_toggles import (  # noqa: F401
     USE_PROMPTING_SOLUTION,
@@ -48,7 +41,12 @@ from workshop.exercise_toggles import (  # noqa: F401
 )
 
 # ============================================================================
-# Engine initialization kwargs (optional) - default to empty (override by uncommenting)
+# Workshop Phase (change this number to advance)
+# ============================================================================
+PHASE = 1
+
+# ============================================================================
+# Engine initialization kwargs (optional) - default to empty
 # ============================================================================
 
 ENGINE_KWARGS = {}
@@ -56,95 +54,109 @@ ENGINE_KWARGS = {}
 CHUNKER_KWARGS = {}
 
 # ============================================================================
-# Phase 1: Baseline (Message-count chunker + Naive engine)
+# Phase 1-2: Baseline + Prompt Engineering (Naive engine)
 # ============================================================================
+if PHASE in (1, 2):
+    # Phase 1: Explore baseline system, build intuition
+    # Phase 2: Prompt engineering exercise (exercises/prompting.py)
 
-from workshop.rag.chunkers import MessageCountChunker
-from workshop.rag.engines import NaiveContextEngine
+    from workshop.rag.chunkers import MessageCountChunker
+    from workshop.rag.engines import NaiveContextEngine
 
-CHUNKER_CLASS = MessageCountChunker
-ENGINE_CLASS = NaiveContextEngine
+    CHUNKER_CLASS = MessageCountChunker
+    ENGINE_CLASS = NaiveContextEngine
 
-CHUNKER_DEFAULTS = {
-    # Conversation windowing (inherited from BaseChunkerParams)
-    "max_tokens": 25_000,
-    "max_days": 25,
-    # Chunking-specific
-    "chunk_length": 6,
-    "chunk_overlap": 4,
-}
-
-# ============================================================================
-# Phase 2: Similarity engine (embedding-based retrieval with NumPy)
-# ============================================================================
-# Note: embedder is injected automatically from Hydra config (models.embedding_llm)
-
-# from workshop.rag.engines import SimilarityContextEngine
-#
-# CHUNKER_CLASS = MessageCountChunker
-# ENGINE_CLASS = SimilarityContextEngine
-#
-# ENGINE_KWARGS = {
-#     "similarity_threshold": 0.0,
-#     "top_k": 10,
-# }
-#
-# CHUNKER_DEFAULTS = {
-#     "chunk_length": 6,
-#     "chunk_overlap": 4,
-# }
+    CHUNKER_DEFAULTS = {
+        "max_tokens": 25_000,
+        "max_days": 25,
+        "chunk_length": 6,
+        "chunk_overlap": 4,
+    }
 
 # ============================================================================
-# Phase 3: RAG engine (Qdrant with ANN search + re-ranking + prompting)
+# Phase 3: Similarity engine (NumPy in-memory cosine similarity)
 # ============================================================================
-# Note: embedder is injected automatically from Hydra config (models.embedding_llm)
-#
-# Exercises for Phase 3:
-# 1. exercises/reranking.py - Implement rerank() for two-stage retrieval
-# 2. exercises/prompting.py - Design system prompts and context formatting
 
-# from workshop.rag.engines import RAGContextEngine
+if PHASE == 3:
+    # Exercise: exercises/similarity.py - cosine_similarity(), get_top_k()
+    # Note: embedder is injected automatically from Hydra config (models.embedding_llm)
+
+    from workshop.rag.chunkers import MessageCountChunker
+    from workshop.rag.engines import SimilarityContextEngine
+
+    CHUNKER_CLASS = MessageCountChunker
+    ENGINE_CLASS = SimilarityContextEngine
+
+    ENGINE_KWARGS = {
+        "similarity_threshold": 0.0,
+        "top_k": 10,
+    }
+
+    CHUNKER_DEFAULTS = {
+        "chunk_length": 6,
+        "chunk_overlap": 4,
+    }
+
+# ============================================================================
+# Phase 4: RAG engine (Qdrant ANN search + BM25 re-ranking)
+# ============================================================================
+
+if PHASE == 4:
+    # Exercise: exercises/reranking.py - rerank()
+    # Note: embedder is injected automatically from Hydra config (models.embedding_llm)
+
+    from workshop.rag.chunkers import MessageCountChunker
+    from workshop.rag.engines import RAGContextEngine
+
+    CHUNKER_CLASS = MessageCountChunker
+    ENGINE_CLASS = RAGContextEngine
+
+    ENGINE_KWARGS = {
+        "db_path": ".qdrant",
+        "collection_name": "workshop_chunks",
+        "top_k": 10,
+        "rerank_candidates": 50,
+    }
+
+    CHUNKER_DEFAULTS = {
+        "chunk_length": 6,
+        "chunk_overlap": 4,
+    }
+
+if PHASE not in (1, 2, 3, 4):
+    msg = f"Invalid PHASE={PHASE}. Must be 1, 2, 3, or 4."
+    raise ValueError(msg)
+
+# ============================================================================
+# Optional / Take-Home: Advanced chunkers
+# ============================================================================
+
+# Segmenting chunker (time-gap segmentation)
+# from workshop.rag.chunkers import SegmentingChunker, SegmentingChunkerParams
 #
-# CHUNKER_CLASS = MessageCountChunker
+# CHUNKER_CLASS = SegmentingChunker
 # ENGINE_CLASS = RAGContextEngine
 #
-# ENGINE_KWARGS = {
-#     "db_path": ".qdrant",
-#     "collection_name": "workshop_chunks",
-#     "top_k": 10,
-#     "rerank_candidates": 50,  # Retrieve 50 candidates, re-rank to top_k
-# }
-#
 # CHUNKER_DEFAULTS = {
+#     "time_gap_hours": 6.0,
 #     "chunk_length": 6,
 #     "chunk_overlap": 4,
 # }
 
-# ============================================================================
-# Phase 4: Sentence-boundary chunker (participants implement)
-# ============================================================================
-
-# from workshop.rag.chunkers import SentenceBoundaryChunker, SentenceBoundaryParams
+# Sentence-boundary chunker (token-aware chunking)
+# from workshop.rag.chunkers import SentenceBoundaryChunker
 #
 # CHUNKER_CLASS = SentenceBoundaryChunker
-# ENGINE_CLASS = NaiveContextEngine
+# ENGINE_CLASS = RAGContextEngine
 #
 # CHUNKER_DEFAULTS = {
-#     # Conversation windowing
 #     "max_tokens": 25_000,
 #     "max_days": 25,
-#     # Chunking-specific
-#     "max_chunk_tokens": 500,  # Note: different from max_tokens (context window)
+#     "max_chunk_tokens": 500,
 #     "overlap_sentences": 2,
 # }
 
-
-# ============================================================================
-# Extensions: Advanced chunkers
-# ============================================================================
-
 # Semantic chunker (topic-aware)
-# Note: embed_fn is injected automatically from Hydra config (models.embedding_llm)
 # from workshop.rag.chunkers import SemanticChunker, SemanticChunkerParams
 #
 # CHUNKER_CLASS = SemanticChunker
@@ -155,18 +167,6 @@ CHUNKER_DEFAULTS = {
 # CHUNKER_DEFAULTS = {
 #     "similarity_threshold": 0.7,
 #     "min_chunk_size": 3,
-# }
-
-# Segmenting chunker (time-gap segmentation)
-# from workshop.rag.chunkers import SegmentingChunker, SegmentingChunkerParams
-#
-# CHUNKER_CLASS = SegmentingChunker
-# ENGINE_CLASS = NaiveContextEngine
-#
-# CHUNKER_DEFAULTS = {
-#     "time_gap_hours": 6.0,
-#     "chunk_length": 6,
-#     "chunk_overlap": 4,
 # }
 
 # Contextual chunker (conversation summary for embeddings)

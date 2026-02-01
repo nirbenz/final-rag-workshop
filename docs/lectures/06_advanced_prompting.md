@@ -1,7 +1,7 @@
 # Lecture 06: Advanced Prompting Techniques
 
 > **Duration:** 15 minutes (stretch goal content)
-> **Phase:** Phase 3B Extension
+> **Phase:** Phase 2 Extension
 
 ---
 

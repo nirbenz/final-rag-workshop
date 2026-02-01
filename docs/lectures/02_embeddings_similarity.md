@@ -1,7 +1,7 @@
 # Lecture 02: Embeddings and Semantic Search
 
 > **Duration:** 10 minutes
-> **Phase:** Phase 2 - Embedding-Based Retrieval
+> **Phase:** Phase 3 - Embedding-Based Retrieval
 
 ---
 
@@ -134,7 +134,7 @@ cos(180) = -1.0 -> Opposite direction (most dissimilar)
 
 **Question:** This is still O(n) - how do we scale to millions of documents?
 
-(Answer in Phase 3: Approximate Nearest Neighbor search)
+(Answer in Phase 4: Approximate Nearest Neighbor search)
 
 ---
 
