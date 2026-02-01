@@ -18,4 +18,4 @@ This file is intentionally minimal (no imports) to avoid circular dependencies.
 USE_PROMPTING_SOLUTION = True
 USE_SIMILARITY_SOLUTION = True
 USE_RERANKING_SOLUTION = True
-USE_SEGMENTING_SOLUTION = False  # Optional / take-home
+USE_SEGMENTING_SOLUTION = True  # Optional / take-home

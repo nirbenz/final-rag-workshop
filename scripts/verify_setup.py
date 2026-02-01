@@ -100,7 +100,6 @@ def check_optional_imports() -> tuple[bool, str]:
     optional = {
         "dotenv": "python-dotenv for .env file loading",
         "loguru": "Loguru for logging",
-        "httpx": "HTTPX for async HTTP",
     }
 
     warnings = []
