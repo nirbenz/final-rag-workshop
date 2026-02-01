@@ -56,12 +56,6 @@ def get_embedding_model(model_config: LLMConfig) -> Embedder:
             settings_dict["api_key"] = api_key
             logger.info(f"Explicitly passing API key to Embedder for litellm model")
 
-        # For Cohere models, use float encoding instead of base64 (base64 not supported by Bedrock)
-        if "cohere" in model_config["model_name"].lower():
-            # Set to 'float' to override pydantic-ai's default 'base64'
-            settings_dict["encoding_format"] = "float"
-            logger.info(f"Set encoding_format='float' for Cohere model (base64 not supported)")
-
     settings = pydantic_ai.EmbeddingSettings(**settings_dict)
 
     return Embedder(model=model_config["model_name"], settings=settings)

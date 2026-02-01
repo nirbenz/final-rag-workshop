@@ -4,4 +4,3 @@ kwargs:
   input_type: "search_document"
   output_dimensions: 512
   embedding_types: "float"
-  drop_params: true
