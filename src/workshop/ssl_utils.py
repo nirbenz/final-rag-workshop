@@ -115,24 +115,30 @@ def _patch_openai_clients() -> None:
 
     openai.AsyncOpenAI.__init__ = _patched_async_init
 
-    # Patch the AsyncAPIClient._build_request to intercept body before serialization
-    from openai._base_client import AsyncAPIClient
+    # Patch embeddings.create to set encoding_format=None for Cohere/LiteLLM models
+    from openai.resources import AsyncEmbeddings, Embeddings
 
-    _original_build_request = AsyncAPIClient._build_request
+    _original_async_embeddings_create = AsyncEmbeddings.create
+    _original_sync_embeddings_create = Embeddings.create
 
-    def _patched_build_request(self, *args, **kwargs):
-        # Get the options object which contains json_data
-        options = kwargs.get("options") if "options" in kwargs else (args[0] if args else None)
+    async def _patched_async_embeddings_create(self, *args, **kwargs):
+        model = kwargs.get("model", "")
+        # For Cohere/LiteLLM models, explicitly set encoding_format=None to prevent SDK default
+        if ("cohere" in model.lower() or model.startswith("litellm:")) and "encoding_format" not in kwargs:
+            kwargs["encoding_format"] = None
+            logger.info(f"Set encoding_format=None for async embeddings with model: {model}")
 
-        if options and hasattr(options, "json_data") and isinstance(options.json_data, dict):
-            model = options.json_data.get("model", "")
-            if ("cohere" in model.lower() or model.startswith("litellm:")) and "encoding_format" in options.json_data:
-                original_format = options.json_data["encoding_format"]
-                # Remove encoding_format entirely - Cohere/Bedrock doesn't support it at all
-                del options.json_data["encoding_format"]
-                logger.info(f"[BUILD_REQUEST PATCH] Removed encoding_format='{original_format}' for model: {model}")
+        return await _original_async_embeddings_create(self, *args, **kwargs)
 
-        return _original_build_request(self, *args, **kwargs)
+    def _patched_sync_embeddings_create(self, *args, **kwargs):
+        model = kwargs.get("model", "")
+        # For Cohere/LiteLLM models, explicitly set encoding_format=None to prevent SDK default
+        if ("cohere" in model.lower() or model.startswith("litellm:")) and "encoding_format" not in kwargs:
+            kwargs["encoding_format"] = None
+            logger.info(f"Set encoding_format=None for sync embeddings with model: {model}")
 
-    AsyncAPIClient._build_request = _patched_build_request
-    logger.info("Patched AsyncAPIClient._build_request to remove encoding_format for Cohere")
+        return _original_sync_embeddings_create(self, *args, **kwargs)
+
+    AsyncEmbeddings.create = _patched_async_embeddings_create
+    Embeddings.create = _patched_sync_embeddings_create
+    logger.info("Patched embeddings.create (sync and async) to set encoding_format=None for Cohere/LiteLLM models")
