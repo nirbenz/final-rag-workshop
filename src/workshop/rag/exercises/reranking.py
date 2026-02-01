@@ -58,6 +58,7 @@ def rerank(
         Top-k chunks sorted by relevance (most relevant first)
 
     """
+    raise NotImplementedError("Not implemented")
     if not chunks:
         return []
 
