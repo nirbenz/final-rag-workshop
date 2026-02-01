@@ -106,6 +106,7 @@ def _patch_openai_clients() -> None:
         # Ensure api_key is set from environment if not provided
         if "api_key" not in kwargs or kwargs.get("api_key") == "litellm-placeholder":
             import os
+
             env_key = os.getenv("OPENAI_API_KEY")
             if env_key:
                 kwargs["api_key"] = env_key
@@ -116,6 +117,7 @@ def _patch_openai_clients() -> None:
 
     # Patch the AsyncAPIClient._build_request to intercept body before serialization
     from openai._base_client import AsyncAPIClient
+
     _original_build_request = AsyncAPIClient._build_request
 
     def _patched_build_request(self, *args, **kwargs):

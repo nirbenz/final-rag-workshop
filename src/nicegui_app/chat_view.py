@@ -265,7 +265,6 @@ async def handle_llm_response(
                 retrieved_message_ids=retrieved_message_ids,
             )
         else:
-
             result = await page_state.llm_wrapper.run(
                 query,
                 deps={"context": context_text},

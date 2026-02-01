@@ -8,6 +8,7 @@
 
 # Load environment variables first
 from dotenv import load_dotenv
+
 load_dotenv(override=True)
 
 # Apply SSL bypass early, before any network-related imports
@@ -16,6 +17,7 @@ from workshop.ssl_utils import apply_ssl_bypass
 apply_ssl_bypass()
 
 from typing import Any, Callable, Dict, Optional
+
 import hydra
 from loguru import logger
 from nicegui import app, ui
