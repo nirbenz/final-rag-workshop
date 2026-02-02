@@ -266,7 +266,7 @@ def create_vectordb_card(
                     except Exception as ex:
                         status_label.set_text("")
                         ui.notify(f"Failed to update engine: {ex}", type="negative")
-                        logger.error(f"Engine update failed: {ex}")
+                        logger.exception("Engine update failed")
                     finally:
                         update_btn.props(remove="loading")
 

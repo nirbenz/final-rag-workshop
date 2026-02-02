@@ -292,7 +292,7 @@ async def handle_llm_response(
 
     except Exception as e:
         _handle_llm_error(e, state, message_list)
-        logger.error(f"LLM response error: {e}")
+        logger.exception("LLM response error")
         raise
 
 

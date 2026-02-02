@@ -36,8 +36,8 @@ def get_llm_wrapper(model_config: Config, structured_output_type: Optional[type]
     except ImportError:
         logger.warning("workshop.llm not available, LLM wrapper not initialized")
         return None
-    except Exception as e:
-        logger.error(f"Failed to initialize LLM: {e}")
+    except Exception:
+        logger.exception("Failed to initialize LLM")
         return None
 
 
@@ -59,8 +59,8 @@ def get_embedder(model_config: Config) -> Optional[Embedder]:
     except ImportError as e:
         logger.warning(f"Failed to import embedding model: {e}")
         return None
-    except Exception as e:
-        logger.error(f"Failed to initialize embedding model: {e}")
+    except Exception:
+        logger.exception("Failed to initialize embedding model")
         return None
 
 

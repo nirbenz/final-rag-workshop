@@ -147,10 +147,10 @@ def initialize_workshop_components(state: AppState) -> None:
 
     except ImportError as e:
         logger.warning(f"Failed to import workshop_config: {e}")
-    except ValueError as e:
-        logger.error(f"Failed to initialize workshop components: {e}")
-    except Exception as e:
-        logger.error(f"Failed to initialize workshop components: {e}")
+    except ValueError:
+        logger.exception("Failed to initialize workshop components")
+    except Exception:
+        logger.exception("Failed to initialize workshop components")
 
 
 def create_chat_page(single_client: bool = False) -> None:
