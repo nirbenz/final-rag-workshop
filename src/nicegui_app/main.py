@@ -6,6 +6,11 @@
 
 # pyright: reportOptionalMemberAccess=false
 
+# Load environment variables first
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 # Apply SSL bypass early, before any network-related imports
 from workshop.ssl_utils import apply_ssl_bypass
 
@@ -13,7 +18,6 @@ apply_ssl_bypass()
 
 from typing import Any, Callable, Dict, Optional
 
-from dotenv import load_dotenv
 import hydra
 from loguru import logger
 from nicegui import app, ui
@@ -255,7 +259,6 @@ def main(cfg: DictConfig) -> None:
     Override configs with:
         python -m nicegui_app.main paths.chat_export_path=/path/to/chat.txt
     """
-    load_dotenv(override=True)
     from genai_prices import wait_prices_updated_sync
 
     if not wait_prices_updated_sync(timeout=10):

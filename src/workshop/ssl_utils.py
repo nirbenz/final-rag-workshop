@@ -106,3 +106,31 @@ def _patch_openai_clients() -> None:
         return _original_async_init(self, *args, **kwargs)
 
     openai.AsyncOpenAI.__init__ = _patched_async_init
+
+    # Patch embeddings.create to set encoding_format=None for Cohere/LiteLLM models
+    from openai.resources import AsyncEmbeddings, Embeddings
+
+    _original_async_embeddings_create = AsyncEmbeddings.create
+    _original_sync_embeddings_create = Embeddings.create
+
+    async def _patched_async_embeddings_create(self, *args, **kwargs):
+        model = kwargs.get("model", "")
+        # For Cohere/LiteLLM models, explicitly set encoding_format=None to prevent SDK default
+        if ("cohere" in model.lower() or model.startswith("litellm:")) and "encoding_format" not in kwargs:
+            kwargs["encoding_format"] = None
+            logger.info(f"Set encoding_format=None for async embeddings with model: {model}")
+
+        return await _original_async_embeddings_create(self, *args, **kwargs)
+
+    def _patched_sync_embeddings_create(self, *args, **kwargs):
+        model = kwargs.get("model", "")
+        # For Cohere/LiteLLM models, explicitly set encoding_format=None to prevent SDK default
+        if ("cohere" in model.lower() or model.startswith("litellm:")) and "encoding_format" not in kwargs:
+            kwargs["encoding_format"] = None
+            logger.info(f"Set encoding_format=None for sync embeddings with model: {model}")
+
+        return _original_sync_embeddings_create(self, *args, **kwargs)
+
+    AsyncEmbeddings.create = _patched_async_embeddings_create
+    Embeddings.create = _patched_sync_embeddings_create
+    logger.info("Patched embeddings.create (sync and async) to set encoding_format=None for Cohere/LiteLLM models")

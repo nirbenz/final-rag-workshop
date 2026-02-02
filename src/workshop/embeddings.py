@@ -111,7 +111,11 @@ async def _count_tokens(embedder: Embedder, texts: List[str]) -> List[int]:
     """
     counts = []
     for text in texts:
-        count = await embedder.count_tokens(text)
+        try:
+            count = await embedder.count_tokens(text)
+        except Exception:
+            # Fallback for non-OpenAI models: approximate 4 chars per token
+            count = len(text) // 4
         counts.append(count)
     return counts
 
