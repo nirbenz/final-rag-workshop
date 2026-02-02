@@ -39,7 +39,13 @@ echo "Verifying setup..."
 python3 scripts/verify_setup.py
 
 echo "Copying example.env to .env..."
-cp example.env .env
+# if .env does not exist
+if [ ! -f .env ]; then
+    cp example.env .env
+    echo "Example .env file created. Please fill in your API keys."
+else
+    echo ".env file already exists. Skipping copy."
+fi
 echo "Done"
 
 echo ""
