@@ -13,7 +13,7 @@ Workshop participants always use this engine in Phase 1 to focus on chunking
 strategies without worrying about retrieval quality.
 """
 
-from typing import List, Optional, Sequence
+from typing import Dict, Optional, Sequence
 
 from workshop.rag.engines.types import ChunkEmbedding, ChunkObject
 
@@ -26,26 +26,27 @@ class NaiveContextEngine:
     It demonstrates that chunking and retrieval are separable concerns.
 
     Key behavior:
-    - add_context(): Simply stores chunks in a list
+    - add_context(): Stores chunks keyed by chunk.id (upsert semantics)
     - get_relevant_context(): Ignores query, returns ALL chunks
     - No embeddings, no indexing, no filtering
     """
 
     def __init__(self):
         """Initialize empty context storage."""
-        self._context: List[ChunkObject] = []
+        self._context: Dict[str, ChunkObject] = {}
 
     def add_context(
         self, context: Sequence[ChunkObject], embeddings: Optional[Sequence[ChunkEmbedding]] = None
     ) -> None:
         """
-        Store chunks (embeddings ignored).
+        Store chunks by chunk.id with upsert semantics (embeddings ignored).
 
         Args:
             context: Sequence of ChunkObjects to store
             embeddings: Ignored (no embeddings needed for naive engine)
         """
-        self._context.extend(context)
+        for chunk in context:
+            self._context[chunk.id] = chunk
 
     def get_relevant_context(self, query: str, top_k: int = 10) -> Sequence[ChunkObject]:
         """
@@ -58,12 +59,12 @@ class NaiveContextEngine:
         Returns:
             All stored chunks (entire conversation context)
         """
-        return self._context
+        return list(self._context.values())
 
     @property
     def context(self) -> Sequence[ChunkObject]:
         """Get all stored chunks."""
-        return self._context
+        return list(self._context.values())
 
     @property
     def context_count(self) -> int:
@@ -81,8 +82,9 @@ class NaiveContextEngine:
         Returns:
             Sequence of ChunkObjects for the requested page
         """
-        return self._context[offset : offset + limit]
+        chunks = list(self._context.values())
+        return chunks[offset : offset + limit]
 
     def clear(self) -> None:
         """Clear all stored chunks."""
-        self._context = []
+        self._context = {}

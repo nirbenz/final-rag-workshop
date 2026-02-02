@@ -16,7 +16,7 @@ Workshop participants implement this after NaiveContextEngine to learn about:
 """
 
 import importlib
-from typing import Callable, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 from pydantic_ai import Embedder
@@ -88,6 +88,7 @@ class SimilarityContextEngine:
 
         self._chunks: List[ChunkObject] = []
         self._embeddings: List[ChunkEmbedding] = []
+        self._chunk_index: Dict[str, int] = {}
         self._similarity_threshold = similarity_threshold
         self._embedder = embedder
         self._max_tokens = max_tokens
@@ -106,7 +107,7 @@ class SimilarityContextEngine:
         self, context: Sequence[ChunkObject], embeddings: Optional[Sequence[ChunkEmbedding]] = None
     ) -> None:
         """
-        Store chunks and their embeddings.
+        Store chunks and their embeddings with upsert semantics by chunk.id.
 
         Args:
             context: Sequence of ChunkObjects to store
@@ -117,8 +118,15 @@ class SimilarityContextEngine:
             computed = self._embed_sync(texts, input_type="document")
             embeddings = [np.array(emb) for emb in computed]
 
-        self._chunks.extend(context)
-        self._embeddings.extend(embeddings)
+        for chunk, emb in zip(context, embeddings):
+            if chunk.id in self._chunk_index:
+                idx = self._chunk_index[chunk.id]
+                self._chunks[idx] = chunk
+                self._embeddings[idx] = emb
+            else:
+                self._chunk_index[chunk.id] = len(self._chunks)
+                self._chunks.append(chunk)
+                self._embeddings.append(emb)
 
     def get_relevant_context(self, query: str, top_k: Optional[int] = None) -> Sequence[ChunkObject]:
         """
@@ -173,6 +181,7 @@ class SimilarityContextEngine:
         """Clear all stored chunks and embeddings."""
         self._chunks = []
         self._embeddings = []
+        self._chunk_index = {}
 
     @property
     def max_tokens(self) -> int:

@@ -184,7 +184,7 @@ def chunk_messages_sliding_window(
             messages,
             start_idx=start,
             end_idx=end,
-            chunk_id=f"{chunk_id_prefix}_{idx}",
+            chunk_id=f"{chunk_id_prefix}_{start}_{end}",
             extra_metadata=extra_metadata,
         )
 

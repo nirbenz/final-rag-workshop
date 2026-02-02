@@ -120,7 +120,7 @@ class MessageCountChunker:
                 end_time = end_time.to_pydatetime()  # pyright: ignore[reportAttributeAccessIssue]
 
             chunk = ChunkObject(
-                id=f"chunk_{chunk_id}",
+                id=f"chunk_{i}_{end}",
                 text=text,
                 message_ids=list(range(i, end)),
                 metadata={

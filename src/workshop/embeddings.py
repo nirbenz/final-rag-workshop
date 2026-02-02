@@ -2,7 +2,7 @@
 # Embedding generation and caching utilities
 
 import textwrap
-from typing import List
+from typing import List, Optional
 
 from loguru import logger
 import pydantic_ai
@@ -211,17 +211,28 @@ def get_embeddings_sync(
 
     Returns:
         List of embedding vectors
+
+    Raises:
+        Exception: Re-raises any exception from the embedding thread
     """
     import asyncio
     import threading
 
     result: List[List[float]] = []
+    error: Optional[BaseException] = None
 
     def run_async() -> None:
-        nonlocal result
-        result = asyncio.run(get_embeddings(embedder, texts, max_tokens, input_type))
+        nonlocal result, error
+        try:
+            result = asyncio.run(get_embeddings(embedder, texts, max_tokens, input_type))
+        except BaseException as e:
+            error = e
 
     thread = threading.Thread(target=run_async, daemon=True)
     thread.start()
     thread.join()
+
+    if error is not None:
+        raise error
+
     return result

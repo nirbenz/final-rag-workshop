@@ -18,7 +18,7 @@ Workshop participants implement this after SimilarityContextEngine to learn abou
 import importlib
 import shutil
 from typing import Callable, List, Optional, Sequence
-from uuid import uuid4
+from uuid import NAMESPACE_OID, uuid5
 
 from pydantic_ai import Embedder
 from qdrant_client import QdrantClient
@@ -153,7 +153,7 @@ class RAGContextEngine:
 
         points = [
             PointStruct(
-                id=str(uuid4()),
+                id=str(uuid5(NAMESPACE_OID, chunk.id)),
                 vector=list(emb) if hasattr(emb, "__iter__") else emb,
                 payload={"chunk_json": chunk.model_dump_json()},
             )

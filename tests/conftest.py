@@ -16,6 +16,31 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from workshop.chat import WhatsappMessage
 
 
+@pytest.fixture(autouse=True)
+def _isolate_embedding_cache(tmp_path: Path):
+    """
+    Redirect the embedding cache to a temp directory for every test.
+
+    Prevents test runs from polluting the production cache file
+    with dummy embeddings from TestEmbeddingModel.
+    """
+    import workshop.embedding_cache as cache_mod
+
+    orig_dir = cache_mod._CACHE_DIR
+    orig_file = cache_mod._CACHE_FILE
+    orig_cache = cache_mod._cache
+
+    cache_mod._CACHE_DIR = tmp_path / ".embedding_cache"
+    cache_mod._CACHE_FILE = cache_mod._CACHE_DIR / "embeddings.json"
+    cache_mod._cache = None
+
+    yield
+
+    cache_mod._CACHE_DIR = orig_dir
+    cache_mod._CACHE_FILE = orig_file
+    cache_mod._cache = orig_cache
+
+
 @pytest.fixture
 def test_messages():
     """Create test WhatsApp messages."""

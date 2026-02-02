@@ -253,17 +253,7 @@ def create_vectordb_card(
 
                         status_label.set_text(f"Embedding {len(chunks)} chunks...")
 
-                        # Clear existing chunks
-                        def clear_and_add():
-                            if hasattr(state.engine, "_context"):
-                                state.engine._context = []
-                            elif hasattr(state.engine, "_chunks"):
-                                state.engine._chunks = []
-                                state.engine._embeddings = []
-                            state.engine.add_context(chunks)
-
-                        # Run embedding in thread pool to avoid blocking
-                        await asyncio.to_thread(clear_and_add)
+                        await asyncio.to_thread(state.engine.add_context, chunks)
 
                         # Reset pagination to first page
                         state.display.vectordb_page = 0
