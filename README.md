@@ -4,57 +4,91 @@ A hands-on workshop for learning Retrieval-Augmented Generation (RAG) through im
 
 ## Quick Start
 
+### Using `uv` (same instructions for all operating systems)
+
 ### MacOS
 
 ```bash
-# Install uv (package manager)
-brew install uv
+# Verify Python 3.12
+python3 --version  # Should show Python 3.12.x
+
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
-uv sync
+pip3 install -r requirements.txt
+pip3 install -e
+
+# Verify setup
+python3 scripts/verify_setup.py
 
 # Run the workshop application
-uv run python -m nicegui_app.main
-
-# Alternative: For environments with self-signed certificates (e.g., corporate proxies)
-uv run python run_app.py
+python3 -m nicegui_app.main
 ```
 
 ### Linux/WSL
 
-```bash
-# Install uv (package manager)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+**Inside WSL - make sure you are within the home directory**
 
-# Restart shell or source the env
-source $HOME/.local/bin/env
+```bash
+cd ~
+```
+
+```bash
+# update + install python3.12
+sudo apt update
+sudo apt install -y python3.12-full
+# Verify Python 3.12
+python3 --version  # Should show Python 3.12.x
+
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
-uv sync
+pip3 install -r requirements.txt
+pip3 install -e
+
+# Verify setup
+python3 scripts/verify_setup.py
 
 # Run the workshop application
-uv run python -m nicegui_app.main
-
-# Alternative: For environments with self-signed certificates
-uv run python run_app.py
+python3 -m nicegui_app.main
 ```
 
 ### Windows (Non-WSL)
 
-See [uv installation docs](https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_2).
+**TBD**
 
 ```powershell
-# Install uv (package manager) using PowerShell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+# Verify Python 3.12
+python --version  # Should show Python 3.12.x
 
-# Restart terminal, then install dependencies
-uv sync
+# Create and activate virtual environment
+python -m venv .venv
+.venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Verify setup
+python scripts\verify_setup.py
 
 # Run the workshop application
-uv run python -m nicegui_app.main
+python -m nicegui_app.main
+```
 
-# Alternative: For environments with self-signed certificates
-uv run python run_app.py
+### (Conditional) Using `uv` (same instructions for all operating systems)
+
+> if not using UV, skip
+
+```bash
+# install uv; use homebrew, curl or whatever works on Windows
+
+uv sync
+uv run python scripts/verify_setup.py
+uv run python -m nicegui_app.main
 ```
 
 ## Environment Variables
@@ -76,6 +110,7 @@ export SSL_VERIFY="false"                        # Set to "false" to disable SSL
 ## LiteLLM Support
 
 The workshop now supports [LiteLLM](https://docs.litellm.ai/) as a proxy for accessing multiple LLM providers through a unified OpenAI-compatible API. This is useful for:
+
 - Corporate environments with centralized LLM access
 - Cost tracking and rate limiting across teams
 - Environments requiring SSL inspection bypass
@@ -83,6 +118,7 @@ The workshop now supports [LiteLLM](https://docs.litellm.ai/) as a proxy for acc
 ### Configuration
 
 Models are configured via Hydra configs in `configs/models/`. To use LiteLLM:
+
 1. Set `OPENAI_API_BASE` to your LiteLLM proxy endpoint
 2. Configure models using the `litellm:` prefix (e.g., `litellm:global.anthropic.claude-sonnet-4-5-20250929-v1:0`)
 3. If using self-signed certificates, set `SSL_VERIFY="false"` environment variable
