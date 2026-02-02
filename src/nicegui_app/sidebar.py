@@ -218,10 +218,10 @@ def create_vectordb_card(
                     stored_chunks = len(state.engine.context) if state.engine else 0
                     ui.label(f"Stored chunks: {stored_chunks}").classes("text-sm text-gray-300 mb-2")
 
-                    if hasattr(state.engine, "_embedding_function") and state.engine._embedding_function:
+                    if hasattr(state.engine, "_embedder") and state.engine._embedder:
                         model_name = "Unknown"
-                        if hasattr(state.engine._embedding_function, "name"):
-                            model_name = state.engine._embedding_function.name
+                        if hasattr(state.engine._embedder, "model"):
+                            model_name = state.engine._embedder.model
                         ui.label(f"Model: {model_name}").classes("text-xs text-gray-400")
 
                         if hasattr(state.engine, "_embed_dim"):
