@@ -220,8 +220,10 @@ def create_vectordb_card(
 
                     if hasattr(state.engine, "_embedder") and state.engine._embedder:
                         model_name = "Unknown"
-                        if hasattr(state.engine._embedder, "model"):
-                            model_name = state.engine._embedder.model
+                        if hasattr(state.engine._embedder, "model") and hasattr(
+                            state.engine._embedder.model, "model_name"
+                        ):
+                            model_name = state.engine._embedder.model.model_name
                         ui.label(f"Model: {model_name}").classes("text-xs text-gray-400")
 
                         if hasattr(state.engine, "_embed_dim"):
