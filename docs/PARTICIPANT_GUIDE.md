@@ -76,13 +76,13 @@ You will need a WhatsApp chat export to use as your data source. Follow these in
 
 #### Place Your Chat File
 
-Copy the exported `.txt` file to the `chats/` directory:
+Copy the exported `.txt` file to the [`chats/`](../chats/) directory:
 
 ```bash
 cp ~/Downloads/WhatsApp\ Chat\ with\ MyGroup.txt chats/
 ```
 
-> **Note:** Sample chats are provided in `chats/` if you do not have your own export.
+> **Note:** Sample chats are provided in [`chats/`](../chats/) if you do not have your own export.
 
 ### 0.3 Configure API Keys
 
@@ -137,7 +137,7 @@ This is intentionally naive - it shows you what we are improving!
 ### 1.2 Hands-On: Load Your Chat
 
 1. In the UI sidebar, click **Load Chat**
-2. Select your WhatsApp export file from `chats/`
+2. Select your WhatsApp export file from [`chats/`](../chats/)
 3. Observe the messages appearing in the context panel
 
 ### 1.3 Experiment: Adjust Chunking Parameters
@@ -203,7 +203,7 @@ Restart the app. The engine is still `NaiveContextEngine` (all chunks sent to LL
 
 ### 2.3 Exercise: Design Your Prompts
 
-Open `src/workshop/rag/exercises/prompting.py`:
+Open [`src/workshop/rag/exercises/prompting.py`](../src/workshop/rag/exercises/prompting.py):
 
 ```python
 def get_system_prompt() -> str:
@@ -233,7 +233,7 @@ def get_system_prompt() -> str:
 **How Context Injection Works:**
 
 Your `get_system_prompt()` returns a template with `{context}` placeholder.
-The `llm.py` module handles injecting the actual context at runtime:
+The [`llm.py`](../src/workshop/llm.py) module handles injecting the actual context at runtime:
 
 ```python
 # In llm.py - this is done for you
@@ -337,7 +337,7 @@ class RAGResponse(BaseModel):
     confidence: Literal["high", "medium", "low"]
 ```
 
-The `extract_llm_response()` function in `state.py` handles any Pydantic model
+The `extract_llm_response()` function in [`state.py`](../src/nicegui_app/state.py) handles any Pydantic model
 with an `output` field - the `output` becomes the displayed answer, and the full
 response is available in `raw_output` for debugging.
 
@@ -391,7 +391,7 @@ cos(theta) = (A . B) / (||A|| * ||B||)
 
 ### 3.3 Exercise: Implement Similarity Functions
 
-Open `src/workshop/rag/exercises/similarity.py`:
+Open [`src/workshop/rag/exercises/similarity.py`](../src/workshop/rag/exercises/similarity.py):
 
 ```python
 import numpy as np
@@ -523,7 +523,7 @@ Query -> [ANN Search: 50 candidates] -> [Re-ranker: top 10] -> LLM
 
 ### 4.3 Exercise: Implement Re-ranking
 
-Open `src/workshop/rag/exercises/reranking.py`:
+Open [`src/workshop/rag/exercises/reranking.py`](../src/workshop/rag/exercises/reranking.py):
 
 The baseline just truncates to top_k. Replace it with something smarter.
 
@@ -619,7 +619,7 @@ Fixed-window chunking has fundamental problems:
 
 ### Exercise: Time-Based Segmentation
 
-Open `src/workshop/rag/exercises/segmenting.py` and implement:
+Open [`src/workshop/rag/exercises/segmenting.py`](../src/workshop/rag/exercises/segmenting.py) and implement:
 
 1. `segment_by_time_gaps()` -- split messages into segments when the gap between consecutive messages exceeds a threshold
 2. `chunk_segments()` -- apply sliding-window chunking within each segment (chunks should NOT cross segment boundaries)
@@ -632,7 +632,7 @@ uv run pytest tests/test_segmenting_chunker.py -v
 
 ### Enable Segmenting Chunker
 
-Uncomment the segmenting chunker section in `src/nicegui_app/workshop_config.py`:
+Uncomment the segmenting chunker section in [`src/nicegui_app/workshop_config.py`](../src/nicegui_app/workshop_config.py):
 
 ```python
 from workshop.rag.chunkers import SegmentingChunker
@@ -648,7 +648,7 @@ CHUNKER_DEFAULTS = {
 
 ### Extension: Sentence Boundary Chunker
 
-For an additional challenge, explore `src/workshop/rag/chunkers/sentence_boundary.py`:
+For an additional challenge, explore [`src/workshop/rag/chunkers/sentence_boundary.py`](../src/workshop/rag/chunkers/sentence_boundary.py):
 
 - Chunk by token count instead of message count
 - Respect sentence boundaries (no mid-sentence cuts)
@@ -717,7 +717,7 @@ be found    vectors      search
 
 ### Getting Unstuck
 
-Each exercise has a reference solution. Enable it by setting the toggle in `src/workshop/exercise_toggles.py`:
+Each exercise has a reference solution. Enable it by setting the toggle in [`src/workshop/exercise_toggles.py`](../src/workshop/exercise_toggles.py):
 
 | Exercise   | Toggle Variable            |
 | ---------- | -------------------------- |

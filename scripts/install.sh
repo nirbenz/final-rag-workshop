@@ -17,7 +17,9 @@ else
     exit 1
 fi
 
-PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+hash -r
+
+PYTHON_VERSION=$(python3.12 --version 2>&1 | awk '{print $2}')
 PYTHON_MAJOR_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f1,2)
 
 if [ "$PYTHON_MAJOR_MINOR" != "$REQUIRED_PYTHON" ]; then
@@ -26,17 +28,16 @@ if [ "$PYTHON_MAJOR_MINOR" != "$REQUIRED_PYTHON" ]; then
 fi
 
 echo "Python $PYTHON_VERSION found"
+echo "Updating pip..."
 
 echo "Creating virtual environment..."
-python3 -m venv .venv
+python3.12 -m pip install -U pip
+python3.12 -m venv .venv
 source .venv/bin/activate
 
 echo "Installing dependencies..."
 pip3 install -r requirements.txt
 pip3 install -e .
-
-echo "Verifying setup..."
-python3 scripts/verify_setup.py
 
 echo "Copying example.env to .env..."
 # if .env does not exist
@@ -46,7 +47,9 @@ if [ ! -f .env ]; then
 else
     echo ".env file already exists. Skipping copy."
 fi
-echo "Done"
+
+echo "Verifying setup..."
+python3.12 scripts/verify_setup.py
 
 echo ""
 echo "Setup complete! To activate the virtual environment, run:"

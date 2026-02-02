@@ -2,8 +2,8 @@
 
 ## How It Works
 
-1. Set `PHASE` in `src/nicegui_app/workshop_config.py` to advance
-2. Set toggles in `src/workshop/exercise_toggles.py` to switch between your code and solutions
+1. Set `PHASE` in [`src/nicegui_app/workshop_config.py`](../src/nicegui_app/workshop_config.py) to advance
+2. Set toggles in [`src/workshop/exercise_toggles.py`](../src/workshop/exercise_toggles.py) to switch between your code and solutions
 3. Restart the app after changes: `uv run python -m nicegui_app.main`
 
 ---
@@ -32,7 +32,7 @@
 
 | File | Function |
 |------|----------|
-| `src/workshop/rag/exercises/prompting.py` | `get_system_prompt()` |
+| [`src/workshop/rag/exercises/prompting.py`](../src/workshop/rag/exercises/prompting.py) | `get_system_prompt()` |
 
 **Toggle:** `USE_PROMPTING_SOLUTION = False` to use yours, `True` to see the reference.
 
@@ -50,8 +50,8 @@
 
 | File | Function |
 |------|----------|
-| `src/workshop/rag/exercises/similarity.py` | `cosine_similarity()` |
-| `src/workshop/rag/exercises/similarity.py` | `get_top_k()` |
+| [`src/workshop/rag/exercises/similarity.py`](../src/workshop/rag/exercises/similarity.py) | `cosine_similarity()` |
+| [`src/workshop/rag/exercises/similarity.py`](../src/workshop/rag/exercises/similarity.py) | `get_top_k()` |
 
 **Toggle:** `USE_SIMILARITY_SOLUTION = False` to use yours, `True` to see the reference.
 
@@ -71,7 +71,7 @@
 
 | File | Function |
 |------|----------|
-| `src/workshop/rag/exercises/reranking.py` | `rerank()` |
+| [`src/workshop/rag/exercises/reranking.py`](../src/workshop/rag/exercises/reranking.py) | `rerank()` |
 
 Pick any re-ranking strategy: keyword overlap (easy), BM25 (medium), or cross-encoder (advanced). The baseline just truncates -- replace it with something smarter.
 
@@ -81,7 +81,7 @@ Pick any re-ranking strategy: keyword overlap (easy), BM25 (medium), or cross-en
 
 ## All Toggles at a Glance
 
-In `src/workshop/exercise_toggles.py`:
+In [`src/workshop/exercise_toggles.py`](../src/workshop/exercise_toggles.py):
 
 ```python
 USE_PROMPTING_SOLUTION = True    # Phase 2: prompt design
