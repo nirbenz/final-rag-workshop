@@ -1,4 +1,4 @@
-model: "litellm:global.anthropic.claude-opus-4-5-20251101-v1:0"
+model: "openai:global.anthropic.claude-opus-4-5-20251101-v1:0"
 model_name: ${.model}
 cost_map:
   output_tokens: 75 * 10**-6

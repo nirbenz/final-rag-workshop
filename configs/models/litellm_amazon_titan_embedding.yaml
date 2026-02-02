@@ -1,4 +1,4 @@
-model: "litellm:amazon.titan-embed-text-v2:0"
+model: "openai:amazon.titan-embed-text-v2:0"
 model_name: ${.model}
 kwargs:
   dimensions: 1024
