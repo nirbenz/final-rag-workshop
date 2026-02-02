@@ -32,15 +32,13 @@ def _load_rerank() -> Callable:
     """
     Dynamically reload and return the rerank exercise function.
 
-    Reloads the toggle module and the appropriate reranking module
-    to pick up code changes without restarting the app.
+    Reloads the appropriate reranking module to pick up code changes
+    without restarting the app.
 
     Returns:
         The rerank function
     """
     import workshop.exercise_toggles as toggles_mod
-
-    importlib.reload(toggles_mod)
 
     if toggles_mod.USE_RERANKING_SOLUTION:
         import workshop.rag.solutions.reranking as mod

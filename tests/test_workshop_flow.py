@@ -313,9 +313,9 @@ class TestToggleSwitching:
         """With prompting=True, llm module uses solution prompt."""
         set_toggles(prompting=True)
 
-        from workshop.llm import get_system_prompt
+        from workshop.llm import load_system_prompt
 
-        prompt = get_system_prompt()
+        prompt = load_system_prompt()
         assert isinstance(prompt, str)
         assert "{context}" in prompt
 
@@ -323,10 +323,10 @@ class TestToggleSwitching:
         """With prompting=False, llm module uses exercise prompt (raises)."""
         set_toggles(prompting=False)
 
-        from workshop.llm import get_system_prompt
+        from workshop.llm import load_system_prompt
 
         with pytest.raises(NotImplementedError):
-            get_system_prompt()
+            load_system_prompt()
 
     def test_toggle_similarity_solution(self, example_chunks: List[ChunkObject], mock_embedder: Embedder) -> None:
         """With similarity=True, SimilarityContextEngine retrieval works."""
@@ -440,9 +440,9 @@ class TestPhaseProgression:
         assert naive.context_count == 0
 
         # -- Phase 2: Prompt template is valid --
-        from workshop.llm import get_system_prompt
+        from workshop.llm import load_system_prompt
 
-        prompt = get_system_prompt()
+        prompt = load_system_prompt()
         assert "{context}" in prompt
         formatted = prompt.format(context="Some retrieved context")
         assert "Some retrieved context" in formatted
@@ -561,7 +561,7 @@ class TestIntegrationWithLLM:
         """
         With prompting=False, the LLM agent raises NotImplementedError.
 
-        The exercise get_system_prompt() stub raises before any LLM API
+        The exercise load_system_prompt() stub raises before any LLM API
         call is made, validating that the toggle correctly blocks the
         agent path when the participant has not yet implemented the prompt.
         """
