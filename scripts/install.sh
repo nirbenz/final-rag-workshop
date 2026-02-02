@@ -38,6 +38,10 @@ pip3 install -e .
 echo "Verifying setup..."
 python3 scripts/verify_setup.py
 
+echo "Copying example.env to .env..."
+cp example.env .env
+echo "Done"
+
 echo ""
 echo "Setup complete! To activate the virtual environment, run:"
 echo "  source .venv/bin/activate"
