@@ -15,8 +15,9 @@ Workshop participants implement this after SimilarityContextEngine to learn abou
 - Two-stage retrieval with re-ranking
 """
 
+import importlib
 import shutil
-from typing import List, Optional, Sequence
+from typing import Callable, List, Optional, Sequence
 from uuid import uuid4
 
 from pydantic_ai import Embedder
@@ -24,15 +25,30 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 
 from workshop.embeddings import get_embeddings_sync
-
-# Import per-exercise toggle (separate file to avoid circular imports)
-from workshop.exercise_toggles import USE_RERANKING_SOLUTION
 from workshop.rag.engines.types import ChunkEmbedding, ChunkObject
 
-if USE_RERANKING_SOLUTION:
-    from workshop.rag.solutions.reranking import rerank
-else:
-    from workshop.rag.exercises.reranking import rerank
+
+def _load_rerank() -> Callable:
+    """
+    Dynamically reload and return the rerank exercise function.
+
+    Reloads the toggle module and the appropriate reranking module
+    to pick up code changes without restarting the app.
+
+    Returns:
+        The rerank function
+    """
+    import workshop.exercise_toggles as toggles_mod
+
+    importlib.reload(toggles_mod)
+
+    if toggles_mod.USE_RERANKING_SOLUTION:
+        import workshop.rag.solutions.reranking as mod
+    else:
+        import workshop.rag.exercises.reranking as mod
+
+    importlib.reload(mod)
+    return mod.rerank
 
 
 class RAGContextEngine:
@@ -187,6 +203,7 @@ class RAGContextEngine:
         ]
 
         # Stage 2: Re-rank candidates and return top_k
+        rerank = _load_rerank()
         return rerank(query, candidates, top_k)
 
     def clear(self) -> None:

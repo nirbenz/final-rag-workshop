@@ -15,21 +15,37 @@ Workshop participants implement this after NaiveContextEngine to learn about:
 - Top-k retrieval with thresholds
 """
 
-from typing import List, Optional, Sequence
+import importlib
+from typing import Callable, List, Optional, Sequence, Tuple
 
 import numpy as np
 from pydantic_ai import Embedder
 
 from workshop.embeddings import get_embeddings_sync
-
-# Import per-exercise toggle (separate file to avoid circular imports)
-from workshop.exercise_toggles import USE_SIMILARITY_SOLUTION
 from workshop.rag.engines.types import ChunkEmbedding, ChunkObject
 
-if USE_SIMILARITY_SOLUTION:
-    from workshop.rag.solutions.similarity import cosine_similarity, get_top_k
-else:
-    from workshop.rag.exercises.similarity import cosine_similarity, get_top_k
+
+def _load_similarity_functions() -> Tuple[Callable, Callable]:
+    """
+    Dynamically reload and return similarity exercise functions.
+
+    Reloads the toggle module and the appropriate similarity module
+    to pick up code changes without restarting the app.
+
+    Returns:
+        Tuple of (cosine_similarity, get_top_k) functions
+    """
+    import workshop.exercise_toggles as toggles_mod
+
+    importlib.reload(toggles_mod)
+
+    if toggles_mod.USE_SIMILARITY_SOLUTION:
+        import workshop.rag.solutions.similarity as mod
+    else:
+        import workshop.rag.exercises.similarity as mod
+
+    importlib.reload(mod)
+    return mod.cosine_similarity, mod.get_top_k
 
 
 class SimilarityContextEngine:
@@ -126,7 +142,7 @@ class SimilarityContextEngine:
         query_embedding = np.array(self._embed_sync([query], input_type="query")[0])
         embeddings_matrix = np.array(self._embeddings)
 
-        # Use imported functions (from exercises or solutions)
+        cosine_similarity, get_top_k = _load_similarity_functions()
         similarities = cosine_similarity(query_embedding, embeddings_matrix)
         top_indices = get_top_k(similarities, self._similarity_threshold, top_k)
 

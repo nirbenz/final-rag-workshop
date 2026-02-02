@@ -1,6 +1,7 @@
 # Workshop LLM module
 # Simplified LLM factory for pydantic-ai
 
+import importlib
 from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
@@ -19,9 +20,9 @@ from workshop.exercise_toggles import USE_PROMPTING_SOLUTION
 from workshop.types import LLMConfig
 
 if USE_PROMPTING_SOLUTION:
-    from workshop.rag.solutions.prompting import get_system_prompt
+    pass
 else:
-    from workshop.rag.exercises.prompting import get_system_prompt
+    pass
 
 # Re-export embedding functions for backward compatibility
 # Import from workshop.embeddings for new code
@@ -37,11 +38,35 @@ __all__ = [
     "ModelMessageError",
     "create_agent",
     "get_pydantic_agent",
+    "load_system_prompt",
     # Re-exported from embeddings module
     "get_embedding_model",
     "get_embeddings",
     "get_embeddings_sync",
 ]
+
+
+def load_system_prompt() -> str:
+    """
+    Dynamically reload and return the current system prompt.
+
+    Reloads both the exercise toggle module and the appropriate prompting
+    module to pick up code changes without restarting the app.
+
+    Returns:
+        System prompt template string with {context} placeholder
+    """
+    import workshop.exercise_toggles as toggles_mod
+
+    importlib.reload(toggles_mod)
+
+    if toggles_mod.USE_PROMPTING_SOLUTION:
+        import workshop.rag.solutions.prompting as mod
+    else:
+        import workshop.rag.exercises.prompting as mod
+
+    importlib.reload(mod)
+    return mod.get_system_prompt()
 
 
 class ModelMessageError(Exception):
@@ -133,7 +158,6 @@ def get_pydantic_agent(
     def system_prompt_input(ctx: RunContext[Any]) -> str:
         deps = ctx.deps or {}
         context = deps.get("context", "No context available.")
-        # Get the template and inject context here
-        return get_system_prompt().format(context=context)
+        return load_system_prompt().format(context=context)
 
     return agent

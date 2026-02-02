@@ -15,22 +15,38 @@ Workshop participants implement this as an advanced extension to learn about:
 - Metadata enrichment with segment_id
 """
 
-from typing import List, Optional, Sequence, Tuple
+import importlib
+from typing import Callable, List, Optional, Sequence, Tuple
 
 from pydantic import Field
 
 from workshop.chat import WhatsappMessage
-
-# Import per-exercise toggle (separate file to avoid circular imports)
-from workshop.exercise_toggles import USE_SEGMENTING_SOLUTION
 from workshop.rag.chunkers.types import BaseChunkerParams
 from workshop.rag.chunkers.utils import compute_sliding_window_boundaries
 from workshop.rag.engines.types import ChunkObject
 
-if USE_SEGMENTING_SOLUTION:
-    from workshop.rag.solutions.segmenting import chunk_segments, segment_by_time_gaps
-else:
-    from workshop.rag.exercises.segmenting import chunk_segments, segment_by_time_gaps
+
+def _load_segmenting_functions() -> Tuple[Callable, Callable]:
+    """
+    Dynamically reload and return segmenting exercise functions.
+
+    Reloads the toggle module and the appropriate segmenting module
+    to pick up code changes without restarting the app.
+
+    Returns:
+        Tuple of (segment_by_time_gaps, chunk_segments) functions
+    """
+    import workshop.exercise_toggles as toggles_mod
+
+    importlib.reload(toggles_mod)
+
+    if toggles_mod.USE_SEGMENTING_SOLUTION:
+        import workshop.rag.solutions.segmenting as mod
+    else:
+        import workshop.rag.exercises.segmenting as mod
+
+    importlib.reload(mod)
+    return mod.segment_by_time_gaps, mod.chunk_segments
 
 
 class SegmentingChunkerParams(BaseChunkerParams):
@@ -128,8 +144,9 @@ class SegmentingChunker:
         Returns:
             List of message lists, each representing a continuous segment
 
-        Uses the imported segment_by_time_gaps function (from exercises or solutions).
+        Uses the dynamically loaded segment_by_time_gaps function (from exercises or solutions).
         """
+        segment_by_time_gaps, _ = _load_segmenting_functions()
         return segment_by_time_gaps(messages, self.params.time_gap_hours)
 
     def chunk_messages(self, messages: Sequence[WhatsappMessage]) -> Sequence[ChunkObject]:
@@ -145,7 +162,7 @@ class SegmentingChunker:
             - message_ids: Indices in original message list
             - metadata: start_idx, end_idx, timestamps, speakers, segment_id
 
-        Uses the imported functions (from exercises or solutions):
+        Uses the dynamically loaded functions (from exercises or solutions):
         1. segment_by_time_gaps() to split into conversation segments
         2. chunk_segments() to apply sliding-window chunking within each segment
         """
@@ -156,6 +173,7 @@ class SegmentingChunker:
         segments = self._segment_by_time_gaps(messages)
 
         # Chunk within each segment
+        _, chunk_segments = _load_segmenting_functions()
         return chunk_segments(
             messages=messages,
             segments=segments,
