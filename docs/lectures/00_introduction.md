@@ -1,6 +1,5 @@
 # Lecture 00: Introduction to RAG
 
-> **Duration:** 15 minutes
 > **Phase:** Opening
 
 ---
@@ -18,7 +17,7 @@ By the end of this lecture, participants will:
 
 ## Outline
 
-### 1. LLM Limitations (5 minutes)
+### 1. LLM Limitations
 
 **Key Points:**
 
@@ -31,7 +30,7 @@ By the end of this lecture, participants will:
 
 ---
 
-### 2. RAG as the Solution (5 minutes)
+### 2. RAG as the Solution
 
 **The Three Parts of RAG:**
 
@@ -45,6 +44,8 @@ By the end of this lecture, participants will:
 └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
+*The three-part RAG pipeline: find information, format it as context, generate a grounded answer.*
+
 **Benefits:**
 
 - External knowledge access
@@ -56,32 +57,49 @@ By the end of this lecture, participants will:
 
 ---
 
-### 3. Why WhatsApp Chats? (3 minutes)
+### 3. Why WhatsApp Chats?
 
-**Realistic challenges:**
+WhatsApp chats are messy in all the right ways:
 
-- Messy data: abbreviations, emojis, multiple languages
+- Abbreviations, emojis, multiple languages
 - Temporal structure: when do topics change?
 - Multiple speakers: who said what matters
-- Personal connection: participants care about their own conversations
-
-**Alternative datasets considered:**
-- Documentation (too clean)
-- News articles (no conversation structure)
-- Code (different domain)
+- Personal connection: you care about your own conversations
 
 ---
 
-### 4. Workshop Goal (2 minutes)
+### 4. The Full Pipeline
 
-**By the end of today:**
+**What we are building today:**
+
+```
+┌──────────┐   ┌───────────┐   ┌──────────┐   ┌───────────┐   ┌────────────┐   ┌───────────┐
+│ Chunking │-->│ Embedding │-->│ Indexing  │-->│ Retrieval │-->│ Re-ranking │-->│ Prompting │--> LLM
+└──────────┘   └───────────┘   └──────────┘   └───────────┘   └────────────┘   └───────────┘
+   Phase 1        Phase 3        Phase 4        Phase 3/4        Phase 4         Phase 2
+```
+
+*The six pipeline components and which workshop phase introduces each. Each phase "lights up" a new box. Phases reflect teaching order, not pipeline order -- we teach prompting (Phase 2) before retrieval (Phase 3) so you can evaluate improvements immediately.*
+
+Each phase lights up a new component. By the end, you have a complete RAG system.
+
+**Workshop Goal:**
 
 - Build intuition for retrieval quality
 - Understand chunking tradeoffs
 - Implement semantic search from scratch
 - Design effective RAG prompts
+- Scale with vector databases and re-ranking
 
-**Demo:** Show the finished Phase 3 system answering questions about a chat.
+**Demo:** Show the finished Phase 4 system answering questions about a chat.
+
+---
+
+## What's Next: Phase 1
+
+We start with the baseline -- a deliberately naive system that shows you what we are improving.
+
+**Next up:** Lecture 01, then Phase 1 hands-on exploration.
 
 ---
 
@@ -90,13 +108,8 @@ By the end of this lecture, participants will:
 - Keep the demo short but impressive
 - Use a chat with interesting/funny content
 - Show both good and bad retrieval examples
-- Emphasize: "The rest is just LLM calls - retrieval is what we're learning"
-
----
-
-## Slides
-
-> **TODO:** Create presentation slides for this lecture
+- Emphasize: "The rest is just LLM calls -- retrieval is what we're learning"
+- The pipeline diagram will reappear at each phase with the active component highlighted
 
 ---
 

@@ -1,6 +1,5 @@
 # Lecture 01: The Baseline System
 
-> **Duration:** 5 minutes
 > **Phase:** Phase 1 - Baseline Exploration
 
 ---
@@ -17,7 +16,7 @@ By the end of this lecture, participants will:
 
 ## Outline
 
-### 1. MessageCountChunker (2 minutes)
+### 1. MessageCountChunker
 
 **How it works:**
 
@@ -34,6 +33,8 @@ Chunk 3: [M5, M6, M7, M8]     indices 4-7  (overlaps M5, M6)
 Chunk 4: [M7, M8, M9, M10]    indices 6-9  (overlaps M7, M8)
 ```
 
+*Sliding window with overlap: consecutive chunks share messages at their boundaries (e.g., M3-M4 appear in both Chunk 1 and 2).*
+
 **Parameters:**
 
 | Parameter | Purpose | Tradeoff |
@@ -45,7 +46,7 @@ Chunk 4: [M7, M8, M9, M10]    indices 6-9  (overlaps M7, M8)
 
 ---
 
-### 2. NaiveContextEngine (2 minutes)
+### 2. NaiveContextEngine
 
 **How it works:**
 
@@ -66,7 +67,7 @@ def get_relevant_context(self, query: str, top_k: int):
 
 ---
 
-### 3. What to Observe During Exploration (1 minute)
+### 3. What to Observe During Exploration
 
 **Questions to answer:**
 
@@ -79,18 +80,70 @@ def get_relevant_context(self, query: str, top_k: int):
 
 ---
 
-## Instructor Notes
+## Where We Are
 
-- Keep this lecture short - the exploration is the learning
-- Draw the sliding window on a whiteboard
-- Emphasize that this is intentionally bad
-- Prepare for "why would anyone do this?" - explain it's a teaching baseline
+```
+              *** ACTIVE ***
+┌──────────┐                    ┌─────┐
+│ CHUNKING │ ──── all chunks ──>│ LLM │ ──> Response
+└──────────┘                    └─────┘
+  MessageCountChunker            NaiveContextEngine
+  (sliding window)               (no filtering at all)
+```
+
+*Phase 1 architecture: all chunks go directly to the LLM with no retrieval or filtering.*
+
+Everything else in the pipeline is absent. This is the starting point we improve from.
 
 ---
 
-## Slides
+## Workshop Mechanics: Before You Start
 
-> **TODO:** Create presentation slides for this lecture
+**Two files control the workshop progression:**
+
+**1. Phase selection** -- determines which chunker and engine are active:
+
+```python
+# src/nicegui_app/workshop_config.py
+PHASE = 1    # Change to 1, 2, 3, or 4
+```
+
+**2. Exercise toggles** -- switch between your code and reference solutions:
+
+```python
+# src/workshop/exercise_toggles.py
+USE_PROMPTING_SOLUTION = False   # Phase 2: prompt design
+USE_SIMILARITY_SOLUTION = False  # Phase 3: cosine similarity + top-k
+USE_RERANKING_SOLUTION = False   # Phase 4: re-ranking strategy
+USE_SEGMENTING_SOLUTION = False  # Optional: time-based segmentation
+```
+
+Set a toggle to `False` when you start an exercise (to use your code).
+Set it back to `True` if you get stuck (to fall back to the reference solution).
+
+**After any change:** Restart the app with `uv run python -m nicegui_app.main`
+
+---
+
+## What's Next: Phase 1 Hands-On
+
+Explore the baseline system. No coding yet -- just observe:
+
+1. Load your WhatsApp chat
+2. Ask questions, adjust chunk size/overlap
+3. Notice that ALL chunks are sent to the LLM regardless of query
+
+**Next up:** Phase 1 exploration, then Lecture 02 on prompt engineering.
+
+---
+
+## Instructor Notes
+
+- Keep this lecture short -- the exploration is the learning
+- Draw the sliding window on a whiteboard
+- Emphasize that this is intentionally bad
+- Prepare for "why would anyone do this?" -- explain it's a teaching baseline
+- Make sure everyone understands the two config files before starting hands-on
 
 ---
 
@@ -98,4 +151,5 @@ def get_relevant_context(self, query: str, top_k: int):
 
 - Chunker: `src/workshop/rag/chunkers/message_count.py`
 - Engine: `src/workshop/rag/engines/naive.py`
-- Config: `src/nicegui_app/workshop_config.py`
+- Phase config: `src/nicegui_app/workshop_config.py`
+- Exercise toggles: `src/workshop/exercise_toggles.py`

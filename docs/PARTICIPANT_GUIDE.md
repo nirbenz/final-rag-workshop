@@ -1,6 +1,5 @@
 # RAG Workshop - Participant Hands-On Guide
 
-> **Duration:** ~4 hours
 > **Prerequisites:** Python 3.12+, basic Python knowledge, familiarity with NumPy
 
 Welcome to the RAG Workshop! In this hands-on session, you will build a complete Retrieval-Augmented Generation system from scratch, using WhatsApp chat exports as your data source. By the end, you will understand how chunking strategies, embedding-based retrieval, and prompt engineering work together to create intelligent Q&A systems over your own conversations.
@@ -9,17 +8,17 @@ Welcome to the RAG Workshop! In this hands-on session, you will build a complete
 
 ## Table of Contents
 
-1. [Phase 0: Setup](#phase-0-setup-15-minutes)
-2. [Phase 1: Baseline Exploration](#phase-1-baseline-exploration-35-minutes)
-3. [Phase 2: Prompt Engineering](#phase-2-prompt-engineering-40-minutes)
-4. [Phase 3: Embedding-Based Retrieval](#phase-3-embedding-based-retrieval-55-minutes)
-5. [Phase 4: Vector Database & Re-ranking](#phase-4-vector-database--re-ranking-50-minutes)
+1. [Phase 0: Setup](#phase-0-setup)
+2. [Phase 1: Baseline Exploration](#phase-1-baseline-exploration)
+3. [Phase 2: Prompt Engineering](#phase-2-prompt-engineering)
+4. [Phase 3: Embedding-Based Retrieval](#phase-3-embedding-based-retrieval)
+5. [Phase 4: Vector Database & Re-ranking](#phase-4-vector-database--re-ranking)
 6. [Optional: Advanced Chunking Strategies](#optional-advanced-chunking-strategies)
 7. [Appendix: Troubleshooting](#appendix-troubleshooting)
 
 ---
 
-## Phase 0: Setup (15 minutes)
+## Phase 0: Setup
 
 > **Lecture Notes:** [00_introduction.md](lectures/00_introduction.md)
 
@@ -115,7 +114,7 @@ Open your browser to `http://localhost:8080`. You should see the workshop interf
 
 ---
 
-## Phase 1: Baseline Exploration (35 minutes)
+## Phase 1: Baseline Exploration
 
 > **Lecture Notes:** [01_baseline_system.md](lectures/01_baseline_system.md)
 >
@@ -176,9 +175,9 @@ Before moving on, consider:
 
 ---
 
-## Phase 2: Prompt Engineering (40 minutes)
+## Phase 2: Prompt Engineering
 
-> **Lecture Notes:** [04_prompt_engineering.md](lectures/04_prompt_engineering.md)
+> **Lecture Notes:** [02_prompt_engineering.md](lectures/02_prompt_engineering.md)
 >
 > **Goal:** Design effective prompts that ground LLM responses in retrieved context.
 
@@ -357,9 +356,9 @@ USE_PROMPTING_SOLUTION = True  # Fall back to reference solution
 
 ---
 
-## Phase 3: Embedding-Based Retrieval (55 minutes)
+## Phase 3: Embedding-Based Retrieval
 
-> **Lecture Notes:** [02_embeddings_similarity.md](lectures/02_embeddings_similarity.md)
+> **Lecture Notes:** [03_embeddings_similarity.md](lectures/03_embeddings_similarity.md)
 >
 > **Goal:** Implement semantic search using vector embeddings.
 
@@ -491,9 +490,9 @@ USE_SIMILARITY_SOLUTION = True  # Fall back to reference solution
 
 ---
 
-## Phase 4: Vector Database & Re-ranking (50 minutes)
+## Phase 4: Vector Database & Re-ranking
 
-> **Lecture Notes:** [03_vector_databases.md](lectures/03_vector_databases.md)
+> **Lecture Notes:** [04_vector_databases.md](lectures/04_vector_databases.md)
 >
 > **Goal:** Scale retrieval with ANN search and add re-ranking for precision.
 
@@ -601,7 +600,7 @@ USE_RERANKING_SOLUTION = True  # Fall back to BM25 reference solution
 
 ## Optional: Advanced Chunking Strategies
 
-> **Lecture Notes:** [05_chunking_strategies.md](lectures/05_chunking_strategies.md)
+> **Lecture Notes:** [05_advanced_topics.md](lectures/05_advanced_topics.md)
 >
 > **Goal:** Implement data-aware chunking that respects conversation boundaries.
 >
@@ -661,12 +660,13 @@ For an additional challenge, explore [`src/workshop/rag/chunkers/sentence_bounda
 ### The RAG Pipeline
 
 ```
-Chunking -> Embedding -> Indexing -> Retrieval -> Re-ranking -> Prompting -> Generation
-    |           |           |            |            |             |            |
-    v           v           v            v            v             v            v
- Affects     Creates     Enables      Finds        Refines      Formats      Produces
-what can    semantic     fast ANN    candidates    accuracy     context       answer
-be found    vectors      search
+┌──────────┐   ┌───────────┐   ┌───────────┐   ┌───────────┐   ┌────────────┐   ┌───────────┐
+│ Chunking │-->│ Embedding │-->│  Indexing  │-->│ Retrieval │-->│ Re-ranking │-->│ Prompting │--> LLM
+└──────────┘   └───────────┘   └───────────┘   └───────────┘   └────────────┘   └───────────┘
+     |              |              |                 |               |                |
+  Affects        Creates        Enables           Finds          Refines          Formats
+  what can       semantic       fast ANN        candidates       accuracy         context
+  be found       vectors        search
 ```
 
 ### Tradeoffs Everywhere
