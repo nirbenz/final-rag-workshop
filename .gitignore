@@ -204,6 +204,7 @@ chats
 !chats/example_chat.txt
 private_scripts
 *.bak
+docs/rag_presentation/*
 
 # Vector DB storage
 .qdrant
