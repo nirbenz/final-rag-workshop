@@ -1,38 +1,2021 @@
-[15/12/26, 09:00:00] WhatsApp: Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more.
-[15/12/26, 09:00:01] Alice: Hey everyone! Ready for the RAG workshop today?
-[15/12/26, 09:01:15] Bob: Absolutely! I've been reading about chunking strategies
-[15/12/26, 09:01:45] Alice: Nice! What did you find most interesting?
-[15/12/26, 09:02:22] Bob: The trade-off between chunk size and context quality
-[15/12/26, 09:02:48] Bob: Smaller chunks = more precise retrieval but less context
-[15/12/26, 09:03:12] Charlie: That's exactly what I was confused about
-[15/12/26, 09:03:38] Charlie: How do you decide the right chunk size?
-[15/12/26, 09:04:05] Alice: It depends on your use case! For Q&A, smaller chunks work better
-[15/12/26, 09:04:32] Alice: For summarization, you want larger chunks with more context
-[15/12/26, 09:05:01] Bob: What about overlapping chunks?
-[15/12/26, 09:05:28] Alice: Great question! Overlap helps preserve context at boundaries
-[15/12/26, 09:06:14] Alice: Usually 10-20% overlap is a good starting point
-[15/12/26, 09:07:03] Charlie: Makes sense. What about embeddings?
-[15/12/26, 09:08:11] Bob: I've been using OpenAI's text-embedding-3-small
-[15/12/26, 09:08:42] Bob: Works great for semantic search
-[15/12/26, 09:09:18] Alice: Gemini embeddings are also excellent
-[15/12/26, 09:09:45] Alice: And they support task-specific embeddings
-[15/12/26, 09:10:22] Charlie: What's the difference between RETRIEVAL_QUERY and RETRIEVAL_DOCUMENT?
-[15/12/26, 09:11:08] Alice: RETRIEVAL_DOCUMENT is for indexing your chunks
-[15/12/26, 09:11:35] Alice: RETRIEVAL_QUERY is for embedding the user's question
-[15/12/26, 09:12:14] Alice: Using different task types improves retrieval quality
-[15/12/26, 09:13:02] Bob: That's a neat trick! I didn't know that
-[15/12/26, 09:14:18] Charlie: Should we use a vector database?
-[15/12/26, 09:15:05] Alice: For production, definitely. LanceDB is great for local development
-[15/12/26, 09:15:38] Alice: It's embedded, fast, and supports hybrid search
-[15/12/26, 09:16:22] Bob: What about Pinecone or Qdrant?
-[15/12/26, 09:17:01] Alice: Those are better for larger scale deployments
-[15/12/26, 09:17:34] Alice: But for a workshop, LanceDB keeps things simple
-[15/12/26, 09:18:15] Charlie: Perfect. I think I'm ready to start coding!
-[15/12/26, 09:19:02] Bob: Same here. Let's build something cool
-[15/12/26, 09:20:11] Alice: Awesome! Remember: start simple with MessageCountChunker
-[15/12/26, 09:20:45] Alice: Then iterate based on retrieval quality
-[15/12/26, 09:21:18] Charlie: Got it. Simple first, optimize later
-[15/12/26, 09:22:06] Bob: The best engineering advice :)
-[15/12/26, 09:23:14] Alice: Alright, let's get started! Good luck everyone
-[15/12/26, 09:24:02] Charlie: Thanks Alice! This is going to be fun
-[15/12/26, 09:25:08] Bob: See you all in the workshop!
+[10/7/24, 08:12:33] NovaMind Team: Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more.
+[10/7/24, 08:12:45] Dana: Welcome to the NovaMind team chat everyone!
+[10/7/24, 08:12:58] Dana: We finally have enough people to justify a group chat
+[10/7/24, 08:13:10] Yossi: Six whole people. We're basically Google now.
+[10/7/24, 08:13:22] Liam: Google with a WeWork hot desk and a dream
+[10/7/24, 08:13:35] Alex: And a very aggressive ping pong player in the co-working space
+[10/7/24, 08:13:48] Marco: That guy is terrifying. He plays during lunch every day.
+[10/7/24, 08:14:00] Sophie: OK so what's this group for? Project stuff or general?
+[10/7/24, 08:14:15] Dana: General office stuff, logistics, announcements. Project discussions stay in Slack channels.
+[10/7/24, 08:14:28] Dana: Speaking of logistics -- our WeWork desks are in zone C, 4th floor
+[10/7/24, 08:14:42] Dana: Member card gets you into the building and onto our floor
+[10/7/24, 08:14:55] Dana: If you forget your card, the front desk code is 8842
+[10/7/24, 08:15:08] Marco: I already forgot my card twice last week
+[10/7/24, 08:15:20] Dana: Marco it's been one week
+[10/7/24, 08:15:32] Marco: It's been a busy week
+[10/7/24, 08:15:45] Sophie: What's the WiFi here again? I keep connecting to the wrong one
+[10/7/24, 08:15:58] Yossi: WeWork-Members for us, password is printed on that little card at your desk
+[10/7/24, 08:16:10] Alex: My card says "community2024" -- is that right?
+[10/7/24, 08:16:22] Yossi: Yeah that's the current one
+[10/7/24, 08:16:35] Liam: There's also WeWork-Guest but it's painfully slow
+[10/7/24, 08:16:48] Marco: I set up a VPN on the members network. Much more secure for our work.
+[10/7/24, 08:17:00] Dana: Good thinking Marco
+[10/7/24, 09:00:15] Dana: Team standup at 9am sharp every day. We're using the small phone booth room near the kitchen.
+[10/7/24, 09:00:28] Liam: Can we book an actual meeting room? The phone booth fits like 3 people
+[10/7/24, 09:00:42] Dana: WeWork charges extra for meeting rooms. Let's save cash for now.
+[10/7/24, 09:00:55] Yossi: Startup life. Sardine standup it is.
+[10/7/24, 09:01:08] Sophie: At least it'll be quick. No room to get comfortable.
+[10/7/24, 10:30:22] Liam: Has anyone used LanceDB before? I'm evaluating vector databases for our prototype
+[10/7/24, 10:30:38] Yossi: I played with it last month. It's embedded, no server needed. Pretty nice for early stage.
+[10/7/24, 10:30:55] Marco: How does it compare to Pinecone?
+[10/7/24, 10:31:10] Yossi: Way simpler to set up. Pinecone is overkill for where we are right now.
+[10/7/24, 10:31:25] Liam: What about Qdrant?
+[10/7/24, 10:31:40] Yossi: Qdrant is great but requires running a service. LanceDB is just a library. Perfect for prototyping.
+[10/7/24, 10:31:55] Liam: Sold. I'll start the integration today.
+[10/7/24, 12:15:05] Sophie: Lunch group? There's a new salad place downstairs
+[10/7/24, 12:15:18] Alex: I'm in. The WeWork kitchen only has those sad granola bars today
+[10/7/24, 12:15:32] Liam: Count me in
+[10/7/24, 12:15:45] Marco: Same
+[10/7/24, 12:16:00] Dana: Let's all go. Team bonding via overpriced salads.
+[10/7/24, 12:16:15] Yossi: I brought lunch from home but I'll join for the company
+[10/7/24, 14:22:08] Alex: Did anyone see the new Claude 3.5 Sonnet benchmarks? It's beating GPT-4 on code generation
+[10/7/24, 14:22:25] Yossi: Yeah the coding capabilities are impressive. We should benchmark it against our current GPT-4 pipeline
+[10/7/24, 14:22:42] Liam: I ran a quick test last night actually. Claude is noticeably better at following complex instructions
+[10/7/24, 14:22:58] Alex: The Artifacts feature is cool too, though not relevant for our API use case
+[10/7/24, 14:23:15] Sophie: From a product perspective, should we support multiple LLM backends?
+[10/7/24, 14:23:30] Dana: Absolutely. Model-agnostic is part of our value prop.
+[10/7/24, 14:23:45] Yossi: We already have an abstraction layer. Adding Claude is maybe 2 days of work.
+[10/7/24, 14:24:00] Liam: I can do it this sprint
+[10/7/24, 16:45:12] Marco: Hey does anyone know how to book the WeWork event space? I want to do a demo for a potential customer next week
+[10/7/24, 16:45:28] Dana: You book through the WeWork app, under "meeting rooms"
+[10/7/24, 16:45:42] Dana: But event spaces are expensive. How many people?
+[10/7/24, 16:45:58] Marco: Just 3-4 from their side plus us
+[10/7/24, 16:46:12] Dana: Use a regular meeting room then. Book the one called "Innovate" -- it fits 8
+[10/7/24, 16:46:28] Marco: Got it. What's the booking limit per month?
+[10/7/24, 16:46:42] Dana: We get 10 hours of meeting room credits. Check the app for remaining balance.
+[10/7/24, 16:46:58] Sophie: We've used 3 hours this month already FYI
+[10/8/24, 08:05:18] Alex: Morning. The elevator is insanely slow today
+[10/8/24, 08:05:32] Liam: It's always slow. I've started taking the stairs
+[10/8/24, 08:05:45] Alex: 4 floors though
+[10/8/24, 08:05:58] Liam: Cardio
+[10/8/24, 08:30:12] Marco: Anyone else's internet crawling this morning?
+[10/8/24, 08:30:28] Marco: I'm getting 5mbps on the WeWork network
+[10/8/24, 08:30:42] Yossi: Same here. Probably everyone downloading stuff after the weekend.
+[10/8/24, 08:30:58] Marco: I'll switch to my phone hotspot for now
+[10/8/24, 08:31:12] Alex: The guest network is actually faster right now weirdly enough
+[10/8/24, 08:31:28] Marco: Of course it is. Nobody uses it because it's supposed to be slow.
+[10/8/24, 09:02:15] Dana: Standup! Phone booth in 1 min
+[10/8/24, 10:15:33] Sophie: Quick product question -- our target customer for the MVP, are we going B2B or B2C?
+[10/8/24, 10:15:48] Dana: B2B. Enterprise knowledge management. Companies with large internal documentation.
+[10/8/24, 10:16:05] Sophie: OK so the chat-with-your-docs angle
+[10/8/24, 10:16:20] Dana: Exactly. But specifically for conversational data -- Slack, Teams, WhatsApp groups
+[10/8/24, 10:16:35] Sophie: That's a much harder problem than just PDFs
+[10/8/24, 10:16:50] Yossi: That's why nobody's solved it well yet. That's our opportunity.
+[10/8/24, 10:17:05] Sophie: Fair point. The chunking problem alone is a differentiator if we nail it.
+[10/8/24, 10:17:20] Liam: Speaking of chunking -- I've been experimenting with different chunk sizes
+[10/8/24, 10:17:35] Liam: 200 tokens is way too small for conversations. You lose all context.
+[10/8/24, 10:17:50] Liam: 1000 tokens is too big. The retrieval becomes imprecise.
+[10/8/24, 10:18:05] Yossi: What's working best?
+[10/8/24, 10:18:20] Liam: Around 400-500 tokens with 50 token overlap. But honestly it's still not great.
+[10/8/24, 10:18:35] Yossi: We need something smarter than fixed-size chunks for conversational data
+[10/8/24, 10:18:50] Liam: Agreed. I have some ideas about time-based segmentation.
+[10/8/24, 12:30:05] Alex: Anyone want to order from that burger place on Kaplan? They have a lunch deal
+[10/8/24, 12:30:20] Liam: Which one, Vitrina?
+[10/8/24, 12:30:35] Alex: Yeah. 59 NIS for burger + fries + drink
+[10/8/24, 12:30:50] Sophie: I'm in. Classic burger for me
+[10/8/24, 12:31:05] Marco: Cheeseburger, no onions
+[10/8/24, 12:31:20] Dana: Veggie burger please
+[10/8/24, 12:31:35] Yossi: I'll have what Dana's having
+[10/8/24, 12:31:50] Liam: OK ordering now on Wolt
+[10/8/24, 14:00:22] Sophie: Hey has anyone been watching the US election coverage? It's getting wild
+[10/8/24, 14:00:38] Alex: The polls are so close. This is going to be a nail-biter.
+[10/8/24, 14:00:55] Liam: I'm trying to avoid the news cycle honestly. It's all-consuming.
+[10/8/24, 14:01:10] Dana: Same. Let's keep politics light in this group though, OK?
+[10/8/24, 14:01:25] Sophie: Agreed, just making conversation
+[10/8/24, 14:01:40] Marco: The only election I care about is which LLM wins the MMLU benchmark
+[10/8/24, 14:01:55] Yossi: Claude 2024
+[10/8/24, 14:02:10] Alex: GPT forever
+[10/8/24, 14:02:25] Liam: Gemini dark horse
+[10/8/24, 14:02:40] Dana: We support all LLMs equally in this company. No model discrimination.
+[10/8/24, 16:30:08] Marco: Heads up -- I'm setting up our GitHub Actions CI pipeline tonight
+[10/8/24, 16:30:25] Marco: There might be some spurious notifications as I test
+[10/8/24, 16:30:40] Yossi: No worries. What's the test coverage looking like?
+[10/8/24, 16:30:55] Marco: About 45% right now. We need to get that up.
+[10/8/24, 16:31:10] Yossi: Target 80% before we show anything to customers
+[10/8/24, 16:31:25] Liam: I'll write tests for the chunking module this week
+[10/9/24, 08:15:22] Sophie: Good morning! Reminder: we have that potential customer demo on Thursday
+[10/9/24, 08:15:38] Sophie: Company called DataStream. They're a fintech with massive Slack history.
+[10/9/24, 08:15:55] Dana: This could be our first design partner. Let's make it count.
+[10/9/24, 08:16:10] Yossi: What do they want to see specifically?
+[10/9/24, 08:16:25] Sophie: They want to search their Slack conversations. Typical use case: "what did the engineering team decide about the database migration in Q2"
+[10/9/24, 08:16:42] Yossi: We can demo that. Liam, how's the Slack connector looking?
+[10/9/24, 08:16:58] Liam: Functional but rough. I can polish it by tomorrow.
+[10/9/24, 08:17:12] Alex: I'll make sure the UI is presentable for the demo
+[10/9/24, 08:17:28] Marco: I'll set up a clean demo environment on our staging server
+[10/9/24, 09:01:05] Dana: Standup time!
+[10/9/24, 11:30:15] Liam: Question for the group -- for the demo, should we use real Slack data or synthetic?
+[10/9/24, 11:30:32] Yossi: Synthetic is safer. Don't want to accidentally show anything sensitive.
+[10/9/24, 11:30:48] Sophie: I can generate realistic sample conversations. Give me a template and I'll write 50 threads.
+[10/9/24, 11:31:05] Liam: That would be amazing Sophie. Aim for a mix of technical discussions, project updates, and casual chat.
+[10/9/24, 11:31:20] Sophie: On it!
+[10/9/24, 11:31:35] Alex: Include some tricky ones -- like a question asked on Monday with the answer on Wednesday in a different channel
+[10/9/24, 11:31:50] Sophie: Cross-channel references? That's evil. I love it.
+[10/9/24, 13:45:22] Marco: The WeWork printer is broken again
+[10/9/24, 13:45:38] Marco: I need to print the NDA for the DataStream meeting
+[10/9/24, 13:45:55] Alex: There's a print shop two blocks down on Yigal Alon
+[10/9/24, 13:46:10] Marco: Name?
+[10/9/24, 13:46:25] Alex: PrintBox I think. Or maybe CopyMax. It's the one next to the pharmacy.
+[10/9/24, 13:46:40] Marco: Helpful, thanks Alex
+[10/9/24, 13:46:55] Alex: You're welcome. It's definitely one of those two names.
+[10/9/24, 15:00:08] Dana: Team -- Yossi and I have been discussing our office situation
+[10/9/24, 15:00:25] Dana: WeWork is great for getting started but we need our own space
+[10/9/24, 15:00:40] Dana: I'm starting to look at offices. Budget is around 15-20K NIS/month
+[10/9/24, 15:00:55] Sophie: Where are you looking? Sarona area?
+[10/9/24, 15:01:10] Dana: Sarona, Rothschild, HaYarkon corridor. Anywhere in central TLV really.
+[10/9/24, 15:01:25] Yossi: Preferably somewhere with decent parking
+[10/9/24, 15:01:40] Marco: And a server room or at least a closet we can convert
+[10/9/24, 15:01:55] Liam: And a coffee machine. The WeWork coffee is a war crime.
+[10/9/24, 15:02:10] Alex: Seconded. The coffee here tastes like regret.
+[10/9/24, 15:02:25] Dana: Noted -- good coffee is a business requirement
+[10/10/24, 08:20:15] Sophie: Demo day! DataStream meeting at 2pm in the Innovate room
+[10/10/24, 08:20:30] Sophie: I finished the synthetic Slack dataset. 50 threads, ~2000 messages
+[10/10/24, 08:20:45] Sophie: Including some intentionally tricky cross-channel references
+[10/10/24, 08:21:00] Liam: Sophie you're a machine. Importing it now.
+[10/10/24, 08:21:15] Alex: UI is demo-ready. Clean, simple, professional.
+[10/10/24, 08:21:30] Marco: Demo environment is up and running. API response times are under 2 seconds.
+[10/10/24, 08:21:45] Yossi: Nice work team. Let's do a dry run at 11?
+[10/10/24, 08:22:00] Dana: Good idea. Everyone in Innovate at 11.
+[10/10/24, 11:45:22] Dana: Dry run went well! A few tweaks:
+[10/10/24, 11:45:38] Dana: 1. The search for "database migration decision" returned results from the wrong quarter
+[10/10/24, 11:45:55] Yossi: That's the temporal relevance issue. Liam can you add a date filter to the demo?
+[10/10/24, 11:46:10] Liam: Quick fix, give me 30 minutes
+[10/10/24, 11:46:25] Dana: 2. When I asked "who decided to use PostgreSQL" it showed the message but not who sent it
+[10/10/24, 11:46:40] Alex: I'll add the sender info to the result cards. Easy fix.
+[10/10/24, 11:46:55] Dana: 3. Overall flow is great. Everyone be ready at 1:45.
+[10/10/24, 15:30:08] Dana: DataStream demo is done!
+[10/10/24, 15:30:25] Dana: I think it went really well. They were impressed with the conversational search.
+[10/10/24, 15:30:40] Sophie: Their head of engineering asked some tough questions about scale
+[10/10/24, 15:30:55] Yossi: Yeah, they have 5 million Slack messages. I told them we can handle it.
+[10/10/24, 15:31:10] Marco: Can we handle 5 million messages?
+[10/10/24, 15:31:25] Yossi: We will by the time they sign
+[10/10/24, 15:31:40] Marco: Noted. I'll start load testing.
+[10/10/24, 15:31:55] Liam: The temporal query issue came up in the demo too. They asked about a decision from "last quarter" and got results from a year ago
+[10/10/24, 15:32:10] Yossi: We need to solve the temporal relevance problem properly. It's going to come up with every customer.
+[10/10/24, 15:32:25] Dana: Agreed. Let's make it a priority for next sprint.
+[10/10/24, 17:00:05] Alex: That demo was stressful but fun. Anyone want to grab a beer at the Sarona market?
+[10/10/24, 17:00:20] Liam: YES. I need to decompress.
+[10/10/24, 17:00:35] Marco: In
+[10/10/24, 17:00:50] Sophie: Same
+[10/10/24, 17:01:05] Yossi: Let's go
+[10/10/24, 17:01:20] Dana: First round is on me!
+[10/11/24, 09:05:22] Dana: Standup! Everyone alive after last night?
+[10/11/24, 09:05:38] Liam: Barely. That third beer was a mistake.
+[10/11/24, 09:05:55] Alex: Fourth beer, Liam. You had four.
+[10/11/24, 09:06:10] Liam: I choose to remember it differently.
+[10/11/24, 10:30:15] Marco: Question -- has anyone worked with WhatsApp chat exports before?
+[10/11/24, 10:30:32] Marco: A potential customer asked if we can ingest WhatsApp group data
+[10/11/24, 10:30:48] Liam: WhatsApp exports are just text files. Each line is [timestamp] sender: message
+[10/11/24, 10:31:05] Marco: Is the format consistent?
+[10/11/24, 10:31:20] Liam: Mostly, but there are edge cases. Multi-line messages, media attachments, system messages
+[10/11/24, 10:31:35] Yossi: We should build a WhatsApp parser. It's a common data source.
+[10/11/24, 10:31:50] Liam: I'll prototype one this weekend. The tricky part is handling different date formats -- US vs EU etc.
+[10/11/24, 10:32:05] Sophie: From a product angle, WhatsApp is huge in Israel and Europe. Good market fit.
+[10/11/24, 10:32:20] Dana: Definitely build the parser. It's a differentiator.
+[10/11/24, 13:00:08] Sophie: Hey completely off topic but has anyone seen Joker 2?
+[10/11/24, 13:00:25] Alex: Don't waste your money. It's terrible.
+[10/11/24, 13:00:40] Liam: I actually kind of liked it
+[10/11/24, 13:00:55] Alex: Liam you have no taste. You also put ketchup on hummus.
+[10/11/24, 13:01:10] Marco: He WHAT
+[10/11/24, 13:01:25] Liam: It was ONE TIME and I was very hungover
+[10/11/24, 13:01:40] Sophie: Back to the movie -- the musical numbers were bizarre
+[10/11/24, 13:01:55] Alex: Lady Gaga deserved a better script
+[10/11/24, 13:02:10] Dana: I'm waiting for it on streaming. Not worth theater prices for a disappointing sequel.
+[10/11/24, 13:02:25] Yossi: Speaking of streaming, has anyone watched The Penguin on HBO?
+[10/11/24, 13:02:40] Marco: So good. Colin Farrell is unrecognizable.
+[10/11/24, 13:02:55] Sophie: The acting is incredible. Episode 3 especially.
+[10/11/24, 13:03:10] Alex: No spoilers! I'm only on episode 2
+[10/14/24, 08:10:05] Dana: Monday morning! Hope everyone had a good weekend
+[10/14/24, 08:10:20] Liam: Weekend was productive -- WhatsApp parser is working
+[10/14/24, 08:10:35] Liam: Handles multi-line messages, media placeholders, and system messages
+[10/14/24, 08:10:50] Yossi: Nice! Can you demo it in standup?
+[10/14/24, 08:11:05] Liam: Sure. I tested it on a real WhatsApp export from a group I'm in. Parsed 12,000 messages cleanly.
+[10/14/24, 08:11:20] Marco: Any edge cases?
+[10/14/24, 08:11:35] Liam: Hebrew messages work fine. Emojis work. The only issue is deleted message placeholders -- they show up as a special unicode character
+[10/14/24, 08:11:50] Yossi: Good enough for now. We can handle edge cases as they come up.
+[10/14/24, 09:02:08] Dana: Standup time!
+[10/14/24, 10:45:33] Sophie: DataStream follow-up: they want a second demo with their actual data
+[10/14/24, 10:45:50] Sophie: They'll send us a sanitized Slack export this week
+[10/14/24, 10:46:05] Dana: Great sign! That means they're seriously considering us
+[10/14/24, 10:46:20] Yossi: How much data are we talking?
+[10/14/24, 10:46:35] Sophie: They said about 500K messages to start, from their engineering channels
+[10/14/24, 10:46:50] Marco: I'll make sure our infrastructure can handle that. Should be fine.
+[10/14/24, 10:47:05] Liam: The chunking pipeline might need optimization for that volume though
+[10/14/24, 10:47:20] Yossi: How long does it take to process right now?
+[10/14/24, 10:47:35] Liam: About 5 minutes for 2000 messages. So 500K would take... math... about 20 hours
+[10/14/24, 10:47:50] Marco: That's way too slow. We need to parallelize.
+[10/14/24, 10:48:05] Liam: Agreed. The embedding calls are the bottleneck. We can batch them.
+[10/14/24, 12:00:15] Alex: Lunch spot suggestion: there's a new ramen place in Sarona called Tori
+[10/14/24, 12:00:30] Sophie: Ramen in October? It's still 30 degrees outside
+[10/14/24, 12:00:45] Alex: Ramen is always appropriate
+[10/14/24, 12:01:00] Marco: I'm in. Hot soup is the ultimate comfort food.
+[10/14/24, 12:01:15] Liam: Me too. Let's go at 12:30.
+[10/14/24, 12:01:30] Dana: Count me in
+[10/14/24, 12:01:45] Yossi: Same
+[10/14/24, 14:30:22] Dana: Team, I looked at 3 offices this morning. Quick update:
+[10/14/24, 14:30:38] Dana: Option 1: Yigal Alon 98, 4th floor. 80sqm, 14K/month. No parking.
+[10/14/24, 14:30:55] Dana: Option 2: HaYarkon 45, 3rd floor. 100sqm, 16K/month. 5 parking spots. Has a small server closet.
+[10/14/24, 14:31:10] Dana: Option 3: Derech Menachem Begin 48, 2nd floor. 120sqm, 22K/month. Modern. No server room.
+[10/14/24, 14:31:25] Yossi: HaYarkon sounds like the best fit. Parking + server room is important.
+[10/14/24, 14:31:40] Marco: Agree. I need somewhere to put the GPU workstation that's arriving next month.
+[10/14/24, 14:31:55] Sophie: What's the neighborhood like at HaYarkon?
+[10/14/24, 14:32:10] Dana: Walking distance to the beach, lots of restaurants, good bus lines
+[10/14/24, 14:32:25] Alex: Beach proximity is a strong selling point for recruiting
+[10/14/24, 14:32:40] Liam: When would we move in?
+[10/14/24, 14:32:55] Dana: If we sign this week, we could move in by early December
+[10/14/24, 14:33:10] Sophie: That gives us about 6 weeks. Tight but doable.
+[10/14/24, 14:33:25] Dana: I'm leaning toward HaYarkon 45. Any objections?
+[10/14/24, 14:33:40] Yossi: None from me
+[10/14/24, 14:33:55] Marco: Go for it
+[10/14/24, 14:34:10] Alex: Ship it
+[10/14/24, 14:34:25] Liam: +1
+[10/14/24, 14:34:40] Sophie: Let's do it!
+[10/14/24, 14:34:55] Dana: Alright, I'll schedule the signing for Wednesday
+[10/14/24, 17:15:08] Yossi: Random thought -- we should hire an office manager before we move. Someone to handle logistics, facilities, vendors etc.
+[10/14/24, 17:15:25] Dana: Already on it. I have 3 candidates lined up for interviews this week.
+[10/14/24, 17:15:40] Sophie: While we're talking about hiring, we really need an ML engineer. I keep hearing from customers that they want more sophisticated retrieval.
+[10/14/24, 17:15:55] Dana: That's next on the list after office manager. And we need QA too.
+[10/14/24, 17:16:10] Yossi: And a data scientist for evaluation and benchmarking
+[10/14/24, 17:16:25] Dana: One at a time! Let's not burn through our runway hiring everyone at once.
+[10/15/24, 08:22:15] Marco: Morning. Just got an email -- our GPU workstation shipped!
+[10/15/24, 08:22:32] Marco: NVIDIA A100, 80GB VRAM. Should arrive in about 3 weeks.
+[10/15/24, 08:22:48] Yossi: Excellent. That'll be essential for running local embedding models.
+[10/15/24, 08:23:05] Liam: Can we use it for inference too or just embeddings?
+[10/15/24, 08:23:20] Yossi: Both. 80GB VRAM can run most open-source LLMs easily.
+[10/15/24, 08:23:35] Marco: I'll configure it when it arrives. Dual boot Ubuntu server + my tears of joy.
+[10/15/24, 09:00:45] Dana: Standup!
+[10/15/24, 11:00:22] Alex: Has anyone here tried Cursor IDE? It just launched their latest update
+[10/15/24, 11:00:38] Liam: Using it right now actually. The AI autocomplete is ridiculously good.
+[10/15/24, 11:00:55] Alex: Better than Copilot?
+[10/15/24, 11:01:10] Liam: Miles better. It understands the full project context, not just the current file.
+[10/15/24, 11:01:25] Marco: I tried it but went back to vim. I'm a lost cause.
+[10/15/24, 11:01:40] Yossi: Use whatever makes you productive. Except Notepad. Nobody should use Notepad.
+[10/15/24, 11:01:55] Alex: I'm going to try Cursor this week
+[10/15/24, 13:30:05] Sophie: Liam, can you remind me what embedding model we're using for the prototype?
+[10/15/24, 13:30:20] Liam: text-embedding-ada-002 from OpenAI. 1536 dimensions.
+[10/15/24, 13:30:35] Sophie: Is that the latest one?
+[10/15/24, 13:30:50] Yossi: No, text-embedding-3-small and 3-large are newer. We should upgrade.
+[10/15/24, 13:31:05] Liam: I'll switch to text-embedding-3-small this week. It's cheaper and slightly better.
+[10/15/24, 13:31:20] Sophie: What's the cost difference?
+[10/15/24, 13:31:35] Liam: Ada is $0.10 per million tokens. 3-small is $0.02. Huge savings.
+[10/15/24, 13:31:50] Marco: 5x cheaper? That's significant at scale.
+[10/15/24, 13:32:05] Dana: Make the switch. Every dollar counts at this stage.
+[10/15/24, 16:00:12] Dana: Office lease signed! HaYarkon 45, here we come!
+[10/15/24, 16:00:28] Dana: Move-in date is December 1st
+[10/15/24, 16:00:45] Dana: We'll need to furnish the place from scratch
+[10/15/24, 16:01:00] Sophie: That's exciting! What about furniture?
+[10/15/24, 16:01:15] Dana: Looking for recommendations. Anyone know a good office furniture vendor?
+[10/15/24, 16:01:30] Alex: IKEA business?
+[10/15/24, 16:01:45] Yossi: IKEA for a startup office looks a bit... cheap
+[10/15/24, 16:02:00] Marco: My friend runs a company that buys and resells used office furniture. Great quality, half the price.
+[10/15/24, 16:02:15] Marco: Place is called SecondDesk. They're in Bnei Brak.
+[10/15/24, 16:02:30] Dana: Send me their details, I'll check it out
+[10/15/24, 16:02:45] Marco: Owner is Dani, number is 052-555-7788. Tell him Marco sent you.
+[10/15/24, 16:03:00] Dana: Thanks Marco!
+[10/16/24, 08:30:05] Sophie: Morning everyone! Anyone catch the Apple event yesterday?
+[10/16/24, 08:30:22] Alex: The new M4 Macs look insane. I want a Mac Mini so badly.
+[10/16/24, 08:30:38] Liam: The 24GB unified memory model would be perfect for local LLM inference
+[10/16/24, 08:30:55] Yossi: We're not buying everyone Mac Minis
+[10/16/24, 08:31:10] Alex: But Yossi... productivity...
+[10/16/24, 08:31:25] Yossi: Your current MacBook Pro is 6 months old
+[10/16/24, 08:31:40] Alex: 7 months actually. Practically ancient.
+[10/16/24, 08:31:55] Dana: Moving on
+[10/16/24, 09:01:12] Dana: Standup!
+[10/16/24, 11:15:33] Liam: Embedding model upgrade is done. Switched from ada-002 to text-embedding-3-small
+[10/16/24, 11:15:50] Liam: Initial benchmarks show 4% improvement in retrieval accuracy and 5x lower cost
+[10/16/24, 11:16:05] Yossi: Win-win. Nice work.
+[10/16/24, 11:16:20] Marco: I noticed the embedding dimension went from 1536 to... what is it now?
+[10/16/24, 11:16:35] Liam: 1536 by default but 3-small supports dimension reduction down to 512
+[10/16/24, 11:16:50] Yossi: Stick with 1536 for now. We can optimize later.
+[10/16/24, 14:00:15] Alex: Did anyone else get an email about a WeWork community event tonight?
+[10/16/24, 14:00:32] Alex: "Startup Mixer" at 6pm in the ground floor lounge
+[10/16/24, 14:00:48] Sophie: Free drinks?
+[10/16/24, 14:01:05] Alex: Free beer and wine according to the invite
+[10/16/24, 14:01:20] Marco: Say no more
+[10/16/24, 14:01:35] Sophie: Networking + free alcohol. Classic WeWork.
+[10/16/24, 14:01:50] Dana: Let's go as a team. Good opportunity to meet other startups.
+[10/16/24, 14:02:05] Yossi: I'll pass tonight. Got to pick up the kids.
+[10/16/24, 14:02:20] Dana: No worries Yossi
+[10/17/24, 08:15:22] Liam: That mixer was fun last night. Met a team building an AI-powered legal assistant.
+[10/17/24, 08:15:38] Sophie: I talked to a company doing RAG for medical records. Super interesting use case.
+[10/17/24, 08:15:55] Alex: I met the scary ping pong guy. His name is Eran and he's training for a tournament.
+[10/17/24, 08:16:10] Marco: That explains a lot.
+[10/17/24, 08:16:25] Dana: Any potential partnership leads?
+[10/17/24, 08:16:40] Sophie: The legal tech company might be interested in our platform. I got their CTO's number.
+[10/17/24, 08:16:55] Dana: Great, let's follow up!
+[10/17/24, 09:02:05] Dana: Standup!
+[10/17/24, 10:30:15] Sophie: DataStream sent their Slack export!
+[10/17/24, 10:30:32] Sophie: 487,000 messages from 12 channels over 18 months
+[10/17/24, 10:30:48] Liam: Importing now. With the batched embedding pipeline, this should take about 4 hours.
+[10/17/24, 10:31:05] Marco: I'll monitor the server resources during processing
+[10/17/24, 10:31:20] Yossi: Let's make sure we have good evaluation queries ready for when it's done
+[10/17/24, 10:31:35] Sophie: I'll prepare 20 test queries based on what they said they'd want to search for
+[10/17/24, 14:45:22] Liam: Processing complete! 487K messages -> 24,350 chunks
+[10/17/24, 14:45:38] Liam: Average chunk size: ~450 tokens. Total embedding time: 3.5 hours.
+[10/17/24, 14:45:55] Marco: Peak memory usage was 12GB. We need to optimize that.
+[10/17/24, 14:46:10] Yossi: 3.5 hours for half a million messages is OK for a batch process. Let's focus on quality.
+[10/17/24, 14:46:25] Sophie: Running the test queries now
+[10/17/24, 15:30:08] Sophie: Results on the DataStream data are mixed
+[10/17/24, 15:30:25] Sophie: Simple factual queries work great -- "what database do we use for payments" gets the right answer
+[10/17/24, 15:30:40] Sophie: But temporal queries are bad -- "what did they decide in the last engineering all-hands" returns results from 6 months ago
+[10/17/24, 15:30:55] Sophie: And attribution queries fail -- "who proposed switching to Kubernetes" returns the discussion but doesn't highlight the person
+[10/17/24, 15:31:10] Yossi: Temporal and attribution are our two biggest challenges right now
+[10/17/24, 15:31:25] Liam: For attribution, I think we need to include sender metadata in the search results, not just message content
+[10/17/24, 15:31:40] Yossi: And for temporal, we need recency scoring in the retrieval pipeline
+[10/17/24, 15:31:55] Dana: Let's prioritize these for the next 2 weeks. DataStream follow-up demo is November 1st.
+[10/18/24, 08:20:08] Marco: TGIF. Anyone else exhausted?
+[10/18/24, 08:20:25] Liam: This week was intense. Three all-nighters.
+[10/18/24, 08:20:40] Alex: Liam please stop glamorizing burnout
+[10/18/24, 08:20:55] Dana: Seriously Liam, work-life balance. We're a marathon not a sprint.
+[10/18/24, 08:21:10] Liam: Fair point. I'll take it easier this weekend.
+[10/18/24, 08:21:25] Yossi: Good. Rested engineers write better code.
+[10/18/24, 09:01:15] Dana: Standup!
+[10/18/24, 11:00:22] Sophie: Office manager interviews today! First candidate at 2pm.
+[10/18/24, 11:00:38] Dana: Her name is Noa. Previously at Wix managing their TLV office.
+[10/18/24, 11:00:55] Dana: Second candidate at 3:30 -- Tal, from a boutique hotel chain.
+[10/18/24, 11:01:10] Sophie: Both sound solid. What are we looking for specifically?
+[10/18/24, 11:01:25] Dana: Someone who can handle the office move, facilities management, and general admin. Also someone the team enjoys being around.
+[10/18/24, 11:01:40] Yossi: Culture fit is key for this role
+[10/18/24, 16:30:05] Dana: Interviews done! Both candidates were strong.
+[10/18/24, 16:30:22] Dana: Noa was exceptional though. She handled the "how would you organize an office move in 6 weeks" scenario perfectly.
+[10/18/24, 16:30:38] Sophie: She also had really good energy. Felt like she'd fit in great.
+[10/18/24, 16:30:55] Dana: I'm going to make her an offer this weekend. I think she's the one.
+[10/18/24, 16:31:10] Yossi: Quick hire, quick win
+[10/20/24, 12:00:15] Dana: Sunday update -- Noa accepted our offer! She starts Monday October 21st.
+[10/20/24, 12:00:32] Sophie: That's tomorrow! Amazing
+[10/20/24, 12:00:48] Alex: Welcome Noa!
+[10/20/24, 12:01:05] Marco: Another one joins the chaos
+[10/20/24, 12:01:20] Liam: Does she know about the WeWork coffee situation?
+[10/20/24, 12:01:35] Dana: I may have undersold that particular challenge
+[10/21/24, 08:15:05] Dana: Everyone please welcome Noa to the group chat!
+[10/21/24, 08:15:20] NovaMind Team: Dana added Noa
+[10/21/24, 08:15:35] Noa: Hi everyone! So excited to be here!
+[10/21/24, 08:15:50] Alex: Welcome Noa!
+[10/21/24, 08:16:05] Marco: Welcome to the team!
+[10/21/24, 08:16:20] Sophie: Hey Noa! We're thrilled to have you
+[10/21/24, 08:16:35] Liam: Welcome! Fair warning -- the coffee here is terrible
+[10/21/24, 08:16:50] Yossi: Welcome Noa! Don't listen to Liam, the coffee is merely bad, not terrible
+[10/21/24, 08:17:05] Noa: Ha! First task: fix the coffee situation. Noted.
+[10/21/24, 08:17:20] Dana: Noa, quick orientation: we're at WeWork Sarona, zone C, 4th floor. Your desk is next to mine.
+[10/21/24, 08:17:35] Noa: Got my member card this morning. Already here!
+[10/21/24, 08:17:50] Dana: Your biggest project for the next 6 weeks: coordinating our move to HaYarkon 45 by December 1st
+[10/21/24, 08:18:05] Noa: I read the lease details you sent. Already started a project plan.
+[10/21/24, 08:18:20] Dana: You're going to fit in perfectly
+[10/21/24, 09:01:08] Dana: Standup! Noa, you're joining us in the phone booth. It's... cozy.
+[10/21/24, 09:01:25] Noa: I've been in the phone booth. "Cozy" is generous.
+[10/21/24, 10:30:15] Noa: OK team, I need some input for the new office setup. What do you NEED to have? Non-negotiables.
+[10/21/24, 10:30:32] Marco: Dedicated room for the server/GPU workstation. Proper cooling.
+[10/21/24, 10:30:48] Liam: Good coffee machine. Premium beans. This is non-negotiable.
+[10/21/24, 10:31:05] Alex: Standing desk option would be amazing
+[10/21/24, 10:31:20] Sophie: Two meeting rooms minimum. The phone booth is killing us.
+[10/21/24, 10:31:35] Yossi: Whiteboard in every meeting room
+[10/21/24, 10:31:50] Dana: A welcoming entrance area for visitors and customers
+[10/21/24, 10:32:05] Noa: Got it all. I'll put together a budget and plan by end of week.
+[10/21/24, 10:32:20] Noa: Also -- who is the coffee expert here? I need guidance on the machine.
+[10/21/24, 10:32:35] Liam: I have strong opinions. Can we discuss at lunch?
+[10/21/24, 10:32:50] Noa: Perfect!
+[10/21/24, 12:45:12] Noa: Just had the WeWork coffee. I understand the urgency now.
+[10/21/24, 12:45:28] Liam: Told you
+[10/21/24, 12:45:45] Noa: After extensive lunch discussion with Liam, here are the options:
+[10/21/24, 12:46:00] Noa: A) DeLonghi Magnifica S -- 3,500 NIS, solid workhorse, easy to use
+[10/21/24, 12:46:15] Noa: B) Jura E8 -- 6,500 NIS, premium, built-in water filter, better espresso
+[10/21/24, 12:46:30] Noa: C) Breville Barista Express -- 2,800 NIS, manual, requires skill
+[10/21/24, 12:46:45] Dana: The Jura sounds great but it's almost double the DeLonghi
+[10/21/24, 12:47:00] Yossi: Get the DeLonghi for now. We can upgrade when we raise our next round.
+[10/21/24, 12:47:15] Marco: I vote DeLonghi too. Save the money for server hardware.
+[10/21/24, 12:47:30] Liam: DeLonghi is a solid choice. Much better than WeWork.
+[10/21/24, 12:47:45] Noa: DeLonghi it is! I'll order it to be delivered when we move in.
+[10/21/24, 15:00:22] Alex: Hey anyone know what the WeWork front desk code is? The one you told us at the beginning Dana
+[10/21/24, 15:00:38] Alex: I need to let a delivery person in
+[10/21/24, 15:00:55] Sophie: Wasn't it 8842?
+[10/21/24, 15:01:10] Marco: I thought it was 8824
+[10/21/24, 15:01:25] Dana: It's 8842. Sophie is right.
+[10/21/24, 15:01:40] Alex: Thanks!
+[10/22/24, 08:20:05] Marco: Morning. PSA: there's a suspicious email going around pretending to be from WeWork about "verifying your membership"
+[10/22/24, 08:20:22] Marco: It's a phishing attempt. Do NOT click any links.
+[10/22/24, 08:20:38] Liam: Thanks for the heads up
+[10/22/24, 08:20:55] Sophie: I got that email too! Almost clicked it
+[10/22/24, 08:21:10] Marco: The real WeWork will never ask for your password via email. When in doubt, DM me.
+[10/22/24, 08:21:25] Noa: I'll report it to WeWork management
+[10/22/24, 09:01:15] Dana: Standup!
+[10/22/24, 11:30:08] Yossi: Liam, how's the temporal relevance feature coming along?
+[10/22/24, 11:30:25] Liam: Good progress. I'm adding a time decay function to the similarity scores.
+[10/22/24, 11:30:40] Liam: Newer messages get a boost. The decay rate is configurable.
+[10/22/24, 11:30:55] Yossi: What decay function are you using?
+[10/22/24, 11:31:10] Liam: Exponential. Score_final = Score_similarity * exp(-lambda * days_old)
+[10/22/24, 11:31:25] Liam: With lambda = 0.01, a message from 30 days ago gets a 74% weight
+[10/22/24, 11:31:40] Yossi: That seems reasonable. We should make lambda tunable per-customer.
+[10/22/24, 11:31:55] Liam: Already done. It's in the config file.
+[10/22/24, 14:00:22] Sophie: Movie recommendation for the weekend: The Wild Robot
+[10/22/24, 14:00:38] Sophie: It's animated but genuinely beautiful. Great storytelling.
+[10/22/24, 14:00:55] Alex: I took my niece to see it last weekend. I cried more than she did.
+[10/22/24, 14:01:10] Liam: Are we a movie recommendation group now?
+[10/22/24, 14:01:25] Sophie: We're a group that happens to have excellent taste in movies
+[10/22/24, 14:01:40] Marco: I'm still watching The Penguin. No time for movies.
+[10/22/24, 14:01:55] Dana: The Wild Robot is on my list. DreamWorks really stepped up.
+[10/23/24, 08:30:15] Noa: Office move update! Here's the timeline:
+[10/23/24, 08:30:32] Noa: Nov 15: Furniture delivery to HaYarkon 45
+[10/23/24, 08:30:48] Noa: Nov 18-22: Network cabling and IT setup (Marco, I'll need your input)
+[10/23/24, 08:31:05] Noa: Nov 25-29: Final touches, coffee machine setup, kitchen stocking
+[10/23/24, 08:31:20] Noa: Dec 1: WE MOVE IN
+[10/23/24, 08:31:35] Marco: I'll block Nov 18-22 for network setup. I want to run all the cabling myself.
+[10/23/24, 08:31:50] Yossi: Ambitious timeline. What could go wrong?
+[10/23/24, 08:32:05] Noa: Furniture delays are the biggest risk. I'm ordering this week to give us buffer.
+[10/23/24, 08:32:20] Dana: What about the GPU workstation? Marco, when does that arrive?
+[10/23/24, 08:32:35] Marco: Should be here by end of October. I'll store it at the WeWork until we move.
+[10/23/24, 08:32:50] Noa: I found the furniture vendor for the office by the way
+[10/23/24, 08:33:05] Noa: OfficeHub on Kaplan Street. They specialize in startup offices.
+[10/23/24, 08:33:20] Noa: Contact person is Ronit, 054-555-3847
+[10/23/24, 08:33:35] Dana: Great find Noa! What kind of pricing?
+[10/23/24, 08:33:50] Noa: Very competitive. She quoted 45K NIS for the full setup -- desks, chairs, shelving, kitchen table
+[10/23/24, 08:34:05] Dana: That's within budget. Let's go with them.
+[10/23/24, 08:34:20] Noa: Also looked into Marco's contact for used furniture -- SecondDesk
+[10/23/24, 08:34:35] Noa: They have great stuff but delivery takes 3 weeks. Too risky for our timeline.
+[10/23/24, 08:34:50] Marco: Fair enough. OfficeHub it is.
+[10/23/24, 09:01:22] Dana: Standup!
+[10/23/24, 13:00:15] Liam: Hey Sophie, for the DataStream demo prep -- what are the 20 test queries you prepared?
+[10/23/24, 13:00:32] Sophie: I shared them in the #datastream Slack channel yesterday
+[10/23/24, 13:00:48] Liam: Oh I missed that. Can you paste the top 5 here? I want to test the temporal stuff specifically.
+[10/23/24, 13:01:05] Sophie: Sure:
+[10/23/24, 13:01:20] Sophie: 1. "What did the team decide about the caching layer in the last sprint?"
+[10/23/24, 13:01:35] Sophie: 2. "Who proposed the migration to microservices and when?"
+[10/23/24, 13:01:50] Sophie: 3. "What were the main concerns about the new payment provider?"
+[10/23/24, 13:02:05] Sophie: 4. "Summarize the debate about React vs Vue that happened in August"
+[10/23/24, 13:02:20] Sophie: 5. "What is the current deployment process?"
+[10/23/24, 13:02:35] Liam: Perfect. #1 and #5 are great temporal tests. #2 is attribution. Let me run these.
+[10/23/24, 16:00:08] Alex: I'm heading out early today, dentist appointment
+[10/23/24, 16:00:25] Alex: If anyone needs me, I'll be online from home after 5
+[10/23/24, 16:00:40] Yossi: No worries, have fun at the dentist
+[10/23/24, 16:00:55] Alex: "Fun" is a strong word
+[10/24/24, 08:05:15] Sophie: Guys have you seen the news? OpenAI just launched the search feature in ChatGPT
+[10/24/24, 08:05:32] Sophie: Direct competitor to Google
+[10/24/24, 08:05:48] Yossi: The real question is: does it support RAG or is it just web search with an LLM wrapper?
+[10/24/24, 08:06:05] Liam: From what I read it's basically Bing with GPT-4 on top
+[10/24/24, 08:06:20] Alex: Not impressed. Perplexity has been doing this better for a year.
+[10/24/24, 08:06:35] Marco: The market is getting crowded. Good thing we're focused on enterprise internal data.
+[10/24/24, 08:06:50] Dana: Exactly. We don't compete with ChatGPT Search. Our moat is conversational data understanding.
+[10/24/24, 08:07:05] Sophie: Still, the fact that OpenAI is moving into search validates the general direction.
+[10/24/24, 08:07:20] Yossi: Every AI company becoming a search company. Tale as old as... last year.
+[10/24/24, 09:01:08] Dana: Standup!
+[10/24/24, 11:30:22] Noa: Hey team, I need everyone to fill out this form for the new office key cards
+[10/24/24, 11:30:38] Noa: Full name, phone number, and a headshot photo
+[10/24/24, 11:30:55] Noa: Link: forms.novamind.com/keycard (fake link obviously)
+[10/24/24, 11:31:10] Marco: After that phishing email the other day, I'm suspicious of ALL links now
+[10/24/24, 11:31:25] Noa: Ha! Valid concern. I promise this one is legit. I set it up on our own domain.
+[10/24/24, 11:31:40] Alex: Filled it out
+[10/24/24, 11:31:55] Liam: Done
+[10/24/24, 11:32:10] Sophie: Done!
+[10/24/24, 11:32:25] Marco: Done. But I used my hacker alias headshot.
+[10/24/24, 11:32:40] Noa: Marco please use a real photo
+[10/24/24, 11:32:55] Marco: Fine. Updated.
+[10/24/24, 14:30:05] Liam: Temporal relevance results are in!
+[10/24/24, 14:30:22] Liam: On the DataStream data:
+[10/24/24, 14:30:38] Liam: "What did the team decide in the last sprint?" -- now correctly returns last sprint's decisions, not stuff from 6 months ago
+[10/24/24, 14:30:55] Liam: "Current deployment process" -- returns the most recent process doc, not the old one from their Slack
+[10/24/24, 14:31:10] Liam: The time decay is working well
+[10/24/24, 14:31:25] Yossi: What about the attribution query?
+[10/24/24, 14:31:40] Liam: "Who proposed microservices" still doesn't highlight the specific person. We need to work on that.
+[10/24/24, 14:31:55] Yossi: Add it to the sprint backlog. Let's nail attribution before the Nov 1 demo.
+[10/24/24, 17:00:22] Sophie: Halloween is next Thursday! Should we do something at the office?
+[10/24/24, 17:00:38] Alex: WeWork usually does something. There was a costume contest last year apparently.
+[10/24/24, 17:00:55] Marco: I'm going as a deleted production database
+[10/24/24, 17:01:10] Liam: That's terrifying on so many levels
+[10/24/24, 17:01:25] Sophie: I was thinking we could bring snacks and decorate our zone a bit
+[10/24/24, 17:01:40] Noa: I'll get some candy and decorations. This is literally my job now.
+[10/24/24, 17:01:55] Dana: Keep it low-key though, we have work to do
+[10/24/24, 17:02:10] Yossi: I'm too old for Halloween costumes
+[10/24/24, 17:02:25] Alex: No one is too old for Halloween Yossi
+[10/25/24, 09:01:05] Dana: Standup!
+[10/25/24, 11:45:15] Marco: GPU workstation tracking says delivery on Monday October 28!
+[10/25/24, 11:45:32] Marco: 3 days ahead of schedule
+[10/25/24, 11:45:48] Yossi: Great news! Where are we going to put it in the WeWork?
+[10/25/24, 11:46:05] Marco: Under my desk. It'll be loud but temporary.
+[10/25/24, 11:46:20] Noa: The WeWork has a storage room on the ground floor. Maybe there?
+[10/25/24, 11:46:35] Marco: No network access down there. Needs to be near an ethernet drop.
+[10/25/24, 11:46:50] Noa: Fair point. Under your desk it is.
+[10/25/24, 14:00:22] Alex: Who wants to see Venom 3 this weekend?
+[10/25/24, 14:00:38] Liam: Is it any good?
+[10/25/24, 14:00:55] Alex: Reviews are terrible but I love Tom Hardy
+[10/25/24, 14:01:10] Sophie: I'm in. Sometimes bad movies are the most fun
+[10/25/24, 14:01:25] Marco: I'll go. When?
+[10/25/24, 14:01:40] Alex: Saturday 8pm at Cinema City Glilot?
+[10/25/24, 14:01:55] Sophie: Works for me
+[10/25/24, 14:02:10] Marco: Done
+[10/25/24, 14:02:25] Liam: Count me in too. I'll be the one eating popcorn loudly.
+[10/28/24, 08:10:15] Marco: GPU workstation is HERE
+[10/28/24, 08:10:32] Marco: Currently setting it up under my desk. The fans sound like a jet engine.
+[10/28/24, 08:10:48] Yossi: How much VRAM did we end up getting?
+[10/28/24, 08:11:05] Marco: 80GB. A100. It's a beast.
+[10/28/24, 08:11:20] Liam: Can I SSH into it?
+[10/28/24, 08:11:35] Marco: Give me a few hours to set up Ubuntu and the CUDA drivers. I'll share credentials after.
+[10/28/24, 08:11:50] Noa: Marco it is genuinely very loud under there. The neighbors are looking.
+[10/28/24, 08:12:05] Marco: 5 more weeks Noa. Just 5 more weeks until we have a proper server room.
+[10/28/24, 09:01:22] Dana: Standup!
+[10/28/24, 11:00:15] Alex: Venom 3 was hilariously bad by the way. We laughed the entire time.
+[10/28/24, 11:00:32] Sophie: The dance sequence was peak cinema
+[10/28/24, 11:00:48] Marco: I don't know what I watched but I don't regret it
+[10/28/24, 11:01:05] Liam: The post-credits scene though...
+[10/28/24, 11:01:20] Alex: NO SPOILERS Liam
+[10/28/24, 11:01:35] Liam: I wasn't going to say anything!
+[10/28/24, 11:01:50] Yossi: Is any movie safe to discuss in this group?
+[10/28/24, 14:30:05] Marco: GPU workstation is ready! Ubuntu 22.04, CUDA 12.1, PyTorch 2.1
+[10/28/24, 14:30:22] Marco: SSH access details:
+[10/28/24, 14:30:38] Marco: Host: gpu-local.novamind.internal
+[10/28/24, 14:30:55] Marco: I'll DM each of you individual credentials
+[10/28/24, 14:31:10] Liam: Already got mine. Logged in. This thing is FAST.
+[10/28/24, 14:31:25] Yossi: Can you run a quick benchmark? How fast can it generate embeddings?
+[10/28/24, 14:31:40] Liam: Running text-embedding-3-small equivalent locally using BGE-large...
+[10/28/24, 14:31:55] Liam: Holy cow. 3000 embeddings per second. That's 10x faster than the API.
+[10/28/24, 14:32:10] Marco: And free! Well, after the electricity bill.
+[10/28/24, 14:32:25] Yossi: This changes our economics significantly. Let's explore running embeddings locally.
+[10/29/24, 08:30:08] Noa: Good morning! Two quick things:
+[10/29/24, 08:30:25] Noa: 1. Halloween tomorrow -- I've set up candy bowls and some decorations in our zone
+[10/29/24, 08:30:40] Noa: 2. Office key cards for HaYarkon 45 are ready for pickup! I have them at my desk.
+[10/29/24, 08:30:55] Alex: Ooh key cards! It's getting real!
+[10/29/24, 08:31:10] Sophie: Can I grab mine today?
+[10/29/24, 08:31:25] Noa: Yes! Come by anytime.
+[10/29/24, 08:31:40] Marco: Are these for the building or just our floor?
+[10/29/24, 08:31:55] Noa: Just our floor. The building entrance has a keypad code.
+[10/29/24, 08:32:10] Marco: What's the building code?
+[10/29/24, 08:32:25] Noa: I'll get it from the building management before we move in. They change it monthly apparently.
+[10/29/24, 08:32:40] Marco: Monthly? That's going to be fun.
+[10/29/24, 09:01:08] Dana: Standup!
+[10/29/24, 12:15:22] Dana: Team, we have a new hire joining in two weeks! Priya Sharma, ML Engineer
+[10/29/24, 12:15:38] Dana: She's coming from Amazon, 5 years of experience in NLP and information retrieval
+[10/29/24, 12:15:55] Yossi: Excellent! We really needed ML expertise.
+[10/29/24, 12:16:10] Sophie: When does she start?
+[10/29/24, 12:16:25] Dana: November 11th. She'll be at WeWork with us for the last few weeks, then move with us.
+[10/29/24, 12:16:40] Liam: Looking forward to having someone who actually knows ML instead of me pretending
+[10/29/24, 12:16:55] Yossi: You've done a great job Liam. But yes, dedicated ML talent will be huge.
+[10/29/24, 14:00:15] Alex: Completely off topic but I just discovered that the WeWork kitchen has a waffle maker
+[10/29/24, 14:00:32] Alex: It was hidden behind the toaster this whole time
+[10/29/24, 14:00:48] Sophie: WHAT
+[10/29/24, 14:01:05] Liam: How long have we been here and nobody found this??
+[10/29/24, 14:01:20] Alex: 3 months of waffle-less suffering
+[10/29/24, 14:01:35] Noa: I'm buying waffle mix right now
+[10/29/24, 14:01:50] Marco: WeWork: come for the hot desks, stay for the hidden waffle maker
+[10/29/24, 14:02:05] Dana: This is the most excited I've seen this team since we closed our first customer lead
+[10/30/24, 08:15:22] Marco: Happy Halloween eve! Quick tech update:
+[10/30/24, 08:15:38] Marco: I finished setting up monitoring for the GPU workstation
+[10/30/24, 08:15:55] Marco: Dashboard is at grafana.novamind.internal
+[10/30/24, 08:16:10] Marco: Shows GPU utilization, memory, temperature, and running jobs
+[10/30/24, 08:16:25] Yossi: Smart. We need to make sure people don't step on each other's jobs.
+[10/30/24, 08:16:40] Marco: I also set up a simple queue system. Check the #gpu-queue Slack channel for scheduling.
+[10/30/24, 09:01:05] Dana: Standup!
+[10/30/24, 11:00:08] Liam: Attribution feature is done!
+[10/30/24, 11:00:25] Liam: Now when you ask "who said X" or "who proposed X", the response highlights the specific sender
+[10/30/24, 11:00:40] Liam: Tested on DataStream data: "Who proposed Kubernetes" now correctly identifies "Amit from Platform team, October 3rd"
+[10/30/24, 11:00:55] Yossi: Beautiful. That was the last missing piece for the demo.
+[10/30/24, 11:01:10] Sophie: I'll update the demo script to include attribution queries
+[10/30/24, 11:01:25] Dana: We're ready for DataStream. November 1st is going to be great.
+[10/30/24, 15:00:15] Noa: Waffles are in the kitchen! Fresh batch just made
+[10/30/24, 15:00:32] Alex: Already on my second one
+[10/30/24, 15:00:48] Liam: These are incredible Noa
+[10/30/24, 15:01:05] Marco: I put Nutella on mine. No ragrets.
+[10/30/24, 15:01:20] Sophie: "No ragrets" -- classic Marco
+[10/30/24, 15:01:35] Noa: I'll make this a weekly thing. Waffle Wednesdays?
+[10/30/24, 15:01:50] Everyone: YES
+[10/31/24, 08:30:05] Noa: HAPPY HALLOWEEN!
+[10/31/24, 08:30:22] Noa: Candy bowls are full, decorations are up, and I may have gone a bit overboard with the fake spider webs
+[10/31/24, 08:30:38] Alex: The WeWork entrance looks amazing Noa
+[10/31/24, 08:30:55] Marco: I came as a 500 Internal Server Error
+[10/31/24, 08:31:10] Marco: It's just a red T-shirt that says "500" but I feel it captures the horror
+[10/31/24, 08:31:25] Liam: I'm a merge conflict. Wearing two different outfits stitched together.
+[10/31/24, 08:31:40] Sophie: That's actually creative Liam
+[10/31/24, 08:31:55] Alex: I came as a deprecated API. I have a "sunset" sign around my neck.
+[10/31/24, 08:32:10] Dana: You're all ridiculous and I love it
+[10/31/24, 08:32:25] Yossi: I told you I'm too old for this
+[10/31/24, 08:32:40] Sophie: Yossi you're wearing a Spider-Man T-shirt
+[10/31/24, 08:32:55] Yossi: That's just my regular Tuesday shirt
+[10/31/24, 09:01:08] Dana: Standup! Spooky edition
+[10/31/24, 12:00:15] Sophie: DataStream confirmed the demo for tomorrow at 3pm
+[10/31/24, 12:00:32] Sophie: They're sending 5 people: CEO, CTO, Head of Engineering, VP Product, and a data engineer
+[10/31/24, 12:00:48] Dana: Big delegation. They're taking this seriously.
+[10/31/24, 12:01:05] Yossi: Let's do a final dry run today at 2pm
+[10/31/24, 12:01:20] Sophie: I booked the Innovate room for 2-3pm
+[10/31/24, 14:45:22] Yossi: Dry run done. We're ready. Let's crush it tomorrow.
+[10/31/24, 14:45:38] Dana: Agreed. Everyone get a good night's sleep tonight.
+[10/31/24, 14:45:55] Liam: I'll try. The Halloween candy is going to keep me up.
+[10/31/24, 14:46:10] Noa: There's still half a bowl of candy left if anyone wants some
+[10/31/24, 14:46:25] Alex: "Half a bowl" -- I've been snacking all day. Sorry.
+[10/31/24, 14:46:40] Marco: We all have. That's what Halloween is for.
+[11/1/24, 08:15:05] Dana: DataStream demo day, round 2! This time with their real data
+[11/1/24, 08:15:22] Sophie: Meeting at 3pm, WeWork Innovate room
+[11/1/24, 08:15:38] Liam: All 487K messages are indexed and ready. I tested the top 20 queries this morning -- huge improvement across the board
+[11/1/24, 08:15:55] Yossi: Temporal relevance and attribution both working?
+[11/1/24, 08:16:10] Liam: Yes and yes. Night and day compared to last time.
+[11/1/24, 08:16:25] Alex: UI is polished. Added a nice animation for the search results.
+[11/1/24, 08:16:40] Marco: Staging environment is warmed up. Response times averaging 1.2 seconds.
+[11/1/24, 08:16:55] Dana: Let's crush this.
+[11/1/24, 09:00:45] Dana: Standup!
+[11/1/24, 16:30:15] Dana: DataStream demo CRUSHED IT
+[11/1/24, 16:30:32] Dana: Their CEO said "this is exactly what we've been looking for"
+[11/1/24, 16:30:48] Sophie: The temporal query blew their minds. They searched for "what did we decide last sprint about the auth refactor" and got the exact right answer
+[11/1/24, 16:31:05] Liam: The attribution queries worked perfectly too. "Who suggested Kubernetes" returned the right person with timestamp
+[11/1/24, 16:31:20] Yossi: Their data engineer was super impressed with the speed
+[11/1/24, 16:31:35] Dana: They want to start a paid pilot. 3 months, $5K/month
+[11/1/24, 16:31:50] Sophie: Our first paying customer!
+[11/1/24, 16:32:05] Alex: Let's GOOO
+[11/1/24, 16:32:20] Marco: Beer o'clock?
+[11/1/24, 16:32:35] Noa: I'm already looking up happy hour spots
+[11/1/24, 16:32:50] Dana: Sarona market. Same spot as last time. Let's celebrate!
+[11/3/24, 10:00:15] Alex: Sunday morning random thought: has anyone played the new CoD?
+[11/3/24, 10:00:32] Marco: Black Ops 6? It's actually great. Best one in years.
+[11/3/24, 10:00:48] Alex: Zombies mode is insane
+[11/3/24, 10:01:05] Liam: I've been too busy to game. Living vicariously through you guys.
+[11/3/24, 10:01:20] Marco: We should do a team gaming night sometime
+[11/3/24, 10:01:35] Alex: After we move into the new office. Movie night AND gaming night.
+[11/4/24, 08:10:05] Noa: Monday! Quick update on the HaYarkon 45 move:
+[11/4/24, 08:10:22] Noa: Furniture is ordered from OfficeHub, delivery confirmed for Nov 15
+[11/4/24, 08:10:38] Noa: Electrician is scheduled for Nov 12 for additional outlets in the server room
+[11/4/24, 08:10:55] Noa: Internet -- Bezeq is installing fiber on Nov 11
+[11/4/24, 08:11:10] Marco: Fiber? What speed?
+[11/4/24, 08:11:25] Noa: 1 Gbps symmetric. Should be enough for us.
+[11/4/24, 08:11:40] Marco: That's beautiful. WeWork gives us like 100Mbps shared with 200 other startups.
+[11/4/24, 08:11:55] Yossi: Our own fiber line. We're growing up.
+[11/4/24, 09:00:30] Dana: Standup!
+[11/4/24, 11:30:08] Sophie: Hey team, a question about the product roadmap
+[11/4/24, 11:30:25] Sophie: DataStream wants WhatsApp support in addition to Slack. How hard is that?
+[11/4/24, 11:30:40] Liam: I already built the parser remember? It handles WhatsApp exports natively.
+[11/4/24, 11:30:55] Sophie: Oh right! I forgot about that. So we just need to wire it into the pipeline?
+[11/4/24, 11:31:10] Liam: Basically yes. Maybe 2-3 days of integration work.
+[11/4/24, 11:31:25] Sophie: Can we add it to the pilot scope?
+[11/4/24, 11:31:40] Dana: Let's not over-promise. Deliver Slack first, then add WhatsApp as a bonus.
+[11/4/24, 11:31:55] Yossi: Agreed. Under-promise, over-deliver.
+[11/4/24, 14:00:22] Liam: Has anyone been following the Anthropic news? They raised another massive round.
+[11/4/24, 14:00:38] Alex: $4 billion from Amazon. These numbers are insane.
+[11/4/24, 14:00:55] Yossi: The AI arms race is real.
+[11/4/24, 14:01:10] Marco: At least it means better models for us to build on.
+[11/4/24, 14:01:25] Dana: Speaking of which, we should evaluate Claude's latest model for our pipeline
+[11/4/24, 14:01:40] Yossi: Once Priya starts next week, that can be her first project -- model evaluation.
+[11/5/24, 08:30:05] Sophie: Election Day in the US tomorrow! Things are going to be wild
+[11/5/24, 08:30:22] Alex: My Twitter feed is already unbearable
+[11/5/24, 08:30:38] Liam: Remember Dana's rule -- politics light in this group
+[11/5/24, 08:30:55] Dana: Appreciate that Liam. Let's focus on building. The world will keep turning regardless.
+[11/5/24, 08:31:10] Noa: Regardless of politics, I have a very important announcement
+[11/5/24, 08:31:25] Noa: The DeLonghi coffee machine has been delivered to HaYarkon 45!
+[11/5/24, 08:31:40] Noa: I set it up during the electrician's visit yesterday
+[11/5/24, 08:31:55] Liam: Can we move in now? I need that coffee.
+[11/5/24, 08:32:10] Noa: 26 more days Liam. Control yourself.
+[11/5/24, 09:00:15] Dana: Standup!
+[11/5/24, 14:30:22] Marco: Hey anyone know if there's a good electronics store near HaYarkon? I need a few more ethernet cables for the setup
+[11/5/24, 14:30:38] Alex: There's a place on Dizengoff called TechZone. They have everything.
+[11/5/24, 14:30:55] Marco: Perfect. I'll stop by tomorrow.
+[11/5/24, 14:31:10] Noa: I think the place is called TechPoint actually, not TechZone
+[11/5/24, 14:31:25] Alex: You might be right. It's on Dizengoff near the corner of Gordon
+[11/5/24, 14:31:40] Marco: I'll find it
+[11/6/24, 08:15:08] Alex: Well, that was quite an election night
+[11/6/24, 08:15:25] Sophie: Regardless of how you feel about the results, at least the uncertainty is over
+[11/6/24, 08:15:40] Dana: Let's keep the focus on what we can control. We have customers to serve and a product to build.
+[11/6/24, 08:15:55] Yossi: What she said. Standup in 45.
+[11/6/24, 08:16:10] Marco: Anyone else stress-eating? I've gone through an entire bag of Bamba
+[11/6/24, 08:16:25] Noa: I brought extra snacks today. Kitchen table.
+[11/6/24, 08:16:40] Liam: Noa is the MVP of emotional support snacks
+[11/6/24, 09:01:05] Dana: Standup!
+[11/6/24, 11:00:22] Yossi: Back to work. Liam, the DataStream pilot contract needs a technical appendix
+[11/6/24, 11:00:38] Yossi: They want specs on: data handling, security, uptime SLA, and supported data sources
+[11/6/24, 11:00:55] Liam: I'll draft the data handling and supported sources sections
+[11/6/24, 11:01:10] Marco: I'll do security and uptime
+[11/6/24, 11:01:25] Yossi: Great, need it by Friday so Sophie can review before sending
+[11/6/24, 11:01:40] Sophie: Put it in the shared Google Doc and I'll add the customer-facing language
+[11/6/24, 14:22:15] Alex: Just finished the dashboard redesign for the pilot
+[11/6/24, 14:22:32] Alex: Added conversation threading view, timestamp display, and source attribution badges
+[11/6/24, 14:22:48] Liam: Screenshot?
+[11/6/24, 14:23:05] Alex: Sent it in #product Slack. It looks clean.
+[11/6/24, 14:23:20] Sophie: Just saw it. Love the attribution badges. That's exactly what DataStream asked for.
+[11/6/24, 14:23:35] Dana: Great work Alex. The product is really starting to look professional.
+[11/7/24, 08:20:12] Sophie: Morning! Two things:
+[11/7/24, 08:20:28] Sophie: 1. DataStream pilot contract is signed! They start Monday.
+[11/7/24, 08:20:45] Sophie: 2. I have a meeting with another potential customer today -- a consulting firm called Vertex
+[11/7/24, 08:21:00] Dana: Signed! That's incredible. Sophie, you're a closer.
+[11/7/24, 08:21:15] Yossi: What does Vertex need?
+[11/7/24, 08:21:30] Sophie: They have massive email threads and meeting notes. Want to make them searchable.
+[11/7/24, 08:21:45] Sophie: Different from Slack/WhatsApp but same core problem
+[11/7/24, 08:22:00] Liam: Email parsing is different from chat parsing. Less structured.
+[11/7/24, 08:22:15] Yossi: True, but the retrieval pipeline is the same. We just need an email connector.
+[11/7/24, 08:22:30] Dana: Let's see what they need first. Sophie, gather requirements and we'll evaluate.
+[11/7/24, 09:01:08] Dana: Standup!
+[11/7/24, 13:00:15] Noa: Fiber internet is installed at HaYarkon 45!
+[11/7/24, 13:00:32] Noa: Speed test: 940 Mbps down, 920 Mbps up
+[11/7/24, 13:00:48] Marco: That's gorgeous. I'm tearing up.
+[11/7/24, 13:01:05] Liam: We're going to download the entire internet on day one
+[11/7/24, 13:01:20] Noa: Also the conference rooms are getting whiteboards installed tomorrow
+[11/7/24, 13:01:35] Noa: Reminder: the two rooms are called Apollo (large, 8 people) and Gemini (small, 4 people)
+[11/7/24, 13:01:50] Alex: Who named them?
+[11/7/24, 13:02:05] Dana: I did. After the space programs. Because we're reaching for the moon.
+[11/7/24, 13:02:20] Yossi: That's very CEO of you Dana
+[11/7/24, 13:02:35] Marco: I would have gone with "Staging" and "Production"
+[11/7/24, 13:02:50] Liam: Or "Main" and "Feature Branch"
+[11/7/24, 13:03:05] Dana: You all had your chance to name them. Apollo and Gemini it is.
+[11/8/24, 09:01:05] Dana: Standup!
+[11/8/24, 11:30:08] Sophie: Vertex meeting went great yesterday
+[11/8/24, 11:30:25] Sophie: They want to index 2 years of email threads -- about 800K emails
+[11/8/24, 11:30:40] Sophie: And meeting transcripts from Otter.ai, another 200K documents
+[11/8/24, 11:30:55] Yossi: That's a lot of data. But our pipeline should handle it.
+[11/8/24, 11:31:10] Liam: Email threading is going to be interesting from a chunking perspective
+[11/8/24, 11:31:25] Liam: Email threads have explicit reply chains, which is actually easier than chat
+[11/8/24, 11:31:40] Sophie: They want a demo in 3 weeks. Can we build an email connector by then?
+[11/8/24, 11:31:55] Yossi: With Priya starting Monday, we'll have more bandwidth. I think we can.
+[11/8/24, 14:00:22] Alex: Weekend movie rec: Conclave with Ralph Fiennes
+[11/8/24, 14:00:38] Alex: It's about electing a new Pope and it's surprisingly thrilling
+[11/8/24, 14:00:55] Sophie: That does NOT sound thrilling Alex
+[11/8/24, 14:01:10] Alex: Trust me. Political intrigue, plot twists, incredible acting.
+[11/8/24, 14:01:25] Liam: I've heard good things. The reviews are stellar.
+[11/8/24, 14:01:40] Marco: I'll watch it. Any movie that makes papal elections exciting deserves respect.
+[11/8/24, 14:01:55] Dana: Adding it to my list. It's getting long.
+[11/10/24, 14:00:15] Dana: Reminder: Priya starts tomorrow! Please make her feel welcome.
+[11/10/24, 14:00:32] Noa: I've set up her desk, member card, and laptop. All ready to go.
+[11/10/24, 14:00:48] Yossi: I prepared an onboarding doc with our architecture overview
+[11/10/24, 14:01:05] Liam: I'll walk her through the codebase in the afternoon
+[11/10/24, 14:01:20] Dana: Perfect team. Let's make her first day great.
+[11/11/24, 08:15:05] Dana: Welcome Priya to the group!
+[11/11/24, 08:15:20] NovaMind Team: Dana added Priya
+[11/11/24, 08:15:35] Priya: Hello everyone! Super excited to join NovaMind!
+[11/11/24, 08:15:50] Alex: Welcome Priya!
+[11/11/24, 08:16:05] Marco: Welcome to the team!
+[11/11/24, 08:16:20] Liam: Hey Priya! Ready to dive into the world of conversational RAG?
+[11/11/24, 08:16:35] Priya: Born ready. I've been reading up on your architecture docs all weekend.
+[11/11/24, 08:16:50] Sophie: That's dedication! Welcome!
+[11/11/24, 08:17:05] Noa: Welcome Priya! Your desk is set up, laptop is charged, and coffee is... well, it's WeWork coffee, but I've ordered good beans for the new office.
+[11/11/24, 08:17:20] Yossi: Welcome aboard! Your first task is evaluating embedding models. I'll brief you at standup.
+[11/11/24, 08:17:35] Priya: Looking forward to it!
+[11/11/24, 09:00:45] Dana: Standup! Extra special today with Priya joining
+[11/11/24, 11:00:22] Priya: Just finished reading through the codebase. A few observations:
+[11/11/24, 11:00:38] Priya: 1. The chunking strategy is too rigid. Fixed-size chunks don't work well for conversations.
+[11/11/24, 11:00:55] Priya: 2. We should explore conversation-aware segmentation -- splitting at natural topic boundaries
+[11/11/24, 11:01:10] Priya: 3. The embedding model comparison should include open-source options we can run on the A100
+[11/11/24, 11:01:25] Liam: I had the same thoughts about chunking. Time-based segmentation was on my radar.
+[11/11/24, 11:01:40] Yossi: Great minds. Priya, can you prototype a smarter chunking approach this sprint?
+[11/11/24, 11:01:55] Priya: Absolutely. I want to try a hybrid approach -- time-gap detection + topic boundary detection using a lightweight classifier
+[11/11/24, 11:02:10] Yossi: Love it. Run some experiments and present findings next week.
+[11/11/24, 14:30:08] Marco: Hey quick question -- does anyone remember the name of that electronics store on Dizengoff?
+[11/11/24, 14:30:25] Marco: I need to buy a network switch for HaYarkon
+[11/11/24, 14:30:40] Alex: TechZone
+[11/11/24, 14:30:55] Noa: I thought we decided it was TechPoint
+[11/11/24, 14:31:10] Alex: Honestly I'm not sure anymore. It's definitely on Dizengoff near Gordon
+[11/11/24, 14:31:25] Marco: I'll just walk down Dizengoff and find it
+[11/11/24, 14:31:40] Noa: Modern problems require modern solutions
+[11/12/24, 08:22:15] Noa: Update: electrician is at HaYarkon 45 right now
+[11/12/24, 08:22:32] Noa: Adding 4 power outlets in the server closet and 2 in the kitchen
+[11/12/24, 08:22:48] Marco: Make sure the server closet outlets are on a separate circuit
+[11/12/24, 08:23:05] Noa: Already specified that. Dedicated 30-amp circuit.
+[11/12/24, 08:23:20] Marco: You're speaking my language Noa
+[11/12/24, 09:00:30] Dana: Standup!
+[11/12/24, 11:00:15] Priya: First embedding model comparison results!
+[11/12/24, 11:00:32] Priya: Tested on our internal evaluation set (200 queries against DataStream data):
+[11/12/24, 11:00:48] Priya: OpenAI text-embedding-3-small: Recall@10 = 0.78, Precision@10 = 0.82
+[11/12/24, 11:01:05] Priya: OpenAI text-embedding-3-large: Recall@10 = 0.81, Precision@10 = 0.85
+[11/12/24, 11:01:20] Priya: Cohere embed-v3: Recall@10 = 0.80, Precision@10 = 0.79
+[11/12/24, 11:01:35] Priya: BGE-large (local, on A100): Recall@10 = 0.76, Precision@10 = 0.80
+[11/12/24, 11:01:50] Yossi: So text-embedding-3-large is the winner?
+[11/12/24, 11:02:05] Priya: On quality yes. But it's 13x more expensive than 3-small. I think 3-small is the best value.
+[11/12/24, 11:02:20] Liam: What about latency?
+[11/12/24, 11:02:35] Priya: BGE-local is fastest obviously. 3-small is fastest among API options.
+[11/12/24, 11:02:50] Yossi: Stick with 3-small for now. We can offer 3-large as a premium tier later.
+[11/12/24, 11:03:05] Dana: Good data-driven decision. Love it.
+[11/12/24, 14:15:22] Sophie: Has anyone watched Silo season 2? Just started on Apple TV
+[11/12/24, 14:15:38] Alex: Yes! The first episode picks up right where season 1 left off
+[11/12/24, 14:15:55] Liam: I need to rewatch season 1 first. I forgot everything.
+[11/12/24, 14:16:10] Marco: Same. Too many shows, too little time.
+[11/12/24, 14:16:25] Priya: What's Silo? I'm out of the loop on TV shows
+[11/12/24, 14:16:40] Sophie: Post-apocalyptic mystery set in an underground silo. Based on Hugh Howey's books. It's excellent.
+[11/12/24, 14:16:55] Priya: Adding to the list. Thanks for the rec!
+[11/13/24, 08:30:05] Marco: Network cabling starts today at HaYarkon!
+[11/13/24, 08:30:22] Marco: I'll be there all day. Running cat6 to every desk position.
+[11/13/24, 08:30:38] Noa: How many drops total?
+[11/13/24, 08:30:55] Marco: 16 desk drops + 4 in the server closet + 2 in each meeting room = 24 total
+[11/13/24, 08:31:10] Yossi: That should be plenty. Good planning Marco.
+[11/13/24, 08:31:25] Marco: I'll also run a separate cable for the access point in each meeting room
+[11/13/24, 08:31:40] Noa: The cable management trays are installed. Try to keep it tidy please.
+[11/13/24, 08:31:55] Marco: Noa I take cable management very seriously. It's going to be art.
+[11/13/24, 09:00:45] Dana: Standup! Marco is remote today at the new office.
+[11/13/24, 14:00:22] Marco: Cabling is done! 24 drops, all tested and labeled.
+[11/13/24, 14:00:38] Marco: I also mounted the network rack in the server closet
+[11/13/24, 14:00:55] Marco: Photos in #office-setup Slack channel
+[11/13/24, 14:01:10] Noa: Marco those cable runs are genuinely beautiful
+[11/13/24, 14:01:25] Alex: That's some r/cableporn level stuff
+[11/13/24, 14:01:40] Marco: I told you. Art.
+[11/14/24, 08:10:15] Liam: Morning. Hey Priya, did you get a chance to look at the conversation chunking problem?
+[11/14/24, 08:10:32] Priya: Yes! I prototyped two approaches over the last couple days:
+[11/14/24, 08:10:48] Priya: Approach 1: Time-gap segmentation. Split when gap > 4 hours between messages.
+[11/14/24, 08:11:05] Priya: Approach 2: Sliding window with semantic similarity. Start a new chunk when the topic drifts significantly.
+[11/14/24, 08:11:20] Liam: How do you detect topic drift?
+[11/14/24, 08:11:35] Priya: Cosine similarity between rolling window embeddings. When it drops below a threshold, new chunk.
+[11/14/24, 08:11:50] Yossi: Which approach performed better?
+[11/14/24, 08:12:05] Priya: Time-gap is simpler and works surprisingly well. Topic detection is better but much more expensive.
+[11/14/24, 08:12:20] Priya: I recommend time-gap for v1 with topic detection as a future improvement.
+[11/14/24, 08:12:35] Yossi: Agree. Ship simple first. Let's integrate time-gap chunking this sprint.
+[11/14/24, 09:00:30] Dana: Standup!
+[11/14/24, 12:30:08] Noa: Furniture delivery tomorrow! I'll be at HaYarkon 45 from 8am to supervise.
+[11/14/24, 12:30:25] Noa: Desks, chairs, kitchen table, shelving units -- the works
+[11/14/24, 12:30:40] Sophie: Do you need help?
+[11/14/24, 12:30:55] Noa: Actually yes -- if anyone can come by after 2pm to help with chair assembly, that would be great
+[11/14/24, 12:31:10] Alex: I'll come
+[11/14/24, 12:31:25] Liam: Me too
+[11/14/24, 12:31:40] Marco: I'll be there anyway finishing the network setup
+[11/14/24, 12:31:55] Noa: Amazing. I'll buy pizza for the helpers.
+[11/15/24, 08:00:12] Noa: Furniture truck is here! Let the assembly begin
+[11/15/24, 14:30:22] Noa: Furniture update: 70% assembled. The desks are great quality.
+[11/15/24, 14:30:38] Alex: These chairs are actually comfortable. Good pick Noa.
+[11/15/24, 14:30:55] Liam: The kitchen area is coming together nicely
+[11/15/24, 14:31:10] Marco: Network is fully operational. WiFi access points are up.
+[11/15/24, 14:31:25] Marco: Network name: NovaMind-Office
+[11/15/24, 14:31:40] Marco: Password: NovaMind2024!
+[11/15/24, 14:31:55] Noa: Also set up the guest network?
+[11/15/24, 14:32:10] Marco: Yes. NovaMind-Guest with a captive portal. No password needed, just email.
+[11/15/24, 14:32:25] Yossi: Nice setup Marco. We're really coming together.
+[11/15/24, 17:00:05] Noa: Furniture is ALL DONE. Office looks amazing.
+[11/15/24, 17:00:22] Noa: Photos in #office-setup. Come see your new workspace!
+[11/15/24, 17:00:38] Sophie: It looks SO GOOD. I can't wait to move in.
+[11/15/24, 17:00:55] Dana: Incredible work Noa. And thank you Alex, Liam, and Marco for the help.
+[11/15/24, 17:01:10] Priya: That kitchen area is gorgeous
+[11/15/24, 17:01:25] Dana: 16 days until we move in!
+[11/18/24, 08:15:22] Marco: Hey, I finished setting up the WiFi at HaYarkon but I realized I should change the admin password on the router
+[11/18/24, 08:15:38] Marco: If anyone needs to access the router config it's at 192.168.1.1
+[11/18/24, 08:15:55] Marco: Admin credentials: admin / NovaMind_Admin_2024
+[11/18/24, 08:16:10] Yossi: Marco maybe don't share admin creds in the group chat
+[11/18/24, 08:16:25] Marco: Good point. I'll change them and DM the new ones to you and Dana.
+[11/18/24, 08:16:40] Yossi: Appreciated
+[11/18/24, 09:00:30] Dana: Standup!
+[11/18/24, 11:00:08] Priya: Time-gap chunking is integrated into the pipeline!
+[11/18/24, 11:00:25] Priya: Default threshold: 6 hours. Configurable per-dataset.
+[11/18/24, 11:00:40] Priya: Tested on the DataStream data -- it creates much more coherent chunks
+[11/18/24, 11:00:55] Priya: Before: many chunks had mixed topics from different conversations
+[11/18/24, 11:01:10] Priya: After: chunks respect conversation boundaries. Topics stay together.
+[11/18/24, 11:01:25] Liam: What about the Q&A problem? Where someone asks a question and the answer is 10 messages later
+[11/18/24, 11:01:40] Priya: Great question. Within a segment, the Q&A pair stays together because there's no time gap between them
+[11/18/24, 11:01:55] Priya: The problem is when the Q&A pair happens to be at a chunk boundary within a segment
+[11/18/24, 11:02:10] Liam: Can we use overlap to handle that?
+[11/18/24, 11:02:25] Priya: Yes, I added 30% overlap between chunks within a segment. It helps a lot.
+[11/18/24, 11:02:40] Yossi: Ship it! This is going to improve our DataStream pilot results significantly.
+[11/18/24, 14:30:15] Sophie: Gladiator 2 comes out this weekend! Anyone want to go?
+[11/18/24, 14:30:32] Alex: Absolutely. The trailer looks epic.
+[11/18/24, 14:30:48] Liam: I'm in. Ridley Scott does not miss.
+[11/18/24, 14:31:05] Marco: He kind of missed with Napoleon though
+[11/18/24, 14:31:20] Alex: Fair point. But this looks more like classic Ridley.
+[11/18/24, 14:31:35] Priya: I never saw the first Gladiator. Is that a problem?
+[11/18/24, 14:31:50] Everyone: YES
+[11/18/24, 14:32:05] Sophie: Priya you need to watch Gladiator 1 before the weekend. It's a masterpiece.
+[11/18/24, 14:32:20] Priya: OK OK I'll watch it tonight
+[11/18/24, 14:32:35] Noa: Saturday 7pm showing work for everyone?
+[11/18/24, 14:32:50] Alex: Yes!
+[11/18/24, 14:33:05] Liam: Done
+[11/18/24, 14:33:20] Marco: In
+[11/19/24, 08:20:15] Noa: Morning! Coffee machine test at HaYarkon yesterday -- the DeLonghi makes excellent espresso
+[11/19/24, 08:20:32] Noa: I dialed in the grind settings. First button is espresso, second button is lungo.
+[11/19/24, 08:20:48] Liam: You tested the coffee machine and didn't invite me?
+[11/19/24, 08:21:05] Noa: Someone had to do quality control Liam. It's a sacrifice I was willing to make.
+[11/19/24, 08:21:20] Alex: What beans are you using?
+[11/19/24, 08:21:35] Noa: Elite Turkish blend to start. I ordered Lavazza Super Crema for when we move in.
+[11/19/24, 08:21:50] Priya: Does it do oat milk cappuccinos?
+[11/19/24, 08:22:05] Noa: The machine's internal frother is for regular milk only. I bought a separate frother for alternative milks.
+[11/19/24, 08:22:20] Priya: You thought of everything
+[11/19/24, 08:22:35] Noa: That's literally my job description
+[11/19/24, 09:01:08] Dana: Standup!
+[11/19/24, 12:00:22] Dana: Hey team, exciting news -- we've had interest from 3 VCs!
+[11/19/24, 12:00:38] Dana: Two reached out after hearing about the DataStream deal
+[11/19/24, 12:00:55] Dana: The third is through a warm intro from the legal tech company Sophie met at the WeWork mixer
+[11/19/24, 12:01:10] Yossi: That's amazing. Which VCs?
+[11/19/24, 12:01:25] Dana: Sequoia Israel, TLV Partners, and Grove Ventures
+[11/19/24, 12:01:40] Sophie: Heavy hitters!
+[11/19/24, 12:01:55] Dana: I'm scheduling initial meetings for December. We need to have our metrics tight by then.
+[11/19/24, 12:02:10] Yossi: We should prepare a proper pitch deck
+[11/19/24, 12:02:25] Dana: Agreed. Sophie, can you help with the narrative?
+[11/19/24, 12:02:40] Sophie: On it. I'll draft a story arc this week.
+[11/20/24, 08:15:05] Sophie: Quick logistics question -- what time does the standup start? I keep arriving at different times
+[11/20/24, 08:15:22] Dana: It's 9am, always been 9am
+[11/20/24, 08:15:38] Yossi: Sometimes I call it at 9:01 if people are running late. Maybe that's confusing?
+[11/20/24, 08:15:55] Sophie: Nah, I just need to set a better alarm
+[11/20/24, 09:00:30] Dana: Standup!
+[11/20/24, 10:30:15] Liam: Hey Priya, I noticed the chunking pipeline is leaving some orphan chunks -- single messages that don't belong to any segment
+[11/20/24, 10:30:32] Priya: Oh interesting. What kind of messages?
+[11/20/24, 10:30:48] Liam: Mostly system messages -- "X joined the group", "X changed the group name"
+[11/20/24, 10:31:05] Priya: Those should be filtered out in preprocessing, not chunking
+[11/20/24, 10:31:20] Liam: Agreed. I'll add a filter.
+[11/20/24, 10:31:35] Priya: Also filter out "This message was deleted" and media attachment placeholders
+[11/20/24, 10:31:50] Liam: Good call. Done by EOD.
+[11/20/24, 14:00:08] Alex: Have any of you played with the new Bluesky? Everyone's migrating from Twitter
+[11/20/24, 14:00:25] Marco: I signed up last week. It's like early Twitter but with better vibes.
+[11/20/24, 14:00:40] Liam: I'm still on Twitter. Or X. Or whatever Elon is calling it this week.
+[11/20/24, 14:00:55] Sophie: Bluesky's decentralized architecture is really interesting from a tech perspective
+[11/20/24, 14:01:10] Priya: AT Protocol is clever. Federation without the complexity of Mastodon.
+[11/20/24, 14:01:25] Alex: Follow me @alex.bsky.social
+[11/20/24, 14:01:40] Marco: Following. Although I mostly post about server monitoring dashboards.
+[11/20/24, 14:01:55] Dana: I'll stick to LinkedIn for professional stuff. I'm too old for new social media.
+[11/20/24, 14:02:10] Yossi: Same. LinkedIn and WhatsApp. That's my digital life.
+[11/21/24, 09:00:30] Dana: Standup!
+[11/21/24, 11:00:15] Noa: 10 days until move-in! Here's the final prep checklist:
+[11/21/24, 11:00:32] Noa: - Kitchen fully stocked (done)
+[11/21/24, 11:00:48] Noa: - Coffee machine tested (done)
+[11/21/24, 11:01:05] Noa: - Network operational (done - thanks Marco)
+[11/21/24, 11:01:20] Noa: - Furniture assembled (done)
+[11/21/24, 11:01:35] Noa: - Whiteboards mounted (done)
+[11/21/24, 11:01:50] Noa: - Still pending: building entrance code, cleaning, signage
+[11/21/24, 11:02:05] Marco: When do we get the entrance code?
+[11/21/24, 11:02:20] Noa: Building management said they'll give it to us on November 28, the day before we get the keys
+[11/21/24, 11:02:35] Marco: Cutting it close
+[11/21/24, 11:02:50] Noa: That's how building management rolls apparently
+[11/21/24, 14:30:22] Dana: Team, I want to start hiring for two more positions
+[11/21/24, 14:30:38] Dana: A QA Lead and a Data Scientist
+[11/21/24, 14:30:55] Dana: We'll need them both for the next phase of growth
+[11/21/24, 14:31:10] Yossi: I have a great QA candidate in mind. Tom Chen, we worked together at my previous startup.
+[11/21/24, 14:31:25] Yossi: He's meticulous, great with automation, and genuinely fun to work with
+[11/21/24, 14:31:40] Dana: Can you reach out? I'd love to talk to him.
+[11/21/24, 14:31:55] Yossi: Already texted him. He's interested.
+[11/21/24, 14:32:10] Sophie: For the data scientist, I know someone from my previous company. Chen Wei, PhD in NLP.
+[11/21/24, 14:32:25] Sophie: She's looking for an early-stage opportunity.
+[11/21/24, 14:32:40] Dana: Two referrals in one conversation. I love this team. Set up introductions!
+[11/22/24, 09:01:05] Dana: Standup!
+[11/22/24, 11:00:08] Priya: Gladiator 1 watch report: IT WAS AMAZING. How did I not see this before?
+[11/22/24, 11:00:25] Alex: Welcome to the club! Now you're ready for tomorrow night
+[11/22/24, 11:00:40] Liam: "Are you not entertained?!"
+[11/22/24, 11:00:55] Priya: I am, in fact, entertained.
+[11/22/24, 11:01:10] Marco: The real question is: can Gladiator 2 live up to the original?
+[11/22/24, 11:01:25] Sophie: With Pedro Pascal and Denzel Washington? Absolutely.
+[11/22/24, 14:00:15] Noa: Gladiator 2 tomorrow at 7pm. Cinema City Glilot. I'll buy the tickets.
+[11/22/24, 14:00:32] Noa: Headcount: me, Alex, Liam, Marco, Sophie, Priya. Anyone else?
+[11/22/24, 14:00:48] Dana: I'll come!
+[11/22/24, 14:01:05] Yossi: Pass for me, family night
+[11/22/24, 14:01:20] Noa: 7 tickets booked!
+[11/24/24, 10:00:15] Alex: Gladiator 2 verdict: not as good as the original but still spectacular
+[11/24/24, 10:00:32] Priya: I loved it! The naval battle scene was incredible
+[11/24/24, 10:00:48] Sophie: Denzel stole every scene he was in
+[11/24/24, 10:01:05] Marco: Pedro Pascal's fight choreography was next level
+[11/24/24, 10:01:20] Liam: The monkeys though. The monkeys were... a choice.
+[11/24/24, 10:01:35] Dana: I had fun. Sometimes spectacle is enough.
+[11/24/24, 10:01:50] Noa: Great team outing! We should do more of these.
+[11/25/24, 08:10:22] Dana: Big week! Interviews for QA and Data Scientist roles
+[11/25/24, 08:10:38] Dana: Tom (QA) interview is today at 2pm
+[11/25/24, 08:10:55] Dana: Chen (Data Scientist) interview is Wednesday at 11am
+[11/25/24, 08:11:10] Yossi: I'll sit in on Tom's interview. He's genuinely brilliant.
+[11/25/24, 08:11:25] Sophie: I'll join Chen's. I can evaluate the NLP knowledge.
+[11/25/24, 09:00:30] Dana: Standup!
+[11/25/24, 15:30:08] Dana: Tom interview done. He's fantastic.
+[11/25/24, 15:30:25] Yossi: Told you. The guy has an encyclopedic knowledge of testing frameworks.
+[11/25/24, 15:30:40] Dana: He also has an extensive rubber duck collection apparently
+[11/25/24, 15:30:55] Yossi: Oh yeah, the rubber duck debugging thing. He takes it very literally.
+[11/25/24, 15:31:10] Dana: Making an offer tonight if Yossi and I agree on terms
+[11/25/24, 15:31:25] Yossi: Already agreed. Ship it.
+[11/26/24, 09:00:45] Dana: Standup!
+[11/26/24, 09:30:22] Dana: Tom accepted our offer! He starts December 16th
+[11/26/24, 09:30:38] Sophie: Another great hire!
+[11/26/24, 09:30:55] Priya: Yay! A QA person. My code is about to be properly roasted.
+[11/26/24, 09:31:10] Liam: Same. I've been QA-ing my own code which is like grading your own exam.
+[11/26/24, 09:31:25] Alex: The rubber ducks are coming! Everyone prepare your desks.
+[11/27/24, 08:15:08] Sophie: Chen's interview today at 11!
+[11/27/24, 09:00:30] Dana: Standup!
+[11/27/24, 12:30:15] Sophie: Chen Wei interview went amazing
+[11/27/24, 12:30:32] Sophie: Her PhD is specifically on evaluation metrics for retrieval systems
+[11/27/24, 12:30:48] Sophie: She designed a novel evaluation framework that accounts for temporal relevance
+[11/27/24, 12:31:05] Priya: That's exactly what we need! Temporal evaluation is our biggest gap
+[11/27/24, 12:31:20] Dana: She's perfect. Making an offer today.
+[11/27/24, 12:31:35] Yossi: When can she start?
+[11/27/24, 12:31:50] Dana: She said she needs 3 weeks notice at her current job. So mid-December if she accepts.
+[11/28/24, 08:10:05] Noa: HUGE DAY. Building management is giving us the keys and entrance code for HaYarkon 45 today!
+[11/28/24, 08:10:22] Noa: Meeting them at 10am
+[11/28/24, 08:10:38] Marco: Finally! What's the entrance code?
+[11/28/24, 08:10:55] Noa: I'll know in 2 hours Marco, patience
+[11/28/24, 08:11:10] Alex: The anticipation is killing me
+[11/28/24, 09:00:30] Dana: Standup!
+[11/28/24, 10:45:15] Noa: Got the keys!
+[11/28/24, 10:45:32] Noa: Building entrance code: 4569#
+[11/28/24, 10:45:48] Noa: Same code for the building door AND our floor entrance
+[11/28/24, 10:46:05] Noa: Press the code then push the door. DON'T pull.
+[11/28/24, 10:46:20] Marco: 4569#, got it
+[11/28/24, 10:46:35] Liam: Saved. Thanks Noa!
+[11/28/24, 10:46:50] Alex: How often do they change it?
+[11/28/24, 10:47:05] Noa: Building management said roughly every 6 weeks. They'll notify us in advance.
+[11/28/24, 10:47:20] Sophie: Can we also get a copy for the group description?
+[11/28/24, 10:47:35] Noa: Good idea, I'll update the group description
+[11/28/24, 10:47:50] Priya: Also the parking -- what's the deal?
+[11/28/24, 10:48:05] Noa: Parking garage is around the back, entrance from Frishman Street
+[11/28/24, 10:48:20] Noa: We have spots B12 through B16 in the underground level
+[11/28/24, 10:48:35] Noa: The garage remote is in the top drawer of the reception desk
+[11/28/24, 10:48:50] Yossi: Is there a separate code for the garage?
+[11/28/24, 10:49:05] Noa: No, the garage uses the same remote for entry and exit
+[11/28/24, 12:30:08] Dana: Chen Wei accepted our offer! Starting January 6th
+[11/28/24, 12:30:25] Sophie: YES! Our team is growing so fast
+[11/28/24, 12:30:40] Priya: Can't wait to work with her on the evaluation framework
+[11/28/24, 12:30:55] Dana: We'll be 10 people in January. From 6 to 10 in 3 months.
+[11/28/24, 12:31:10] Yossi: Hyper-growth. Or as I like to call it, "normal startup chaos".
+[11/28/24, 15:00:22] Noa: Final walkthrough of HaYarkon 45 before the big move
+[11/28/24, 15:00:38] Noa: Everything looks perfect. Cleaning crew comes tomorrow.
+[11/28/24, 15:00:55] Noa: Saturday night I'll do the final setup -- hanging pictures, stocking the kitchen, etc.
+[11/28/24, 15:01:10] Dana: You're going to work Saturday night?
+[11/28/24, 15:01:25] Noa: I want everything to be perfect for the first day. It matters.
+[11/28/24, 15:01:40] Dana: Noa, you're getting a bonus for this.
+[11/28/24, 15:01:55] Noa: I won't argue with that
+[11/29/24, 09:00:30] Dana: Standup! Last Friday at WeWork!
+[11/29/24, 09:30:22] Sophie: Wait really? Last day at WeWork?
+[11/29/24, 09:30:38] Dana: Yes! Monday is our first day at HaYarkon 45!
+[11/29/24, 09:30:55] Alex: I should probably pack up my desk
+[11/29/24, 09:31:10] Noa: Yes please everyone pack your personal items today
+[11/29/24, 09:31:25] Noa: There are boxes at my desk. Take as many as you need.
+[11/29/24, 09:31:40] Marco: I need to move the GPU workstation. It's going to be a two-person job.
+[11/29/24, 09:31:55] Liam: I'll help you Marco. We can do it Sunday if you want.
+[11/29/24, 09:32:10] Marco: Perfect. Sunday afternoon?
+[11/29/24, 09:32:25] Liam: Done
+[11/29/24, 14:00:08] Sophie: Goodbye WeWork coffee! You were terrible and I'll miss you a little
+[11/29/24, 14:00:25] Noa: Goodbye phone booth standup! You were cramped and sweaty
+[11/29/24, 14:00:40] Alex: Goodbye waffle maker! You were hidden but not forgotten
+[11/29/24, 14:00:55] Liam: Goodbye Eran the ping pong champion! You scared us all
+[11/29/24, 14:01:10] Marco: Goodbye shared WiFi! You were slow but reliable-ish
+[11/29/24, 14:01:25] Priya: I was only here for 3 weeks but I'll cherish the memories
+[11/29/24, 14:01:40] Dana: Goodbye co-working space. Hello, real office. This is a milestone, team.
+[11/29/24, 14:01:55] Yossi: Onward and upward
+[12/1/24, 07:45:22] Noa: FIRST DAY AT HAYARKON 45!!
+[12/1/24, 07:45:38] Noa: Quick guide for everyone:
+[12/1/24, 07:45:55] Noa: Building entrance code: 4569#
+[12/1/24, 07:46:10] Noa: 3rd floor, elevator on the right after you enter
+[12/1/24, 07:46:25] Noa: Floor entrance is the same code: 4569#
+[12/1/24, 07:46:40] Noa: WiFi: NovaMind-Office / password: NovaMind2024!
+[12/1/24, 07:46:55] Noa: Coffee machine is ready. Beans are loaded. THIS IS NOT A DRILL.
+[12/1/24, 08:05:12] Liam: I'm at the building entrance and it's not working
+[12/1/24, 08:05:28] Liam: I'm pressing 4569 and nothing happens
+[12/1/24, 08:05:42] Noa: Did you press the # at the end?
+[12/1/24, 08:05:58] Liam: ...no
+[12/1/24, 08:06:12] Noa: 4569# -- the hash is part of the code
+[12/1/24, 08:06:28] Liam: In. I feel foolish.
+[12/1/24, 08:06:42] Marco: I made the same mistake. The # is important people!
+[12/1/24, 08:15:05] Alex: OH. MY. GOD. This office is beautiful.
+[12/1/24, 08:15:22] Sophie: The light! The SPACE! We have actual ROOM
+[12/1/24, 08:15:38] Priya: The coffee machine is already calling my name
+[12/1/24, 08:15:55] Yossi: The server closet is perfect Marco
+[12/1/24, 08:16:10] Marco: I know right? The GPU workstation fits perfectly in the rack
+[12/1/24, 08:16:25] Marco: Temperature is holding at 22C with the ventilation
+[12/1/24, 08:16:40] Dana: I can't believe this is our office. We built this.
+[12/1/24, 08:16:55] Noa: Also -- meeting rooms! Apollo is the big one on the left past the kitchen. Gemini is the smaller one on the right near the bathrooms.
+[12/1/24, 08:17:10] Liam: Finally! No more phone booth standups
+[12/1/24, 08:30:22] Sophie: First espresso from the DeLonghi... this is life-changing after WeWork
+[12/1/24, 08:30:38] Priya: Mine too. Rich, smooth, perfect crema. Noa you're a hero.
+[12/1/24, 08:30:55] Alex: I might cry. This is real coffee.
+[12/1/24, 08:31:10] Noa: You're welcome. Pro tip: the milk frother is the silver thing next to the machine. Use it for anything that isn't regular dairy.
+[12/1/24, 08:31:25] Yossi: Who wants to do the honors of the first standup in Apollo?
+[12/1/24, 08:31:40] Dana: Let's go! First standup in our real office!
+[12/1/24, 09:00:08] Dana: Standup in Apollo! No more sardine standups!
+[12/1/24, 09:00:25] Liam: There's so much space I don't know what to do with my arms
+[12/1/24, 12:00:15] Noa: Lunch options near us:
+[12/1/24, 12:00:32] Noa: Across the street -- HaKosem (incredible falafel)
+[12/1/24, 12:00:48] Noa: 2 blocks up -- Sushi Hub
+[12/1/24, 12:01:05] Noa: Around the corner -- Cafe Nordau (great salads and sandwiches)
+[12/1/24, 12:01:20] Noa: And there's a supermarket on the next block for groceries
+[12/1/24, 12:01:35] Sophie: HaKosem for the inaugural office lunch?
+[12/1/24, 12:01:50] Everyone: YES
+[12/1/24, 14:30:08] Dana: Great first day everyone. This office feels like home already.
+[12/1/24, 14:30:25] Dana: Also reminder: Yossi and I changed the standup time
+[12/1/24, 14:30:40] Dana: New standup is 9:30am in Apollo
+[12/1/24, 14:30:55] Dana: The extra 30 minutes gives everyone time to get settled in the morning
+[12/1/24, 14:31:10] Yossi: 9:30 should work better for the team
+[12/1/24, 14:31:25] Sophie: Much appreciated!
+[12/1/24, 14:31:40] Liam: Thank you. 9am was brutal.
+[12/2/24, 08:30:15] Marco: Hey who used all the coffee beans already?? The hopper is empty
+[12/2/24, 08:30:32] Noa: It's day TWO Marco
+[12/2/24, 08:30:48] Marco: I'm not judging, just reporting
+[12/2/24, 08:31:05] Liam: Guilty. I may have made 5 espressos yesterday.
+[12/2/24, 08:31:20] Noa: I'll buy more beans today. I clearly underestimated this team's caffeine needs.
+[12/2/24, 08:31:35] Priya: We should get a bigger bag. The 1kg lasted literally one day.
+[12/2/24, 08:31:50] Noa: Ordering 5kg. We're going wholesale.
+[12/2/24, 09:30:05] Dana: Standup in Apollo!
+[12/2/24, 11:15:22] Sophie: DataStream pilot week 1 report is in
+[12/2/24, 11:15:38] Sophie: They're loving it. Usage is higher than projected.
+[12/2/24, 11:15:55] Sophie: Their most common query type: "who decided X and when"
+[12/2/24, 11:16:10] Sophie: Attribution + temporal -- exactly our strong suit now
+[12/2/24, 11:16:25] Dana: Fantastic. Happy customers = good reference = easier fundraising
+[12/2/24, 14:00:08] Alex: Hey does anyone have a recommendation for a good desk lamp? The overhead lighting is good but I need focused light for my screen setup
+[12/2/24, 14:00:25] Noa: I'll order desk lamps for anyone who wants one. Send me your preference on Slack.
+[12/2/24, 14:00:40] Alex: Noa the MVP as always
+[12/3/24, 09:30:05] Dana: Standup!
+[12/3/24, 10:30:15] Priya: Hey team, something weird with the retrieval pipeline
+[12/3/24, 10:30:32] Priya: I'm getting stale results when I query the DataStream data
+[12/3/24, 10:30:48] Priya: They added new Slack messages over the weekend but the search doesn't find them
+[12/3/24, 10:31:05] Liam: Did the incremental indexing run?
+[12/3/24, 10:31:20] Marco: Checking... no, the cron job failed silently at 3am
+[12/3/24, 10:31:35] Marco: The embedding API returned rate limit errors and we didn't handle them
+[12/3/24, 10:31:50] Priya: We need retry logic with exponential backoff
+[12/3/24, 10:32:05] Liam: I'll add that today. And an alert for failed indexing jobs.
+[12/3/24, 10:32:20] Marco: I'll set up a monitoring dashboard for the indexing pipeline
+[12/3/24, 10:32:35] Yossi: Good catch. Silent failures are the worst kind.
+[12/3/24, 14:30:22] Sophie: Vertex demo is next week! They confirmed Monday the 9th at 2pm
+[12/3/24, 14:30:38] Sophie: They'll come to our office this time
+[12/3/24, 14:30:55] Alex: First visitors to the new office!
+[12/3/24, 14:31:10] Noa: I'll make sure everything is spotless. And I'll have the coffee machine warmed up.
+[12/3/24, 14:31:25] Dana: Good. First impressions matter.
+[12/4/24, 08:15:22] Alex: The weather is wild today. Storm warning for Tel Aviv.
+[12/4/24, 08:15:38] Marco: I can hear the rain hitting the windows. It's intense.
+[12/4/24, 08:15:55] Noa: FYI the building lobby might flood -- it happened last year apparently
+[12/4/24, 08:16:10] Noa: Building management said they're putting sandbags at the entrance
+[12/4/24, 08:16:25] Liam: Tel Aviv and rain. The city just shuts down.
+[12/4/24, 08:16:40] Sophie: I'm working from home today. Not risking the commute.
+[12/4/24, 08:16:55] Priya: Same here. Roads are flooded near my apartment.
+[12/4/24, 08:17:10] Dana: Anyone who wants to WFH today, go ahead. Safety first.
+[12/4/24, 08:17:25] Yossi: Standup via Zoom today?
+[12/4/24, 08:17:40] Dana: Yes. I'll send the link.
+[12/4/24, 09:30:15] Dana: Zoom standup link in #general Slack channel
+[12/4/24, 14:00:08] Marco: Hey Noa, the server closet got a bit warm during the storm. The building AC was off for maintenance.
+[12/4/24, 14:00:25] Marco: Temperature hit 27C before I noticed.
+[12/4/24, 14:00:40] Noa: Is it OK now?
+[12/4/24, 14:00:55] Marco: Yeah, I opened the closet door and aimed a fan at it. Back to 23C.
+[12/4/24, 14:01:10] Marco: But we should get a portable AC unit for backup
+[12/4/24, 14:01:25] Noa: I'll order one. Any specific requirements?
+[12/4/24, 14:01:40] Marco: Something that can cool a 5sqm room. A small unit will do.
+[12/5/24, 09:30:08] Dana: Standup in Apollo!
+[12/5/24, 11:00:15] Priya: Quick experiment update: I tested ColBERT-style token-level retrieval on our data
+[12/5/24, 11:00:32] Priya: Instead of one vector per chunk, it keeps per-token embeddings
+[12/5/24, 11:00:48] Priya: The precision on short queries improved by 15% compared to dense retrieval alone
+[12/5/24, 11:01:05] Yossi: That's significant. What's the storage overhead?
+[12/5/24, 11:01:20] Priya: About 10x more vectors to store. Not practical at scale yet.
+[12/5/24, 11:01:35] Yossi: File it as a future optimization. Interesting research though.
+[12/5/24, 11:01:50] Priya: For now, hybrid search (dense + BM25) is still our best practical approach
+[12/5/24, 14:30:08] Sophie: Has anyone been to the new Thai place that opened on Ben Yehuda?
+[12/5/24, 14:30:25] Alex: Not yet but I've been wanting to try it. Pad Thai Heaven I think?
+[12/5/24, 14:30:40] Liam: That's a bold name to live up to
+[12/5/24, 14:30:55] Noa: I went last week. The pad thai is actually heavenly. Name checks out.
+[12/5/24, 14:31:10] Sophie: Team lunch there tomorrow?
+[12/5/24, 14:31:25] Marco: I'm in
+[12/5/24, 14:31:40] Priya: Yes please
+[12/6/24, 09:30:08] Dana: Standup!
+[12/6/24, 12:00:15] Noa: Pad Thai Heaven team lunch! Let's go at 12:30
+[12/6/24, 12:00:32] Marco: Already drooling
+[12/6/24, 13:30:22] Alex: OK Noa was right. That pad thai was incredible.
+[12/6/24, 13:30:38] Sophie: Adding it to the regular rotation
+[12/6/24, 13:30:55] Liam: The green curry was amazing too
+[12/6/24, 13:31:10] Priya: The tofu pad thai was perfectly spiced
+[12/6/24, 13:31:25] Marco: I had the duck and I have no regrets
+[12/8/24, 10:00:22] Yossi: Anyone working today? I want to do some performance optimization on the search pipeline
+[12/8/24, 10:00:38] Liam: I'm online. What are you seeing?
+[12/8/24, 10:00:55] Yossi: Average search latency is 1.8 seconds. I want it under 500ms.
+[12/8/24, 10:01:10] Liam: The bottleneck is the re-ranking step. It runs sequentially.
+[12/8/24, 10:01:25] Yossi: Can we parallelize it?
+[12/8/24, 10:01:40] Liam: Yes, I'll switch to async batch re-ranking. Should cut it to under 800ms.
+[12/8/24, 10:01:55] Yossi: That plus caching frequently accessed chunks could get us to 500ms.
+[12/8/24, 10:02:10] Liam: On it. I'll have benchmarks by tomorrow.
+[12/9/24, 08:15:05] Sophie: Vertex demo today at 2pm! They're coming to our office
+[12/9/24, 08:15:22] Noa: Office is clean, coffee is ready, Apollo room is set up
+[12/9/24, 08:15:38] Alex: UI has the email connector integrated. Tested with the sample data.
+[12/9/24, 08:15:55] Liam: Pipeline optimization is done -- search latency is now 620ms average
+[12/9/24, 08:16:10] Yossi: Not quite 500ms but much better. Good enough for the demo.
+[12/9/24, 09:30:15] Dana: Standup! Keep it short, lots to prep for the demo.
+[12/9/24, 15:45:22] Sophie: Vertex demo is done! They loved it.
+[12/9/24, 15:45:38] Sophie: They want to start a 2-month pilot in January. $8K/month.
+[12/9/24, 15:45:55] Dana: Second paying customer! And at a higher price point!
+[12/9/24, 15:46:10] Priya: Our metrics are going to look great for the VC meetings
+[12/9/24, 15:46:25] Marco: Two customers in two months. Not bad.
+[12/9/24, 15:46:40] Yossi: The product is working. Now we need to scale.
+[12/10/24, 09:30:05] Dana: Standup!
+[12/10/24, 11:30:22] Dana: VC meetings update:
+[12/10/24, 11:30:38] Dana: Sequoia -- meeting December 19
+[12/10/24, 11:30:55] Dana: TLV Partners -- meeting December 17
+[12/10/24, 11:31:10] Dana: Grove Ventures -- meeting January 9
+[12/10/24, 11:31:25] Dana: I need everyone to help me nail the pitch deck by December 15
+[12/10/24, 11:31:40] Sophie: I have the narrative draft ready. Sending for review today.
+[12/10/24, 11:31:55] Yossi: I'll prepare the technical deep-dive slides
+[12/10/24, 11:32:10] Priya: I can provide the ML benchmarks and evaluation results
+[12/10/24, 11:32:25] Marco: I'll do the infrastructure and scalability section
+[12/10/24, 11:32:40] Dana: This team. I'm so grateful.
+[12/11/24, 08:30:15] Noa: Hanukkah starts tomorrow night! I'm bringing sufganiyot for the team
+[12/11/24, 08:30:32] Alex: The jelly ones or the fancy ones?
+[12/11/24, 08:30:48] Noa: Both. I ordered from Roladin -- their sufganiyot are legendary.
+[12/11/24, 08:31:05] Liam: Noa is the office snack deity
+[12/11/24, 08:31:20] Sophie: Should we do a team Hanukkah dinner?
+[12/11/24, 08:31:35] Dana: Great idea. How about Thursday at Brasserie?
+[12/11/24, 08:31:50] Sophie: Perfect! I love that place
+[12/11/24, 08:32:05] Noa: I'll make a reservation
+[12/11/24, 09:30:08] Dana: Standup!
+[12/11/24, 14:00:22] Priya: Pitch deck ML section is done. Key highlights:
+[12/11/24, 14:00:38] Priya: - 82% precision on DataStream evaluation set (up from 65% at launch)
+[12/11/24, 14:00:55] Priya: - Time-gap chunking improved retrieval by 23% on conversational data
+[12/11/24, 14:01:10] Priya: - Hybrid search addresses the dense retrieval blind spot for short queries
+[12/11/24, 14:01:25] Yossi: Great numbers. I'll integrate them into the technical section.
+[12/12/24, 08:15:08] Noa: HAPPY HANUKKAH! Sufganiyot are on the kitchen counter
+[12/12/24, 08:15:25] Noa: We have: classic jelly, dulce de leche, pistachio cream, and chocolate hazelnut
+[12/12/24, 08:15:40] Alex: I just had the pistachio one and I saw God
+[12/12/24, 08:15:55] Liam: The dulce de leche is life-changing
+[12/12/24, 08:16:10] Marco: I'm on my second chocolate hazelnut. This is fine.
+[12/12/24, 08:16:25] Priya: I don't know what sufganiyot were before today but they're now my favorite food
+[12/12/24, 08:16:40] Sophie: Roladin never disappoints
+[12/12/24, 08:16:55] Dana: Noa, this is incredible. Thank you!
+[12/12/24, 08:17:10] Noa: Happy Hanukkah everyone! More where these came from
+[12/12/24, 09:30:08] Dana: Standup! Sugar rush edition
+[12/12/24, 11:00:15] Marco: ALERT -- the coffee machine is making a horrible grinding noise
+[12/12/24, 11:00:32] Marco: And the espresso came out looking like dirty water
+[12/12/24, 11:00:48] Noa: What? It was working fine yesterday!
+[12/12/24, 11:01:05] Liam: I think it needs descaling. My old office had the same DeLonghi and it needed descaling every month
+[12/12/24, 11:01:20] Marco: How do you descale it?
+[12/12/24, 11:01:35] Liam: You hold the steam knob and the brew button at the same time for 5 seconds
+[12/12/24, 11:01:50] Liam: Then it goes into descaling mode and walks you through it
+[12/12/24, 11:02:05] Noa: Do we have descaling solution?
+[12/12/24, 11:02:20] Liam: Doubt it. Any store should have it though. Or you can use citric acid.
+[12/12/24, 11:02:35] Noa: I'll run out and get some. Coffee emergency.
+[12/12/24, 11:02:50] Marco: This is our most serious incident since the rate limiting bug
+[12/12/24, 12:15:08] Noa: Coffee machine is descaled and back in action!
+[12/12/24, 12:15:25] Noa: Bought 6 months worth of descaling tablets
+[12/12/24, 12:15:40] Noa: I'll set a monthly reminder to descale
+[12/12/24, 12:15:55] Priya: The espresso is back to normal. Crisis averted.
+[12/12/24, 12:16:10] Alex: The office can continue to function
+[12/13/24, 09:30:05] Dana: Standup!
+[12/13/24, 11:00:22] Yossi: Pitch deck is coming together nicely
+[12/13/24, 11:00:38] Yossi: Technical section done, ML metrics done, Sophie's narrative is excellent
+[12/13/24, 11:00:55] Dana: I want to do a full rehearsal Sunday night. Who can join?
+[12/13/24, 11:01:10] Sophie: I'll be there
+[12/13/24, 11:01:25] Yossi: Count me in
+[12/13/24, 11:01:40] Priya: Me too, I want to practice the ML deep-dive
+[12/13/24, 11:01:55] Dana: Great. Sunday 7pm at the office.
+[12/13/24, 14:00:08] Sophie: Hanukkah team dinner tonight! Brasserie at 7:30
+[12/13/24, 14:00:25] Sophie: Reservation under NovaMind, table for 8
+[12/13/24, 14:00:40] Alex: Can't wait!
+[12/13/24, 14:00:55] Marco: What's the dress code?
+[12/13/24, 14:01:10] Sophie: Brasserie is smart casual. No flip flops Marco.
+[12/13/24, 14:01:25] Marco: But it's my signature look
+[12/13/24, 14:01:40] Sophie: Find another signature
+[12/13/24, 22:00:22] Liam: Incredible dinner! The lamb was to die for
+[12/13/24, 22:00:38] Sophie: The wine pairing was perfect
+[12/13/24, 22:00:55] Priya: Best team dinner yet
+[12/13/24, 22:01:10] Dana: Happy Hanukkah everyone. Grateful for this team.
+[12/15/24, 19:30:15] Dana: Pitch rehearsal starting now! Yossi, Sophie, Priya -- Apollo room
+[12/15/24, 21:00:22] Dana: Great rehearsal. A few tweaks to make but we're ready for TLV Partners on Tuesday.
+[12/15/24, 21:00:38] Sophie: The story flows really well. I think VCs will love the DataStream case study.
+[12/15/24, 21:00:55] Yossi: Priya your ML section was rock solid. Clear and compelling.
+[12/15/24, 21:01:10] Priya: Thanks! I'll polish the benchmark slides a bit more.
+[12/16/24, 07:50:15] Dana: Welcome Tom to the group! Our new QA Lead!
+[12/16/24, 07:50:32] NovaMind Team: Dana added Tom
+[12/16/24, 07:50:48] Tom: Hello NovaMind! Excited to join the best startup in Tel Aviv!
+[12/16/24, 07:51:05] Yossi: Tom! Great to have you officially on board
+[12/16/24, 07:51:20] Alex: Welcome Tom! We've heard great things from Yossi
+[12/16/24, 07:51:35] Liam: Welcome! Fair warning -- the codebase has exactly zero tests for the chunking module
+[12/16/24, 07:51:50] Tom: That's why I'm here. Also I brought rubber ducks.
+[12/16/24, 07:52:05] Sophie: Rubber ducks?
+[12/16/24, 07:52:20] Tom: For debugging. Rubber duck debugging. You explain the problem to a duck and the solution becomes clear.
+[12/16/24, 07:52:35] Tom: I have 14 of them. They each have names.
+[12/16/24, 07:52:50] Marco: This is already the best hire we've made
+[12/16/24, 07:53:05] Priya: I love this
+[12/16/24, 07:53:20] Noa: Welcome Tom! Your desk is set up in the test-- I mean the quality engineering area
+[12/16/24, 07:53:35] Noa: Building entrance code is 4569# by the way. Press # then push don't pull.
+[12/16/24, 07:53:50] Tom: Already in! Yossi gave me the code yesterday. The ducks are being deployed as we speak.
+[12/16/24, 09:30:08] Dana: Standup in Apollo! Tom's first standup with us
+[12/16/24, 11:00:15] Tom: Codebase first impressions:
+[12/16/24, 11:00:32] Tom: The good: clean architecture, well-documented APIs, solid abstractions
+[12/16/24, 11:00:48] Tom: The concerning: test coverage is 47%. We need to get that to 80% minimum.
+[12/16/24, 11:01:05] Tom: The alarming: the chunking module has zero tests and it's our most critical component
+[12/16/24, 11:01:20] Liam: In my defense, I was moving fast
+[12/16/24, 11:01:35] Tom: Moving fast is fine but now we slow down and test. I'll start with the chunking module today.
+[12/16/24, 11:01:50] Yossi: Priority #1: cover the happy path. Edge cases in sprint 2.
+[12/16/24, 11:02:05] Tom: Already writing the test plan. I'll share it by EOD.
+[12/16/24, 14:30:22] Tom: Test plan is ready. 45 test cases for the chunking module alone.
+[12/16/24, 14:30:38] Tom: Including edge cases like: empty messages, single-character messages, messages with only emojis, system messages, deleted messages
+[12/16/24, 14:30:55] Priya: What about the time-gap boundary cases?
+[12/16/24, 14:31:10] Tom: Covered. Tests for: exact threshold, messages at midnight boundary, different timezone formats
+[12/16/24, 14:31:25] Liam: This is... thorough
+[12/16/24, 14:31:40] Tom: Quack quack
+[12/16/24, 14:31:55] Everyone: What
+[12/16/24, 14:32:10] Tom: Sorry, that's what my lead duck Mr. Wadsworth says when tests pass
+[12/17/24, 08:00:05] Dana: TLV Partners meeting today at 3pm. Wish us luck!
+[12/17/24, 08:00:22] Yossi: We don't need luck, we have a great product and great metrics
+[12/17/24, 08:00:38] Sophie: And a great pitch. Go crush it Dana!
+[12/17/24, 08:00:55] Priya: Good luck! The numbers are on your side
+[12/17/24, 08:01:10] Tom: My ducks are sending good vibes
+[12/17/24, 09:30:15] Dana: Standup! Quick one today, I need to prep.
+[12/17/24, 16:30:22] Dana: TLV Partners meeting went well! Good questions, genuine interest
+[12/17/24, 16:30:38] Dana: They want a follow-up in January with a deeper technical dive
+[12/17/24, 16:30:55] Yossi: That's a positive sign. Second meetings mean serious interest.
+[12/17/24, 16:31:10] Sophie: What questions did they focus on?
+[12/17/24, 16:31:25] Dana: Market size, competitive landscape, and why conversation data specifically
+[12/17/24, 16:31:40] Dana: I think the DataStream case study really resonated
+[12/18/24, 09:30:08] Dana: Standup!
+[12/18/24, 11:15:22] Tom: Test coverage update: chunking module is now at 89%
+[12/18/24, 11:15:38] Tom: Found 3 actual bugs in the process!
+[12/18/24, 11:15:55] Tom: Bug 1: Time-gap detector counted gaps wrong when messages had different date formats
+[12/18/24, 11:16:10] Tom: Bug 2: Unicode handling broke on certain emoji combinations
+[12/18/24, 11:16:25] Tom: Bug 3: Empty lines in WhatsApp exports caused the parser to skip the next message
+[12/18/24, 11:16:40] Liam: Yikes. Good catches Tom.
+[12/18/24, 11:16:55] Tom: The ducks always find the bugs
+[12/18/24, 11:17:10] Priya: These could have caused real issues in production. Thank you Tom.
+[12/18/24, 14:00:15] Alex: Office Christmas/Hanukkah decoration debate: yay or nay?
+[12/18/24, 14:00:32] Noa: I already ordered a small menorah for the kitchen counter
+[12/18/24, 14:00:48] Sophie: And maybe some fairy lights? Just to make it cozy
+[12/18/24, 14:01:05] Noa: On it!
+[12/18/24, 14:01:20] Dana: Keep it tasteful but festive
+[12/18/24, 14:01:35] Tom: Can we put a Santa hat on one of my ducks?
+[12/18/24, 14:01:50] Noa: Absolutely
+[12/19/24, 08:00:08] Dana: Sequoia meeting today! This is the big one.
+[12/19/24, 08:00:25] Dana: Their Israel partner plus two associates are coming to OUR office
+[12/19/24, 08:00:40] Noa: Office is spotless. Coffee is ready. Apollo room is set up with water and snacks.
+[12/19/24, 08:00:55] Dana: Team, please be around and be yourselves. They want to see the culture.
+[12/19/24, 08:01:10] Tom: Should I hide the ducks?
+[12/19/24, 08:01:25] Dana: No. The ducks stay. They're part of our culture.
+[12/19/24, 08:01:40] Tom: Mr. Wadsworth will be so proud
+[12/19/24, 09:30:05] Dana: Quick standup today!
+[12/19/24, 14:00:15] Dana: Sequoia meeting just ended
+[12/19/24, 14:00:32] Dana: I think it went REALLY well
+[12/19/24, 14:00:48] Dana: They spent 30 minutes past the scheduled time asking detailed questions
+[12/19/24, 14:01:05] Sophie: What were they most interested in?
+[12/19/24, 14:01:20] Dana: The conversation data angle. They said nobody is doing it well.
+[12/19/24, 14:01:35] Dana: They also LOVED the office. And the coffee.
+[12/19/24, 14:01:50] Yossi: And the ducks?
+[12/19/24, 14:02:05] Dana: The partner literally picked up Mr. Wadsworth and asked if it was a debugging duck
+[12/19/24, 14:02:20] Tom: A person of culture
+[12/19/24, 14:02:35] Dana: They want to move fast. Follow-up call next week.
+[12/19/24, 14:02:50] Everyone: LET'S GO!!
+[12/20/24, 09:30:08] Dana: Standup!
+[12/20/24, 11:00:15] Liam: Performance update: search latency is now 480ms average
+[12/20/24, 11:00:32] Liam: Async re-ranking + chunk caching did the trick
+[12/20/24, 11:00:48] Yossi: Sub-500ms! That's the target. Great work.
+[12/20/24, 11:01:05] Marco: What about P99 latency?
+[12/20/24, 11:01:20] Liam: P99 is 850ms. Still some slow queries on large result sets.
+[12/20/24, 11:01:35] Yossi: Acceptable for now. Let's optimize P99 next quarter.
+[12/20/24, 14:30:08] Noa: Office closing schedule for the holidays:
+[12/20/24, 14:30:25] Noa: December 23-27: Office open but optional WFH
+[12/20/24, 14:30:40] Noa: December 28 - January 1: Office closed
+[12/20/24, 14:30:55] Noa: January 2: Back to normal
+[12/20/24, 14:31:10] Dana: Take the time to rest everyone. You've earned it.
+[12/20/24, 14:31:25] Yossi: I'll be working some of the break. Want to get the pipeline optimization done.
+[12/20/24, 14:31:40] Dana: Yossi. Rest.
+[12/20/24, 14:31:55] Yossi: OK fine. Mostly rest.
+[12/22/24, 10:00:15] Sophie: Sunday morning movie rec: Wicked is SO good
+[12/22/24, 10:00:32] Sophie: Ariana Grande and Cynthia Erivo are incredible together
+[12/22/24, 10:00:48] Alex: I saw it Friday night. The visuals are stunning.
+[12/22/24, 10:01:05] Noa: I cried. Multiple times.
+[12/22/24, 10:01:20] Liam: Adding it to the list. The list is getting very long.
+[12/22/24, 10:01:35] Tom: Is this the one about the Wizard of Oz from the witch's perspective?
+[12/22/24, 10:01:50] Sophie: Yes! The Broadway musical turned movie. It's the cultural event of the year.
+[12/22/24, 10:02:05] Tom: My ducks would love it. Can ducks go to cinemas?
+[12/22/24, 10:02:20] Marco: I think the answer is legally no
+[12/23/24, 08:30:15] Marco: Monday morning. Quiet office today -- looks like most people are WFH
+[12/23/24, 08:30:32] Liam: I'm here. The commute was a dream with nobody on the road.
+[12/23/24, 08:30:48] Marco: Same. And I got the best parking spot.
+[12/23/24, 08:31:05] Tom: Working from home but my ducks and I are fully operational
+[12/23/24, 11:00:22] Yossi: Despite saying I'd rest, I optimized the embedding cache. 40% faster cold starts.
+[12/23/24, 11:00:38] Dana: Yossi what did I say about resting
+[12/23/24, 11:00:55] Yossi: This IS rest for me. Normal work is much harder.
+[12/23/24, 11:01:10] Dana: I give up
+[12/26/24, 09:00:15] Noa: Happy holidays everyone! Just checking in -- the office alarm system went off at 3am last night
+[12/26/24, 09:00:32] Noa: Building security said it was a false alarm, something with the motion sensors
+[12/26/24, 09:00:48] Marco: I can check the camera footage when I'm back. We have cameras right?
+[12/26/24, 09:01:05] Noa: Yes, building has cameras in the hallway but not inside our office
+[12/26/24, 09:01:20] Marco: I'll review the hallway footage just to be safe
+[12/26/24, 09:01:35] Noa: Thanks Marco. Building security already confirmed it was nothing but better safe than sorry.
+[12/29/24, 14:00:08] Dana: Hey team, Sequoia follow-up call is scheduled for January 7
+[12/29/24, 14:00:25] Dana: They want to discuss term sheets
+[12/29/24, 14:00:40] Sophie: TERM SHEETS? That's huge!
+[12/29/24, 14:00:55] Yossi: Already? That was fast
+[12/29/24, 14:01:10] Dana: They said they don't want to lose momentum. I think they're worried about competing offers.
+[12/29/24, 14:01:25] Sophie: Are there competing offers?
+[12/29/24, 14:01:40] Dana: TLV Partners expressed strong interest too. Having two interested VCs gives us leverage.
+[12/29/24, 14:01:55] Yossi: This is exactly where we want to be. Multiple parties, competitive dynamics.
+[12/29/24, 14:02:10] Dana: I'm trying not to get too excited but... I'm very excited
+[12/31/24, 18:00:15] Dana: Happy New Year's Eve everyone!
+[12/31/24, 18:00:32] Dana: What a year it's been. From an idea to a team of 9 (soon to be 10!) with paying customers and VC interest.
+[12/31/24, 18:00:48] Dana: I'm so proud of every single one of you.
+[12/31/24, 18:01:05] Yossi: 2025 is going to be our year
+[12/31/24, 18:01:20] Liam: Here's to shipping great software and drinking great coffee
+[12/31/24, 18:01:35] Alex: And watching great movies
+[12/31/24, 18:01:50] Sophie: And closing great deals
+[12/31/24, 18:02:05] Marco: And maintaining great servers
+[12/31/24, 18:02:20] Priya: And training great models
+[12/31/24, 18:02:35] Tom: And writing great tests
+[12/31/24, 18:02:50] Noa: And making great coffee
+[12/31/24, 18:03:05] Dana: 2025, here we come!
+[1/2/25, 08:15:22] Noa: Happy New Year! Welcome back everyone
+[1/2/25, 08:15:38] Noa: Office is open, coffee machine is warm, and 2025 is going to be amazing
+[1/2/25, 08:15:55] Liam: First coffee of 2025. Let's make it count.
+[1/2/25, 08:16:10] Alex: The office feels so good after a week off
+[1/2/25, 08:16:25] Marco: Server room is looking good. Temperature held steady over the break.
+[1/2/25, 08:16:40] Tom: My ducks missed the office. They told me.
+[1/2/25, 08:16:55] Sophie: Tom please don't ever change
+[1/2/25, 09:30:08] Dana: First standup of 2025! Apollo room!
+[1/2/25, 10:30:15] Dana: Priorities for January:
+[1/2/25, 10:30:32] Dana: 1. Sequoia term sheet call on the 7th
+[1/2/25, 10:30:48] Dana: 2. Grove Ventures meeting on the 9th
+[1/2/25, 10:31:05] Dana: 3. Chen starts on the 6th -- onboarding
+[1/2/25, 10:31:20] Dana: 4. DataStream pilot month 2 -- ensure success metrics
+[1/2/25, 10:31:35] Dana: 5. Vertex pilot kickoff mid-January
+[1/2/25, 10:31:50] Yossi: Packed month. Let's execute.
+[1/2/25, 14:00:22] Priya: Hey has anyone tried the new Gemini 2.0 Flash model?
+[1/2/25, 14:00:38] Priya: The benchmarks look incredible for the price point
+[1/2/25, 14:00:55] Yossi: Haven't tried it yet. How does it compare to GPT-4o-mini?
+[1/2/25, 14:01:10] Priya: Much faster inference, similar quality. And it supports structured output natively.
+[1/2/25, 14:01:25] Liam: Structured output is huge for us. Our prompt engineering for JSON responses is a pain.
+[1/2/25, 14:01:40] Priya: I'll run a comparison this week. Could save us a lot of prompt complexity.
+[1/2/25, 14:01:55] Yossi: Do it. But let's not switch anything before the VC meetings. Stability first.
+[1/3/25, 09:30:08] Dana: Standup!
+[1/3/25, 11:00:15] Tom: Test coverage update: we're at 72% overall!
+[1/3/25, 11:00:32] Tom: Chunking module: 91%, retrieval pipeline: 78%, API layer: 65%
+[1/3/25, 11:00:48] Tom: API layer is the next focus. Lots of untested error paths.
+[1/3/25, 11:01:05] Liam: That's incredible progress Tom. You've been here 3 weeks.
+[1/3/25, 11:01:20] Tom: Mr. Wadsworth demands excellence
+[1/3/25, 14:30:08] Alex: Weekend plan: anyone want to see Nosferatu?
+[1/3/25, 14:30:25] Alex: Robert Eggers directing, Bill Skarsgard as the count
+[1/3/25, 14:30:40] Sophie: YES. I've been waiting for this one.
+[1/3/25, 14:30:55] Liam: The trailer was genuinely terrifying. Count me in.
+[1/3/25, 14:31:10] Marco: Is it horror? I don't do horror.
+[1/3/25, 14:31:25] Alex: It's gothic horror. Very atmospheric, less jump scares.
+[1/3/25, 14:31:40] Marco: I'll risk it
+[1/3/25, 14:31:55] Tom: Priya, you in?
+[1/3/25, 14:32:10] Priya: Sure! Saturday night?
+[1/3/25, 14:32:25] Alex: Saturday 9pm, Cinema City?
+[1/3/25, 14:32:40] Everyone: Done!
+[1/5/25, 10:00:15] Dana: Reminder: Chen starts tomorrow!
+[1/5/25, 10:00:32] Noa: Desk is ready, laptop is configured, coffee machine is primed
+[1/5/25, 10:00:48] Priya: I prepared an onboarding doc for the ML pipeline. Can't wait to work with her.
+[1/5/25, 10:01:05] Tom: I have a welcome duck picked out for her
+[1/5/25, 10:01:20] Sophie: Tom. Does every new hire get a welcome duck?
+[1/5/25, 10:01:35] Tom: Obviously. It's tradition. (It became tradition when I started it 3 weeks ago.)
+[1/6/25, 07:55:12] Dana: Welcome Chen to the NovaMind family!
+[1/6/25, 07:55:28] NovaMind Team: Dana added Chen
+[1/6/25, 07:55:45] Chen: Good morning everyone! So excited to be joining NovaMind!
+[1/6/25, 07:56:00] Alex: Welcome Chen!
+[1/6/25, 07:56:15] Marco: Welcome aboard!
+[1/6/25, 07:56:30] Liam: Hey Chen! We've been looking forward to this
+[1/6/25, 07:56:45] Sophie: Welcome! We have so many evaluation challenges waiting for your PhD brain
+[1/6/25, 07:57:00] Tom: Chen, I present to you the traditional NovaMind welcome duck
+[1/6/25, 07:57:15] Tom: Her name is Quackula. She specializes in data science.
+[1/6/25, 07:57:30] Chen: I love her already. Thank you Tom!
+[1/6/25, 07:57:45] Priya: Welcome Chen! I can't wait to collaborate on the evaluation framework
+[1/6/25, 07:58:00] Yossi: Welcome! Your expertise is exactly what we need right now
+[1/6/25, 07:58:15] Noa: Welcome Chen! Your desk is the one by the window in the ML area. Building code is 4569#, WiFi is NovaMind-Office / NovaMind2024!
+[1/6/25, 07:58:30] Chen: Got it! Already set up. This office is gorgeous.
+[1/6/25, 09:30:08] Dana: Standup in Apollo! Full team for the first time -- all 10 of us!
+[1/6/25, 09:30:25] Dana: We're officially at full strength
+[1/6/25, 10:45:22] Chen: Quick question -- is there a shared drive with all our evaluation datasets?
+[1/6/25, 10:45:38] Priya: Yes! Google Drive, folder "ML-Eval". I'll share access with you.
+[1/6/25, 10:45:55] Chen: Also, what embedding model are we using currently?
+[1/6/25, 10:46:10] Priya: OpenAI text-embedding-3-small, 1536 dimensions
+[1/6/25, 10:46:25] Chen: Got it. And what's the evaluation metric we care about most?
+[1/6/25, 10:46:40] Priya: Precision@10 primarily, but we also track recall@10 and MRR
+[1/6/25, 10:46:55] Chen: Perfect. I'll review the current eval framework today and propose improvements tomorrow.
+[1/6/25, 14:00:08] Noa: Hey everyone, building management called
+[1/6/25, 14:00:25] Noa: They're changing the entrance code next week
+[1/6/25, 14:00:40] Noa: I'll share the new one as soon as I get it
+[1/6/25, 14:00:55] Marco: Already? It's only been about 5 weeks since we got 4569#
+[1/6/25, 14:01:10] Noa: They said every 6 weeks, remember? I guess this is the cycle.
+[1/6/25, 14:01:25] Alex: Building security is very dedicated
+[1/7/25, 09:30:08] Dana: Quick standup today -- I'm prepping for the Sequoia call this afternoon
+[1/7/25, 11:00:15] Chen: First evaluation report!
+[1/7/25, 11:00:32] Chen: I ran our existing test suite with some additional metrics:
+[1/7/25, 11:00:48] Chen: The big finding: our temporal accuracy is only 61%
+[1/7/25, 11:01:05] Chen: Meaning 39% of the time, the system returns an outdated answer when a newer one exists
+[1/7/25, 11:01:20] Priya: That's worse than I thought. The time decay should be helping more.
+[1/7/25, 11:01:35] Chen: The decay lambda is too conservative. Old results are still getting too much weight.
+[1/7/25, 11:01:50] Yossi: Can you tune the lambda and run the eval again?
+[1/7/25, 11:02:05] Chen: Already running it with lambda = 0.02 and 0.05. Results by EOD.
+[1/7/25, 11:02:20] Tom: I'll add temporal accuracy to our automated regression tests
+[1/7/25, 15:30:22] Dana: Sequoia call done!
+[1/7/25, 15:30:38] Dana: They're offering a $4M seed round at a $20M pre-money valuation
+[1/7/25, 15:30:55] Dana: I haven't accepted yet -- want to see what TLV Partners and Grove offer
+[1/7/25, 15:31:10] Yossi: That's a strong offer. $20M pre at seed stage is great.
+[1/7/25, 15:31:25] Sophie: The Sequoia brand alone is worth a lot for future rounds
+[1/7/25, 15:31:40] Dana: Agreed. But let's not rush. The Grove meeting is Thursday.
+[1/7/25, 15:31:55] Dana: Keeping this between us for now, OK? Don't share externals.
+[1/7/25, 15:32:10] Everyone: Of course!
+[1/8/25, 08:55:12] Alex: Morning. The elevator is out of service today
+[1/8/25, 08:55:28] Alex: Sign says maintenance until 2pm
+[1/8/25, 08:55:42] Sophie: Great, 3 floors of stairs with my laptop bag
+[1/8/25, 08:55:58] Tom: Think of it as a free gym membership
+[1/8/25, 08:56:12] Chen: The things I do for this startup
+[1/8/25, 09:25:30] Yossi: Hey team, I want to move standup to 10:00
+[1/8/25, 09:25:45] Yossi: Too many people rushing to make 9:30
+[1/8/25, 09:26:00] Sophie: 10 works much better for me
+[1/8/25, 09:26:15] Liam: Same here
+[1/8/25, 09:26:30] Dana: Let's try it for a week
+[1/8/25, 09:26:45] Yossi: Starting today. Standup at 10 in Apollo.
+[1/8/25, 11:30:22] Chen: Lambda tuning results:
+[1/8/25, 11:30:38] Chen: lambda=0.01 (current): temporal accuracy 61%
+[1/8/25, 11:30:55] Chen: lambda=0.02: temporal accuracy 74%
+[1/8/25, 11:31:10] Chen: lambda=0.05: temporal accuracy 83% but recall drops by 8%
+[1/8/25, 11:31:25] Chen: lambda=0.03 seems like the sweet spot: 79% temporal accuracy with only 2% recall loss
+[1/8/25, 11:31:40] Priya: That's a great improvement. Let's go with 0.03.
+[1/8/25, 11:31:55] Yossi: Make it the default but keep it configurable per-customer
+[1/8/25, 11:32:10] Chen: Already done!
+[1/8/25, 14:15:22] Priya: Hey has anyone been following the Cohere vs OpenAI embedding model debate?
+[1/8/25, 14:15:38] Chen: Yes! Cohere's embed-v3 has better recall but OpenAI has better precision
+[1/8/25, 14:15:55] Priya: Exactly what I found in my earlier tests. For our use case precision matters more.
+[1/8/25, 14:16:10] Yossi: What about the cost comparison?
+[1/8/25, 14:16:25] Priya: OpenAI is $0.02/million tokens, Cohere is $0.10
+[1/8/25, 14:16:40] Chen: Wait, isn't Cohere cheaper? I thought it was $0.01
+[1/8/25, 14:16:55] Priya: For the search endpoint yes, but embed-v3 is $0.10
+[1/8/25, 14:17:10] Yossi: OpenAI it is. Cheaper AND better precision for our use case.
+[1/9/25, 09:55:18] Yossi: Standup at 10 in Apollo
+[1/9/25, 10:30:45] Dana: Great standup everyone. Love the progress on the evaluation framework.
+[1/9/25, 11:00:22] Noa: Hey team, I got the new entrance code from building management
+[1/9/25, 11:00:38] Noa: New code: 7823#
+[1/9/25, 11:00:55] Noa: Effective Monday January 13
+[1/9/25, 11:01:10] Noa: Old code 4569# will stop working Sunday night
+[1/9/25, 11:01:25] Tom: What about the floor code?
+[1/9/25, 11:01:40] Noa: Same -- floor code is also 7823#
+[1/9/25, 11:01:55] Alex: Saved it. Thanks Noa
+[1/9/25, 11:02:10] Chen: Wait, I just got the old code last week! 4569# is already changing?
+[1/9/25, 11:02:25] Noa: Welcome to the building's enthusiastic security rotation
+[1/9/25, 14:00:08] Dana: Grove Ventures meeting at 3pm
+[1/9/25, 14:00:25] Yossi: Good luck!
+[1/9/25, 16:30:15] Dana: Grove was interesting. Different vibe from Sequoia.
+[1/9/25, 16:30:32] Dana: They focus more on deep tech. Loved our ML approach.
+[1/9/25, 16:30:48] Dana: They offered $3M at $18M pre. Lower than Sequoia.
+[1/9/25, 16:31:05] Yossi: Sequoia's offer is better on numbers. Plus the brand value.
+[1/9/25, 16:31:20] Dana: Agreed. I think we go with Sequoia. Let me negotiate a bit more.
+[1/10/25, 08:30:05] Noa: Investors might visit next Thursday
+[1/10/25, 08:30:20] Noa: Sequoia wants to do a final office visit before closing
+[1/10/25, 08:30:35] Dana: Yes, let's make a great impression
+[1/10/25, 08:30:50] Noa: I'll deep clean Wednesday evening
+[1/10/25, 08:31:05] Tom: Should I hide my ducks?
+[1/10/25, 08:31:20] Dana: The ducks stay. They might be our lucky charm -- the Sequoia partner loved Mr. Wadsworth
+[1/10/25, 08:31:35] Tom: The ducks will be in their finest formation
+[1/10/25, 09:55:22] Yossi: Standup in 5
+[1/10/25, 14:22:05] Chen: Hey does anyone know if we have a GPU machine in the office?
+[1/10/25, 14:22:22] Chen: I need to run some heavy embedding experiments
+[1/10/25, 14:22:38] Yossi: Yes! The A100 workstation. It's in the server closet.
+[1/10/25, 14:22:55] Marco: Check the GPU queue in Slack before running anything. And monitor temps.
+[1/10/25, 14:23:10] Chen: Perfect. What's the SSH access?
+[1/10/25, 14:23:25] Marco: I'll DM you credentials. Host is gpu-local.novamind.internal
+[1/10/25, 14:23:40] Chen: Thanks Marco!
+[1/13/25, 08:20:08] Noa: New entrance code is active today!
+[1/13/25, 08:20:25] Noa: 7823# for building entrance AND floor
+[1/13/25, 08:20:40] Noa: Old code 4569# is dead
+[1/13/25, 08:20:55] Chen: Got it, thanks!
+[1/13/25, 08:21:10] Alex: I'm going to spend 3 minutes trying 4569# before remembering. I can feel it.
+[1/13/25, 08:21:25] Sophie: Same. Muscle memory is a problem.
+[1/13/25, 08:35:22] Alex: OK I just tried 4569# at the door. Called it.
+[1/13/25, 08:35:38] Liam: Ha! We all knew this would happen
+[1/13/25, 08:35:55] Alex: 7823# works though. I'm in.
+[1/13/25, 09:55:30] Yossi: Standup in 5
+[1/13/25, 12:08:33] Noa: ALERT: Coffee machine is making that grinding noise again
+[1/13/25, 12:08:50] Noa: The espresso tastes like sadness
+[1/13/25, 12:09:05] Liam: Already? We just descaled it a month ago
+[1/13/25, 12:09:20] Noa: The water here is really hard. Builds up fast.
+[1/13/25, 12:09:35] Tom: I cleaned the drip tray this morning but maybe something else is wrong
+[1/13/25, 12:09:50] Marco: Hold the steam knob and brew button for 5 seconds. That enters descaling mode.
+[1/13/25, 12:10:05] Noa: Do we still have descaling solution?
+[1/13/25, 12:10:20] Marco: Should be in the kitchen cabinet, top shelf
+[1/13/25, 12:10:35] Noa: Found it. Running the cycle now. Coffee will be offline for 30 minutes.
+[1/13/25, 12:10:50] Chen: "Coffee offline for 30 minutes" -- this is a level 1 incident
+[1/13/25, 12:11:05] Dana: Our biggest crisis since founding
+[1/13/25, 12:45:22] Noa: Coffee machine is back online! Descaling complete.
+[1/13/25, 12:45:38] Noa: We really should get a machine with a built-in water filter for the new-- wait we're not moving yet are we?
+[1/13/25, 12:45:55] Sophie: We should just get a water filter for this one
+[1/13/25, 12:46:10] Noa: Good idea. I'll look into it.
+[1/14/25, 09:55:22] Yossi: Standup in 5
+[1/14/25, 11:30:08] Chen: Evaluation framework v2 is ready!
+[1/14/25, 11:30:25] Chen: New metrics added: temporal accuracy, speaker attribution accuracy, and cross-reference resolution
+[1/14/25, 11:30:40] Chen: Current scores:
+[1/14/25, 11:30:55] Chen: Temporal accuracy: 79% (up from 61%)
+[1/14/25, 11:31:10] Chen: Speaker attribution: 85%
+[1/14/25, 11:31:25] Chen: Cross-reference resolution: 52% (this is the weak point)
+[1/14/25, 11:31:40] Priya: 52% on cross-references is bad. What kind of cross-references?
+[1/14/25, 11:31:55] Chen: Things like "use the same approach as last time" or "the vendor Noa recommended"
+[1/14/25, 11:32:10] Chen: Queries that require connecting information across multiple chunks
+[1/14/25, 11:32:25] Yossi: That's the multi-hop problem. It's one of the hardest in RAG.
+[1/14/25, 11:32:40] Priya: We might need a re-ranking step that considers chunk relationships
+[1/14/25, 11:32:55] Chen: I have some ideas. Let me research and present next week.
+[1/15/25, 09:55:08] Yossi: Standup in 5
+[1/15/25, 10:30:22] Dana: Office move update!
+[1/15/25, 10:30:38] Dana: Our lease at HaYarkon 45 is up at the end of February
+[1/15/25, 10:30:55] Dana: I've been looking at larger spaces now that we have funding coming in
+[1/15/25, 10:31:10] Dana: Found an amazing space: Rothschild 22, 5th floor
+[1/15/25, 10:31:25] Dana: It's twice the size, has a proper server room, 3 meeting rooms
+[1/15/25, 10:31:40] Yossi: When would the move happen?
+[1/15/25, 10:31:55] Dana: Tentatively last weekend of February -- Feb 28 to March 1
+[1/15/25, 10:32:10] Noa: I'll start planning the logistics right away
+[1/15/25, 10:32:25] Marco: Does the new place have better cooling for the servers?
+[1/15/25, 10:32:40] Dana: Dedicated server room with proper HVAC
+[1/15/25, 10:32:55] Marco: Music to my ears
+[1/15/25, 10:33:10] Alex: What about the neighborhood? Good lunch options?
+[1/15/25, 10:33:25] Sophie: It's Rothschild, there are 50 restaurants within walking distance
+[1/15/25, 10:33:40] Tom: Will there be room for the duck fleet to expand?
+[1/15/25, 10:33:55] Dana: Double desk space, Tom
+[1/15/25, 10:34:10] Tom: The ducks will be thrilled
+[1/15/25, 10:34:25] Priya: Can we keep the Apollo/Gemini room names?
+[1/15/25, 10:34:40] Dana: We'll have 3 rooms. Naming suggestions?
+[1/15/25, 10:34:55] Yossi: Transformer, Diffusion, and Attention
+[1/15/25, 10:35:10] Liam: Encoder, Decoder, and Latent Space
+[1/15/25, 10:35:25] Chen: Training, Validation, and Test
+[1/15/25, 10:35:40] Sophie: I like Yossi's
+[1/15/25, 10:35:55] Alex: Same
+[1/15/25, 10:36:10] Dana: Transformer, Diffusion, and Attention it is!
+[1/16/25, 08:30:05] Sophie: Hey quick question, what's the entrance code? I forgot to save the new one
+[1/16/25, 08:30:20] Tom: Same, I'm standing outside right now
+[1/16/25, 08:30:35] Liam: Ha oh no
+[1/16/25, 08:30:50] Priya: Has anyone decided on the embedding dimension for production? 768 vs 1536?
+[1/16/25, 08:31:05] Chen: I think we said 1536 for better accuracy but I'd have to check
+[1/16/25, 08:31:20] Yossi: Yeah go with 1536, storage cost is negligible for our scale
+[1/16/25, 08:31:35] Priya: Cool, updating the config
+[1/16/25, 08:31:50] Marco: Tom, Sophie, the code is 7823#
+[1/16/25, 08:32:05] Tom: Thanks! I was about to start climbing the wall
+[1/16/25, 08:32:18] Sophie: In! Thank you Marco
+[1/16/25, 09:55:22] Yossi: Standup in 5
+[1/16/25, 14:30:22] Chen: Interesting finding on retrieval failures
+[1/16/25, 14:30:40] Chen: Short keyword-heavy queries like "parking code" or "WiFi password" perform terribly with dense retrieval
+[1/16/25, 14:30:58] Chen: The embeddings are too generic for short factual queries
+[1/16/25, 14:31:15] Priya: Classic dense retrieval blind spot
+[1/16/25, 14:31:32] Priya: The fix is hybrid search -- dense + BM25 keyword matching
+[1/16/25, 14:31:48] Yossi: We talked about this before. Priya, can you prototype it?
+[1/16/25, 14:32:05] Priya: Already started! I'll have results by Monday
+[1/16/25, 17:00:05] Dana: Team dinner next Thursday at Onza! 7:30pm
+[1/16/25, 17:00:22] Dana: Celebrating the Sequoia term sheet progress
+[1/16/25, 17:00:38] Noa: Reservation made! Table for 10 under NovaMind
+[1/16/25, 17:00:55] Tom: Is Onza the Japanese-Mexican place?
+[1/16/25, 17:01:10] Dana: That's the one
+[1/16/25, 17:01:25] Liam: Their tacos are insane
+[1/16/25, 17:01:40] Priya: Vegetarian options?
+[1/16/25, 17:01:55] Noa: They have great veggie options Priya
+[1/20/25, 08:35:10] Noa: New week! Update on the move:
+[1/20/25, 08:35:25] Noa: Got quotes from 3 moving companies
+[1/20/25, 08:35:42] Noa: MoveIT: 8,500 NIS (bare bones, we pack)
+[1/20/25, 08:35:58] Noa: TLV Movers: 12,000 NIS (full service including IT equipment)
+[1/20/25, 08:36:15] Noa: QuickShift: 10,200 NIS (packing but not IT)
+[1/20/25, 08:36:30] Marco: We need professional handling for the server rack and GPU
+[1/20/25, 08:36:45] Yossi: Go with TLV Movers
+[1/20/25, 08:37:00] Dana: Agreed. Book them Noa.
+[1/20/25, 08:37:15] Noa: Done!
+[1/20/25, 09:55:22] Yossi: Standup in 5
+[1/20/25, 12:45:22] Priya: Hybrid search prototype is done!
+[1/20/25, 12:45:38] Priya: Combined BM25 + dense embeddings with weighted scoring
+[1/20/25, 12:45:55] Priya: Results are significantly better for short queries
+[1/20/25, 12:46:12] Priya: "parking code" now correctly finds the relevant chunk
+[1/20/25, 12:46:28] Chen: What weight ratio?
+[1/20/25, 12:46:45] Priya: 0.7 dense + 0.3 BM25 is the sweet spot
+[1/20/25, 12:47:00] Yossi: Ship it!
+[1/22/25, 09:55:10] Yossi: Standup in 5
+[1/22/25, 11:30:08] Noa: Move update -- Rothschild 22 won't be ready until March 7
+[1/22/25, 11:30:25] Noa: Move is pushed to March 7-8 weekend
+[1/22/25, 11:30:42] Dana: That actually gives us more time. Works out better.
+[1/22/25, 11:30:58] Marco: Does our lease here extend that long?
+[1/22/25, 11:31:15] Noa: Negotiated a week extension with the landlord
+[1/22/25, 11:31:30] Sophie: What about the moving company?
+[1/22/25, 11:31:45] Noa: TLV Movers confirmed the new date
+[1/23/25, 09:55:22] Yossi: Standup in 5
+[1/23/25, 22:30:15] Tom: Team dinner at Onza was incredible
+[1/23/25, 22:30:32] Alex: The miso ribs were everything
+[1/23/25, 22:30:48] Sophie: Told you!
+[1/23/25, 22:31:05] Priya: The grilled tofu bowl was amazing
+[1/23/25, 22:31:22] Dana: Glad everyone enjoyed it!
+[1/24/25, 09:55:15] Yossi: Standup in 5
+[1/24/25, 14:00:22] Tom: Movie night idea! Let's watch Dune Part Two in Apollo after hours
+[1/24/25, 14:00:38] Tom: This Friday at 7pm?
+[1/24/25, 14:00:55] Alex: YES
+[1/24/25, 14:01:10] Liam: Count me in
+[1/24/25, 14:01:25] Marco: I'll set up the projector
+[1/24/25, 14:01:40] Priya: I'll bring popcorn
+[1/24/25, 14:01:55] Chen: Blankets from the couch area?
+[1/24/25, 14:02:10] Dana: This is adorable. I'm in.
+[1/24/25, 14:02:25] Sophie: Me too!
+[1/24/25, 14:02:40] Noa: I'll stock drinks. How many pizzas?
+[1/24/25, 14:02:55] Tom: 5 large? 1 veggie, 1 pepperoni, 1 margherita, 1 mushroom, 1 surprise
+[1/24/25, 14:03:10] Sophie: I'm scared of Tom's surprise pizza
+[1/24/25, 14:03:25] Tom: You should be
+[1/24/25, 21:55:15] Liam: Dune just gets better every time
+[1/24/25, 21:55:30] Dana: The Harkonnen arena scene is the most intense thing I've ever seen
+[1/24/25, 21:55:45] Tom: Tom's surprise pizza was pineapple jalapeno. And it was a hit.
+[1/24/25, 21:56:00] Marco: It was not a hit. I still have heartburn.
+[1/24/25, 21:56:15] Priya: Best office movie night ever. Monthly thing?
+[1/24/25, 21:56:30] Dana: First Friday of every month!
+[1/27/25, 08:40:05] Noa: 6 weeks to move day!
+[1/27/25, 08:40:20] Noa: Packing boxes are at reception. Take 2-3 each for personal items.
+[1/27/25, 08:40:35] Tom: My ducks require their own box
+[1/27/25, 08:40:50] Noa: Already got you an extra large box labeled "Duck Fleet"
+[1/27/25, 08:41:05] Tom: Noa you understand me on a spiritual level
+[1/27/25, 09:55:22] Yossi: Standup in 5
+[1/27/25, 10:22:15] Sophie: Does anyone know a good vendor for standing desks?
+[1/27/25, 10:22:32] Dana: I want standing desks for the new office
+[1/27/25, 10:22:48] Noa: Use OfficeHub! Same vendor as our current furniture. Ronit, 054-555-3847
+[1/27/25, 10:23:05] Sophie: Perfect, I'll call her
+[1/28/25, 09:55:15] Yossi: Standup in 5
+[1/28/25, 15:45:10] Chen: Hybrid search evaluation results:
+[1/28/25, 15:45:28] Chen: Recall@10 improved by 12%, precision@10 improved by 8%
+[1/28/25, 15:45:45] Chen: Significant improvement for short keyword-heavy queries
+[1/28/25, 15:46:00] Priya: The 0.7/0.3 weighting works well
+[1/28/25, 15:46:15] Yossi: Ship it
+[1/28/25, 15:46:30] Tom: Already in the regression test suite
+[1/29/25, 09:55:10] Yossi: Standup in 5
+[1/30/25, 09:55:15] Yossi: Standup in 5
+[1/30/25, 14:30:05] Sophie: Has anyone used Cursor IDE? Saw it trending
+[1/30/25, 14:30:22] Alex: Been using it for 2 months, amazing for frontend
+[1/30/25, 14:30:38] Liam: Tried it but went back to VS Code
+[1/30/25, 14:30:55] Priya: I use it daily. Saves me an hour a day
+[1/30/25, 14:31:10] Marco: I use vim btw
+[1/30/25, 14:31:25] Liam: Of course you do Marco
+[1/30/25, 14:31:40] Tom: I use nano
+[1/30/25, 14:31:55] Everyone: ...
+[1/30/25, 14:32:10] Tom: Just kidding. PyCharm.
+[2/2/25, 10:00:15] Dana: Sunday update -- Sequoia confirmed the investment!
+[2/2/25, 10:00:32] Dana: $4M seed round, closing this month
+[2/2/25, 10:00:48] Sophie: AMAZING!! Congratulations everyone!
+[2/2/25, 10:01:05] Yossi: Incredible news!
+[2/2/25, 10:01:20] Liam: This is massive
+[2/2/25, 10:01:35] Alex: Congratulations team!
+[2/2/25, 10:01:50] Priya: So happy!
+[2/2/25, 10:02:05] Chen: We're going to the moon
+[2/2/25, 10:02:20] Marco: The ducks sealed the deal
+[2/2/25, 10:02:35] Tom: I TOLD YOU. Mr. Wadsworth is our chief fundraising officer.
+[2/2/25, 10:02:50] Noa: So proud of this team!
+[2/3/25, 08:30:10] Noa: 5 weeks to move day! Start decluttering your desks
+[2/3/25, 08:30:25] Tom: I found 4 phone chargers in my drawer that aren't mine
+[2/3/25, 08:30:42] Sophie: One of those might be the one I lost!
+[2/3/25, 08:30:58] Alex: Two are definitely mine
+[2/3/25, 09:55:08] Yossi: Standup in 5
+[2/3/25, 13:22:15] Marco: ALERT: Production is down
+[2/3/25, 13:22:30] Marco: Database connection pool exhausted
+[2/3/25, 13:22:45] Yossi: On it. What's the error?
+[2/3/25, 13:23:00] Marco: "too many connections" -- connection leak in the hybrid search endpoint
+[2/3/25, 13:23:15] Liam: That's my code. Looking at it now.
+[2/3/25, 13:23:30] Marco: Increasing pool limit temporarily
+[2/3/25, 13:23:45] Tom: Error started around 12:45 in the logs
+[2/3/25, 13:24:00] Priya: Is this related to the hybrid search deployment?
+[2/3/25, 13:24:15] Liam: Found it -- BM25 query path wasn't closing connections
+[2/3/25, 13:24:30] Liam: Pushing a fix now
+[2/3/25, 13:24:45] Marco: Pool increase worked, production is back
+[2/3/25, 13:25:00] Yossi: Liam, make sure we have connection tests for all query paths
+[2/3/25, 13:25:15] Liam: Writing them now
+[2/3/25, 13:30:45] Liam: Fix deployed. Connection leak patched.
+[2/3/25, 13:31:00] Marco: Confirmed, connection count normal
+[2/3/25, 13:31:15] Dana: Under 10 minutes from detection to fix. Nice work team.
+[2/3/25, 16:00:22] Noa: Coffee machine needs descaling AGAIN
+[2/3/25, 16:00:38] Marco: Already? Less than 3 weeks since last time
+[2/3/25, 16:00:55] Noa: Hard water. Builds up fast.
+[2/3/25, 16:01:10] Sophie: We should buy a new machine with a built-in water filter for the new office
+[2/3/25, 16:01:25] Dana: What kind?
+[2/3/25, 16:01:40] Noa: Jura E8 has a built-in CLARIS filter system. 6,500 NIS vs 3,500 for another DeLonghi
+[2/3/25, 16:01:55] Yossi: The Jura is amazing. Had one at my previous company. Only thing I missed.
+[2/3/25, 16:02:10] Dana: Get the Jura. Happy engineers = productive engineers.
+[2/3/25, 16:02:25] Noa: Ordering today!
+[2/3/25, 16:02:40] Chen: Best company decision ever
+[2/4/25, 09:55:15] Yossi: Standup in 5
+[2/4/25, 11:45:22] Tom: Post-mortem for yesterday's incident:
+[2/4/25, 11:45:38] Tom: Root cause: connection leak in BM25 query path
+[2/4/25, 11:45:55] Tom: Impact: 8 minutes degraded service
+[2/4/25, 11:46:10] Tom: Fix: proper connection context manager
+[2/4/25, 11:46:25] Tom: Action items: connection monitoring, code review, load testing
+[2/4/25, 11:46:40] Dana: Good post-mortem. No blame, all learning.
+[2/5/25, 09:55:10] Yossi: Standup in 5
+[2/5/25, 10:30:05] Alex: Hey Noa, are we ordering new monitors for the new office?
+[2/5/25, 10:30:22] Noa: Yes! 27-inch 4K for everyone
+[2/5/25, 10:30:38] Alex: Can I get an ultrawide? LG 34WN80C-B
+[2/5/25, 10:30:55] Noa: Sure! Chen, you want one too?
+[2/5/25, 10:31:10] Chen: Yes please! Ultrawide for data viz
+[2/5/25, 10:31:25] Tom: Can my ducks get their own monitor?
+[2/5/25, 10:31:40] Noa: Tom.
+[2/5/25, 10:31:55] Tom: Worth a try
+[2/5/25, 14:20:15] Priya: Has anyone followed the OpenAI o3 drama?
+[2/5/25, 14:20:32] Chen: The reasoning capabilities are insane. Solved ARC-AGI.
+[2/5/25, 14:20:48] Yossi: I'm interested in the multi-modal stuff. Images + text in one pipeline.
+[2/5/25, 14:21:05] Priya: We should prototype multi-modal embeddings
+[2/5/25, 14:21:20] Yossi: After the move. Focus first.
+[2/6/25, 09:55:08] Yossi: Standup in 5
+[2/6/25, 10:15:33] Noa: Jura E8 arrived! But saving it for the new office
+[2/6/25, 10:15:50] Tom: The suspense is killing me
+[2/6/25, 10:16:05] Chen: Can we at least unbox it?
+[2/6/25, 10:16:20] Noa: Absolutely not. It stays in the box.
+[2/6/25, 10:16:35] Dana: The anticipation will make it taste better
+[2/6/25, 10:16:50] Liam: That's not how coffee works Dana
+[2/10/25, 08:35:15] Noa: 4 weeks to move day!
+[2/10/25, 08:35:30] Noa: Pack personal items by March 5. Label boxes with name + new desk number.
+[2/10/25, 08:35:45] Tom: What's my new desk number?
+[2/10/25, 08:36:00] Noa: T-14. Seating chart is on Slack.
+[2/10/25, 08:36:15] Tom: T for Tom. Nice.
+[2/10/25, 08:36:30] Noa: It stands for "test" area but sure
+[2/10/25, 09:55:05] Yossi: Standup in 5
+[2/10/25, 13:30:22] Priya: Does Claude 3.5 support tool use with streaming?
+[2/10/25, 13:30:38] Liam: Yes, accumulate tool_use blocks from streaming deltas
+[2/10/25, 13:30:55] Priya: Stable for production?
+[2/10/25, 13:31:10] Liam: Running it 2 weeks without issues
+[2/10/25, 13:31:25] Chen: Latency improvement from streaming is worth it
+[2/10/25, 13:31:40] Yossi: Handle the edge case where stream disconnects mid-tool-call
+[2/10/25, 13:31:55] Priya: Good catch, adding retry logic
+[2/10/25, 15:45:08] Sophie: Valentine's Day is Friday! Team celebration?
+[2/10/25, 15:45:25] Noa: I'll get artisan chocolates for the kitchen
+[2/10/25, 15:45:40] Tom: Love languages of developers: 1. Acts of code review 2. Quality docs 3. Merged PRs
+[2/10/25, 15:45:55] Liam: 4. Tests that pass on the first try
+[2/10/25, 15:46:10] Priya: 5. No merge conflicts
+[2/12/25, 09:55:10] Yossi: Standup in 5
+[2/12/25, 11:00:33] Marco: Cloudflare outage -- half the internet is down
+[2/12/25, 11:00:50] Liam: Our auth service is affected
+[2/12/25, 11:01:05] Marco: Switching to fallback auth endpoint
+[2/12/25, 11:01:20] Marco: Done. Slower but functional.
+[2/12/25, 13:45:15] Tom: Cloudflare recovering. Auth back to normal.
+[2/12/25, 13:45:30] Marco: Switching back to primary. All nominal.
+[2/12/25, 13:45:45] Yossi: We need proper fallback architecture. Backlog item.
+[2/14/25, 08:45:05] Noa: Happy Valentine's Day! Max Brenner chocolates in the kitchen
+[2/14/25, 08:45:22] Tom: Already had 3. No regrets.
+[2/14/25, 08:45:38] Chen: These are incredible
+[2/14/25, 08:45:55] Alex: There's a card from Dana too
+[2/14/25, 08:46:10] Dana: Chocolates are from Noa, card is from me. Best team a CEO could ask for.
+[2/14/25, 09:55:10] Yossi: Standup in 5
+[2/14/25, 14:00:15] Tom: Movie night tonight! Interstellar in Apollo, 7pm
+[2/14/25, 14:00:30] Tom: Who's in?
+[2/14/25, 14:00:45] Alex: Obviously
+[2/14/25, 14:01:00] Priya: Me!
+[2/14/25, 14:01:15] Chen: In
+[2/14/25, 14:01:30] Marco: I'll be there
+[2/14/25, 14:01:45] Sophie: Valentine's plans, rain check
+[2/14/25, 14:02:00] Dana: Same
+[2/14/25, 14:02:15] Yossi: I'll join. Love that movie.
+[2/14/25, 14:02:30] Tom: 7 out of 10! The power of Nolan
+[2/17/25, 08:30:22] Noa: Less than 3 weeks to the move!
+[2/17/25, 08:30:38] Noa: New office status: painting done, network cabling this week, furniture next week, kitchen equipped (including the Jura!)
+[2/17/25, 08:30:55] Marco: Is the server room ready?
+[2/17/25, 08:31:10] Noa: Rack and cooling installed, waiting for our equipment
+[2/17/25, 08:31:25] Marco: I need to check the power and network there. Tomorrow afternoon?
+[2/17/25, 08:31:40] Noa: Works for me. I have the keys.
+[2/17/25, 09:55:15] Yossi: Standup in 5
+[2/17/25, 14:22:05] Chen: Has anyone tried RAG on conversation data like WhatsApp chats?
+[2/17/25, 14:22:22] Chen: We're getting weird results with chunking
+[2/17/25, 14:22:38] Priya: Weird how?
+[2/17/25, 14:22:55] Chen: When someone asks a question and the answer comes 10 messages later, our chunker splits them
+[2/17/25, 14:23:10] Chen: Question in one chunk, answer in another
+[2/17/25, 14:23:25] Chen: Then querying for the answer only gets the question chunk
+[2/17/25, 14:23:40] Priya: Classic Q&A split problem. The answer chunk has no semantic content alone.
+[2/17/25, 14:23:55] Priya: Like if someone asks "what's the code?" and 8 messages later someone replies "7823#"
+[2/17/25, 14:24:10] Chen: Exactly! "7823#" means nothing in isolation
+[2/17/25, 14:24:25] Yossi: Can overlapping chunks catch this?
+[2/17/25, 14:24:40] Priya: It helps but isn't a real solution. Need smarter segmentation.
+[2/17/25, 14:24:55] Chen: Or topic detection within segments
+[2/17/25, 14:25:10] Yossi: Important problem for our product. Research it.
+[2/18/25, 08:45:12] Sophie: Does anyone have the furniture vendor contact? I lost the message
+[2/18/25, 08:45:28] Noa: OfficeHub, Ronit, 054-555-3847
+[2/18/25, 08:45:45] Sophie: Thanks! Need to finalize standing desk order
+[2/18/25, 08:46:00] Sophie: Who wants a standing desk at the new office?
+[2/18/25, 08:46:15] Marco: Yes
+[2/18/25, 08:46:30] Priya: Absolutely
+[2/18/25, 08:46:45] Chen: Yes please
+[2/18/25, 08:47:00] Alex: Yes
+[2/18/25, 08:47:15] Tom: Sitting desk for me. Creature of comfort.
+[2/18/25, 08:47:30] Liam: Standing for me
+[2/18/25, 08:47:45] Yossi: Standing
+[2/18/25, 08:48:00] Dana: Standing for my office
+[2/18/25, 08:48:15] Sophie: 8 standing, 2 sitting. Ordering today.
+[2/18/25, 14:30:05] Marco: New office server room looks great. Proper rack, dedicated cooling, dual power.
+[2/18/25, 14:30:22] Marco: I'm actually excited about this move
+[2/19/25, 09:55:10] Yossi: Standup in 5
+[2/19/25, 10:45:33] Priya: Conversation chunking research:
+[2/19/25, 10:45:50] Priya: Three approaches:
+[2/19/25, 10:46:05] Priya: 1. Time-gap segmentation (split at 6+ hour gaps, chunk within segments)
+[2/19/25, 10:46:22] Priya: 2. Topic modeling (lightweight model detects boundaries)
+[2/19/25, 10:46:38] Priya: 3. Speaker-aware chunking (keep Q&A pairs together)
+[2/19/25, 10:46:55] Chen: Time-gap is simplest and most effective
+[2/19/25, 10:47:10] Yossi: Start simple, iterate. Ship time-gap this week.
+[2/19/25, 10:47:25] Tom: I'll prepare test data with known Q&A pairs to evaluate
+[2/20/25, 09:15:08] Noa: Building management called about the entrance code again
+[2/20/25, 09:15:25] Noa: Another security update. New code takes effect Monday.
+[2/20/25, 09:15:40] Alex: Again? We just changed it 6 weeks ago
+[2/20/25, 09:15:55] Liam: What's the new code?
+[2/20/25, 09:16:10] Noa: Haven't sent it yet. I'll share when I get it.
+[2/20/25, 09:16:25] Marco: Doesn't matter much, we're moving in 2 weeks
+[2/20/25, 09:55:22] Yossi: Standup in 5
+[2/20/25, 12:30:15] Sophie: Ping pong tournament name poll! Options:
+[2/20/25, 12:30:32] Sophie: A) The NovaMind Open
+[2/20/25, 12:30:48] Sophie: B) Smash & Deploy
+[2/20/25, 12:31:05] Sophie: C) Ping Pong of Doom
+[2/20/25, 12:31:20] Tom: B obviously
+[2/20/25, 12:31:35] Everyone: B!
+[2/20/25, 12:31:50] Sophie: Smash & Deploy it is!
+[2/20/25, 16:45:22] Noa: New entrance code: 1456#
+[2/20/25, 16:45:38] Noa: Effective Monday February 24
+[2/20/25, 16:45:55] Noa: Floor code also 1456#
+[2/20/25, 16:46:10] Tom: How many entrance codes can one building have
+[2/20/25, 16:46:25] Noa: At least 3 apparently
+[2/21/25, 09:10:15] Chen: Has anyone noticed our chatbot returns outdated info sometimes?
+[2/21/25, 09:10:32] Chen: Someone asked "what time is standup" and it said "9:30" even though we changed to 10:00 weeks ago
+[2/21/25, 09:10:48] Priya: Classic temporal reasoning problem
+[2/21/25, 09:11:05] Priya: The old chunk "standup at 9:30" has higher semantic similarity to the query
+[2/21/25, 09:11:22] Priya: But doesn't know the newer chunk supersedes it
+[2/21/25, 09:11:38] Chen: We need recency bias in ranking, or timestamps in context so the LLM can reason about it
+[2/21/25, 09:11:55] Yossi: Great insight. Add to research backlog.
+[2/24/25, 08:30:05] Noa: New entrance code active: 1456#
+[2/24/25, 08:30:22] Noa: 7823# won't work anymore
+[2/24/25, 08:30:38] Alex: Already locked myself out once. 5 minutes outside before checking this chat.
+[2/24/25, 08:30:55] Tom: Didn't we just have this conversation last month?
+[2/24/25, 08:31:10] Noa: Deja vu is our building's specialty
+[2/24/25, 09:55:15] Yossi: Standup in 5
+[2/25/25, 09:15:22] Marco: Server migration plan for the move:
+[2/25/25, 09:15:38] Marco: Fri Mar 7, 6pm: begin shutdown
+[2/25/25, 09:15:55] Marco: Fri Mar 7, 8pm: loaded on truck
+[2/25/25, 09:16:10] Marco: Fri Mar 7, 10pm: arrive Rothschild 22, begin rack install
+[2/25/25, 09:16:25] Marco: Sat Mar 8, 6am: network config and testing
+[2/25/25, 09:16:40] Marco: Sat Mar 8, 12pm: all services back online
+[2/25/25, 09:16:55] Marco: Sun Mar 9: monitoring and testing
+[2/25/25, 09:17:10] Yossi: Contingency?
+[2/25/25, 09:17:25] Marco: Everything critical backed up to AWS. Worst case, cloud for a few days.
+[2/25/25, 09:17:40] Tom: I'll be available Saturday for testing
+[2/25/25, 09:17:55] Liam: Same, on call
+[2/26/25, 09:55:15] Yossi: Standup in 5
+[2/26/25, 10:30:15] Chen: Time-gap chunking evaluation results:
+[2/26/25, 10:30:32] Chen: Q&A pairs stay together much more often now
+[2/26/25, 10:30:48] Chen: The "what's the entrance code" / "4569#" problem is basically solved within segments
+[2/26/25, 10:31:05] Priya: But temporal problem remains -- retrieves OLD entrance code instead of current
+[2/26/25, 10:31:22] Chen: Old segment has higher similarity. Need recency weighting.
+[2/26/25, 10:31:38] Priya: Just multiply relevance by time decay factor
+[2/26/25, 10:31:55] Chen: I'll benchmark exponential vs linear decay
+[2/26/25, 10:32:10] Yossi: This is exactly the problem our customers face. Priority.
+[2/27/25, 09:00:15] Noa: Tomorrow is our last full day at HaYarkon 45!
+[2/27/25, 09:00:32] Noa: Everyone finished packing?
+[2/27/25, 09:00:48] Tom: Ducks are in their special box
+[2/27/25, 09:01:05] Marco: Server side prepped. Backup verified.
+[2/27/25, 09:01:20] Dana: Ready. A bit sad honestly. This is where NovaMind was born.
+[2/27/25, 09:01:35] Noa: Team photo before the movers arrive Friday!
+[2/27/25, 15:40:22] Sophie: What will the WiFi password be at the new office?
+[2/27/25, 15:40:38] Marco: Network: NovaMind-Office (same name)
+[2/27/25, 15:40:55] Marco: Password: NovaMind_Rothschild!
+[2/27/25, 15:41:10] Marco: Guest network uses captive portal
+[2/27/25, 15:41:25] Priya: NovaMind_Rothschild! -- with the exclamation mark?
+[2/27/25, 15:41:40] Marco: Yes, exclamation mark is part of the password
+[2/28/25, 09:00:05] Noa: LAST DAY AT HAYARKON 45
+[2/28/25, 09:00:22] Noa: Team photo at 4pm. Movers at 5pm.
+[2/28/25, 09:00:38] Dana: End of an era
+[2/28/25, 09:00:55] Yossi: And the beginning of a better one
+[2/28/25, 16:00:05] Noa: Team photo done!
+[2/28/25, 16:00:22] Noa: Movers are here. Loading up.
+[2/28/25, 16:00:38] Marco: Shutting down servers. Last backup running... done. We're offline.
+[2/28/25, 18:30:45] Marco: All equipment at the new office. Starting server rack install.
+[2/28/25, 22:15:08] Marco: Server rack installed and powered on. Starting network config.
+[3/1/25, 06:15:22] Marco: All services back online! Ahead of schedule!
+[3/1/25, 06:15:38] Marco: WiFi up: NovaMind-Office / NovaMind_Rothschild!
+[3/1/25, 06:15:55] Yossi: Amazing work Marco
+[3/1/25, 06:16:10] Tom: Running tests now
+[3/1/25, 06:45:33] Tom: ALL TESTS PASSING. 847/847 green.
+[3/1/25, 06:45:50] Liam: Backend APIs responding correctly
+[3/1/25, 06:46:05] Marco: Migration complete. Going to sleep.
+[3/1/25, 06:46:20] Dana: Sleep well Marco. Hero's welcome Monday.
+[3/2/25, 10:00:15] Marco: 24h check: everything running perfectly. No anomalies.
+[3/2/25, 10:00:32] Tom: Health checks all green on my end
+[3/3/25, 08:00:05] Noa: WELCOME TO ROTHSCHILD 22!
+[3/3/25, 08:00:22] Noa: Building entrance code: 2891#
+[3/3/25, 08:00:38] Noa: 5th floor, elevator on the left
+[3/3/25, 08:00:55] Noa: Floor entrance is badge reader -- collect badges at reception
+[3/3/25, 08:01:10] Noa: WiFi: NovaMind-Office / NovaMind_Rothschild!
+[3/3/25, 08:01:25] Noa: The Jura E8 is in the kitchen and ready!
+[3/3/25, 08:01:40] Noa: Conference rooms: Transformer (big), Diffusion (medium), Attention (small)
+[3/3/25, 08:01:55] Noa: Standup is 10am in Transformer
+[3/3/25, 08:02:10] Dana: This place looks AMAZING Noa
+[3/3/25, 08:02:25] Alex: Serious upgrade. The ML team's view is incredible.
+[3/3/25, 08:02:40] Priya: I can see the Mediterranean from my desk!
+[3/3/25, 08:02:55] Marco: Server room is beautiful. Proper HVAC. No more portable AC.
+[3/3/25, 08:03:10] Chen: This coffee machine... I'm in love.
+[3/3/25, 08:03:25] Tom: Ducks arranged, window light perfect. 10/10
+[3/3/25, 08:03:40] Sophie: Standing desks are butter smooth
+[3/3/25, 08:03:55] Yossi: This feels like a real company now
+[3/3/25, 08:04:10] Dana: It IS a real company. $4M and 10 amazing people.
+[3/3/25, 08:04:25] Noa: Parking: spots R5 through R9. Garage code is 3377. Enter from Allenby.
+[3/3/25, 08:04:40] Marco: Different from old garage entrance?
+[3/3/25, 08:04:55] Noa: Yes, old was Frishman. New is Allenby.
+[3/3/25, 09:30:15] Sophie: Jura makes incredible coffee. Worth the wait.
+[3/3/25, 09:30:32] Yossi: Told you. This is the machine.
+[3/3/25, 09:30:48] Tom: Third espresso before 10am. Help.
+[3/3/25, 09:55:22] Yossi: First standup at Rothschild 22! Transformer room in 5
+[3/3/25, 12:30:05] Alex: Lunch recs near the new office?
+[3/3/25, 12:30:22] Sophie: Miznon around the corner, incredible pita
+[3/3/25, 12:30:38] Chen: Great hummus spot on HaShomer, 5 min walk
+[3/3/25, 12:30:55] Noa: Abu Hassan -- legendary hummus
+[3/3/25, 12:31:10] Dana: Abu Hassan for inaugural lunch! On me!
+[3/4/25, 09:55:15] Yossi: Standup in 5
+[3/4/25, 14:15:22] Sophie: Does anyone know which vendor for the office plants?
+[3/4/25, 14:15:38] Dana: I didn't recommend a specific one, but Noa knows
+[3/4/25, 14:15:55] Noa: OfficeHub has a plants section. Same Ronit, 054-555-3847
+[3/4/25, 14:16:10] Sophie: Perfect!
+[3/4/25, 16:00:05] Chen: What's the building entrance code for after hours? I need to come in this weekend
+[3/4/25, 16:00:22] Liam: I think it's different for nights
+[3/4/25, 16:00:38] Marco: Same code Noa shared on Monday
+[3/4/25, 16:00:55] Chen: Wait which code? There have been like 4 codes in 2 months
+[3/4/25, 16:01:10] Noa: Rothschild building code is 2891# -- works 24/7
+[3/4/25, 16:01:25] Noa: Floor access is your badge
+[3/4/25, 16:01:40] Chen: Got it. Thanks!
+[3/5/25, 09:55:08] Yossi: Standup in 5
+[3/5/25, 10:22:15] Priya: Time decay re-ranking implemented!
+[3/5/25, 10:22:32] Priya: "What's the entrance code" now returns the most recent code
+[3/5/25, 10:22:48] Priya: Instead of the January one with higher base similarity
+[3/5/25, 10:23:05] Chen: Exponential decay beat linear by 5% on temporal accuracy
+[3/5/25, 10:23:22] Yossi: Excellent! Real differentiator for our product
+[3/5/25, 10:23:38] Tom: Tests passing
+[3/5/25, 10:23:55] Dana: Love that our own office chat is our test data
+[3/5/25, 10:24:10] Priya: Debugging with real conversations about coffee machines and rubber ducks
+[3/5/25, 10:24:25] Tom: The ducks provide valuable semantic content
+[3/5/25, 12:00:05] Sophie: Smash & Deploy bracket:
+[3/5/25, 12:00:22] Sophie: Dana vs Noa, Tom vs Marco, Priya vs Alex, Liam vs Chen, Yossi vs Sophie
+[3/5/25, 12:00:38] Tom: Marco. Finally a worthy opponent.
+[3/5/25, 12:00:55] Marco: I've been watching YouTube tutorials
+[3/5/25, 12:01:10] Tom: YouTube vs regional championship experience
+[3/6/25, 09:00:15] Noa: Smash & Deploy is tomorrow! Also the DeLonghi backup is in the break area now
+[3/6/25, 09:00:32] Priya: Dual coffee redundancy is live
+[3/6/25, 09:00:48] Marco: Failover tested. Both produce acceptable output.
+[3/6/25, 09:55:10] Yossi: Standup in 5
+[3/6/25, 14:00:05] Yossi: Tomorrow standup at 9:30 because of the tournament in the afternoon
+[3/6/25, 14:00:22] Yossi: Just this once. Back to 10 on Monday.
+[3/7/25, 09:25:15] Yossi: Early standup! Transformer room in 5
+[3/7/25, 13:00:05] Sophie: SMASH & DEPLOY IS STARTING!
+[3/7/25, 13:45:22] Sophie: Round 1: Dana beat Noa 2-1, Tom beat Marco 2-0, Priya beat Alex 2-1, Chen beat Liam 2-0, Sophie beat Yossi 2-0
+[3/7/25, 13:47:10] Dana: I'm surprisingly terrifying at ping pong
+[3/7/25, 13:47:25] Marco: Tom is absolutely ruthless
+[3/7/25, 14:30:05] Sophie: Semis: Tom beat Dana 2-0, Sophie beat Priya 2-1, Chen had a bye
+[3/7/25, 15:00:05] Sophie: FINAL: 1st Tom, 2nd Sophie, 3rd Chen
+[3/7/25, 15:00:22] Tom: REGIONAL CHAMPION STATUS: REAFFIRMED
+[3/7/25, 15:00:38] Alex: The ducks would be proud
+[3/7/25, 15:00:55] Tom: They watched from the windowsill
+[3/7/25, 15:01:10] Noa: I'll get a trophy made. With a duck on it.
+[3/7/25, 15:01:25] Dana: Monthly tournament is officially a thing. Best team ever.
+[3/7/25, 15:01:40] Chen: Best team ever.
+[3/7/25, 15:01:55] Everyone: Best team ever!
