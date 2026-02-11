@@ -71,6 +71,8 @@ Neural networks compress meaning into dense vectors:
 
 ### 2. Why Chunking Boundaries Matter
 
+> **Slide guidance:** The entrance code problem (split Q&A) is one slide; the "it gets worse" temporal example is a second slide; the discussion table is a third (interactive).
+
 **The Entrance Code Problem:**
 
 Consider this real conversation in your WhatsApp chat:
@@ -120,6 +122,8 @@ The overlap parameter is a band-aid, not a cure. We revisit this problem in Lect
 ---
 
 ### 3. Cosine Similarity
+
+> **Slide guidance:** The formula + intuition (angle diagram) is one slide; the properties table + alternatives are a second slide.
 
 **The Formula:**
 

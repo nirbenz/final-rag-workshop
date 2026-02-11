@@ -20,8 +20,6 @@ By the end of this lecture, participants will:
 
 ### 1. The Fixed-Window Problem
 
-Remember the entrance code problem from Lecture 03? The question and answer ended up in different chunks. That was one symptom of a deeper issue:
-
 **What Goes Wrong:**
 
 ```
@@ -52,6 +50,8 @@ Next day: Project work
 ---
 
 ### 2. Data-Driven Chunking Insights
+
+> **Slide guidance:** Each signal (time gaps, histogram, mean messages) is a separate slide.
 
 **Key Question:** How do we find natural conversation boundaries?
 
@@ -99,8 +99,6 @@ avg_messages_before_gap = total_messages / num_gaps_over_threshold
 ### 3. Segmentation Strategies
 
 > **Slide guidance:** Each segmentation strategy (time-based, semantic, speaker-based) is a separate slide.
-
-These strategies address the entrance code problem from Lecture 03: if the question and answer happen in the same conversation burst, segmentation keeps them in the same chunk.
 
 **Strategy 1: Time-Based Segmentation**
 
@@ -172,6 +170,8 @@ Result: Chunks respect conversation boundaries!
 
 ### 5. More Advanced Strategies (Lecture Only)
 
+> **Slide guidance:** Each strategy (contextual chunking, day-level aggregation, query expansion) is a separate slide. These are mention-only -- one diagram each, no deep-dive.
+
 **Contextual Chunking (Anthropic Pattern):**
 
 ```
@@ -206,6 +206,8 @@ Expanded: "vacation travel holiday journey Paris flights booking"
 ## Part B: Advanced Retrieval Models
 
 ### 6. ColBERT and Late Interaction
+
+> **Slide guidance:** The retrieval spectrum is one slide; the ColBERT token-level scoring example is a second slide.
 
 **The Spectrum of Retrieval Models:**
 
@@ -258,6 +260,8 @@ Worth exploring post-workshop for production systems where retrieval quality is 
 
 ### 7. Confidence Calibration
 
+> **Slide guidance:** The prompt template is one slide; the example output with "Why This Matters" is a second slide.
+
 LLMs are confidently wrong. They don't naturally express uncertainty.
 
 **Add to your system prompt:**
@@ -289,6 +293,8 @@ this is the final agreed time. There may be later messages with changes.
 ---
 
 ### 8. Few-Shot Prompting
+
+> **Slide guidance:** The few-shot code example is one slide; the key principles and token budget table are a second slide.
 
 Instructions alone don't guarantee consistent output. Show, don't tell:
 
@@ -333,6 +339,8 @@ Now answer the user's question in the same format."""
 ---
 
 ### 9. Combining Techniques: The Full Prompt
+
+> **Slide guidance:** The stacked system prompt is one slide; the context injection mechanism and "key insight" takeaway are a second slide.
 
 **Stacking CoT + Confidence + Few-Shot + Pydantic:**
 

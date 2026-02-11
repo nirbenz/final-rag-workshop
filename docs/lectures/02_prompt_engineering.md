@@ -113,6 +113,8 @@ This works without any structured output -- the LLM returns a plain string. Star
 
 ### 3. Context Formatting
 
+> **Slide guidance:** Each formatting option (numbered list, XML tags, with metadata) is a separate slide.
+
 **Option 1: Numbered List**
 
 ```
@@ -185,6 +187,8 @@ Sarah: Sure, that works for me.
 
 ### Chain-of-Thought (CoT) Prompting
 
+> **Slide guidance:** The without/with CoT side-by-side is one slide; the "When to Use CoT" table is a second slide.
+
 LLMs often jump to conclusions without showing their work. In RAG, this means:
 - No visibility into which chunks informed the answer
 - Harder to debug incorrect responses
@@ -228,6 +232,8 @@ LLMs often jump to conclusions without showing their work. In RAG, this means:
 ---
 
 ### Structured Output with Pydantic
+
+> **Slide guidance:** The RAGResponse schema is one slide; the integration code + design tip are a second slide.
 
 **Going beyond plain text:** Force the LLM to return a specific schema.
 
