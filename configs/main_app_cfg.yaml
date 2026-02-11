@@ -3,10 +3,10 @@ defaults:
   # - models@models.conversation_llm.1: vertexai_gemini_flash_3
   # - models@models.conversation_llm.2: vertexai_gemini_pro_3
   # - models@models.conversation_llm.3: openai_gpt52_thinking
-  # - models@models.conversation_llm: openai_gpt52_base
-  # - models@models.embedding_llm: openai_text_embedding_3_small
-  - models@models.conversation_llm: litellm_claude_sonnet_45_base
-  - models@models.embedding_llm: litellm_cohere4_embedding
+  - models@models.conversation_llm: openai_gpt52_base
+  - models@models.embedding_llm: openai_text_embedding_3_small
+  # - models@models.conversation_llm: litellm_claude_sonnet_45_base
+  # - models@models.embedding_llm: litellm_cohere4_embedding
   # - models@models.embedding_llm: litellm_amazon_titan_embedding
   - hydra_cfg
   - _self_
