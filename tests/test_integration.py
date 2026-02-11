@@ -48,7 +48,7 @@ class TestChatLoading:
 
         text = ctx.text_context
         assert len(text) > 0
-        assert "Alice" in text or "Bob" in text or "Charlie" in text
+        assert "NovaMind" in text or "Dana" in text or "Marco" in text
 
 
 class TestFullPipeline:
