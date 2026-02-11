@@ -90,7 +90,7 @@ class TestFullPipeline:
         chunks = chunker.chunk_messages(loaded_messages)
         engine.add_context(chunks)
 
-        results = engine.get_relevant_context("chunking strategies", top_k=3)
+        results = engine.get_relevant_context("entrance code", top_k=3)
 
         assert len(results) > 0, "Should return results for query"
 
@@ -99,7 +99,7 @@ class TestFullPipeline:
         chunks = chunker.chunk_messages(loaded_messages)
         engine.add_context(chunks)
 
-        results = engine.get_relevant_context("embeddings", top_k=1)
+        results = engine.get_relevant_context("coffee machine", top_k=1)
         assert len(results) > 0
 
         first_result = results[0]
@@ -113,7 +113,7 @@ class TestFullPipeline:
         chunks = chunker.chunk_messages(loaded_messages)
         engine.add_context(chunks)
 
-        results = engine.get_relevant_context("vector database", top_k=1)
+        results = engine.get_relevant_context("office address", top_k=1)
         assert len(results) > 0
 
         chunk = results[0]
@@ -131,7 +131,7 @@ class TestFullPipeline:
         chunks = chunker.chunk_messages(messages)
         engine.add_context(chunks)
 
-        results = engine.get_relevant_context("RAG workshop", top_k=5)
+        results = engine.get_relevant_context("standup meeting time", top_k=5)
 
         assert len(results) > 0
         assert ctx.num_messages == len(messages)

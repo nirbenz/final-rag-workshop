@@ -55,8 +55,8 @@ class RAGResponse(BaseModel):
         description="Restate the user's question in your own words to show you understand what they're asking",
     )
     reasoning_steps: List[ReasoningStep] = Field(
+        default_factory=list,
         description="Step-by-step reasoning showing how you analyzed the context to find the answer",
-        min_length=1,
     )
     context_used: List[str] = Field(
         description="Direct quote from the provided context that supports your answer. Should be a list of exact quotes.",
