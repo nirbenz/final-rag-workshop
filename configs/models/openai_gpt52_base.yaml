@@ -5,7 +5,5 @@ kwargs:
   max_tokens: 16384
   streaming: false
   use_responses_api: true
-  reasoning:
-    effort: low
   text:
     verbosity: medium
