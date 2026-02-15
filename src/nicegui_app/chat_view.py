@@ -195,8 +195,26 @@ def _handle_llm_error(error: Exception, state: AppStateProtocol, message_list: A
     error_msg = str(error)
     if isinstance(error, RuntimeError):
         ui.notify(error_msg, type="negative")
-    elif "rate limit" in error_msg.lower():
-        ui.notify("Rate limit reached. Please wait a moment and try again.", type="warning")
+    if "rate limit" in error_msg.lower() or ("tokens" in error_msg.lower() and "exceed" in error_msg.lower()):
+        # Show detailed rate limit guidance
+        with ui.dialog() as rate_limit_dialog, ui.card().classes("w-[500px]"):
+            ui.label("Rate Limit Reached").classes("text-lg font-semibold text-red-500")
+            ui.markdown("""
+**The LLM API rate limit was exceeded.**
+
+This usually happens when:
+- Message history is too long (many conversation turns)
+- Retrieved context is very large
+- Multiple requests in quick succession
+
+**Recommendations:**
+1. **Clear chat history** using the "Clear" button in the History section
+2. Wait a moment before trying again
+3. If using a large chat export, consider using a smaller file
+4. Reduce the number of retrieved chunks (top_k setting)
+            """).classes("text-sm")
+            ui.button("OK", on_click=rate_limit_dialog.close).props("color=primary")
+        rate_limit_dialog.open()
     elif "api key" in error_msg.lower() or "authentication" in error_msg.lower():
         ui.notify("API authentication error. Check your API keys.", type="negative")
     else:
