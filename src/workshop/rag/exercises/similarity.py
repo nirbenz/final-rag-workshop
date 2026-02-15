@@ -61,6 +61,7 @@ def cosine_similarity(query_vec: NDArray, chunk_vecs: NDArray) -> NDArray:
     6. Add small epsilon (1e-10) to avoid division by zero
 
     TODO: Implement this function
+    TODO: REMOVE THE EXCEPTION
     """
     raise NotImplementedError(
         "Implement cosine_similarity.\n" "Hint: Use np.linalg.norm() for norms and np.dot() for dot products."
@@ -104,5 +105,6 @@ def get_top_k(
     5. Take first k indices
 
     TODO: Implement this function
+    TODO: REMOVE THE EXCEPTION
     """
     raise NotImplementedError("Implement get_top_k.\n" "Hint: Use np.where() to filter, np.argsort() to sort indices.")

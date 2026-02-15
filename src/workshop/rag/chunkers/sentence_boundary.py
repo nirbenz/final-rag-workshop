@@ -109,6 +109,7 @@ class SentenceBoundaryChunker:
         4. Save final chunk
 
         TODO for participants: Implement the full logic
+        TODO: REMOVE THE EXCEPTION
         """
         raise NotImplementedError(
             "Participants implement this. "
@@ -129,6 +130,7 @@ class SentenceBoundaryChunker:
 
         Returns:
             List of (start_idx, end_idx) tuples for each chunk
+        TODO: REMOVE THE EXCEPTION
         """
         raise NotImplementedError(
             "Participants implement this alongside chunk_messages(). "

@@ -67,6 +67,7 @@ def get_system_prompt() -> str:
         System prompt string with {context} placeholder
 
     TODO: Implement your system prompt
+    TODO: REMOVE THE EXCEPTION
     """
     raise NotImplementedError(
         "Implement get_system_prompt.\n\n"

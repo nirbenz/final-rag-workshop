@@ -136,6 +136,7 @@ class SemanticChunker:
         6. Build ChunkObjects with proper metadata
 
         TODO for participants: Implement the full logic
+        TODO: REMOVE THE EXCEPTION
         """
         raise NotImplementedError(
             "Participants implement this. "
@@ -157,6 +158,7 @@ class SemanticChunker:
 
         Returns:
             List of (start_idx, end_idx) tuples for each chunk
+        TODO: REMOVE THE EXCEPTION
         """
         raise NotImplementedError(
             "Participants implement this alongside chunk_messages(). "

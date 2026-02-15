@@ -76,6 +76,7 @@ def segment_by_time_gaps(
     4. Return list of all segments
 
     TODO: Implement this function
+    TODO: REMOVE THE EXCEPTION
     """
     raise NotImplementedError(
         "Implement segment_by_time_gaps.\n"
@@ -121,6 +122,7 @@ def chunk_segments(
     3. Collect all chunks from all segments
 
     TODO: Implement this function
+    TODO: REMOVE THE EXCEPTION
     """
     raise NotImplementedError(
         "Implement chunk_segments.\n" "Hint: Use chunk_messages_sliding_window() from workshop.rag.chunkers.utils"

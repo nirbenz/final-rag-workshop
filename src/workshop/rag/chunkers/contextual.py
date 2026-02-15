@@ -131,6 +131,7 @@ class ContextualChunker:
             Summary string to add to chunk metadata
 
         TODO for participants: Implement summary generation
+        TODO: REMOVE THE EXCEPTION
         """
         raise NotImplementedError(
             "Participants implement this. "
@@ -159,6 +160,7 @@ class ContextualChunker:
         5. Engine will strip embedding_context before returning to LLM
 
         TODO for participants: Implement full pipeline
+        TODO: REMOVE THE EXCEPTION
         """
         raise NotImplementedError(
             "Advanced extension. "
