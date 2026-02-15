@@ -121,6 +121,7 @@ class DisplayConfig(BaseModel):
         highlight_source: Source for highlights - retrieval (message_ids) or model (context_used)
         vectordb_page: Current page in vectordb view (0-indexed)
         vectordb_page_size: Number of chunks per page in vectordb view
+        clear_db_before_update: Clear database before updating with new chunks
     """
 
     rtl_mode: Literal["auto", "rtl", "ltr"] = Field(
@@ -144,6 +145,10 @@ class DisplayConfig(BaseModel):
         default=20,
         ge=5,
         le=100,
+        json_schema_extra={"exclude_from_form": True},
+    )
+    clear_db_before_update: bool = Field(
+        default=True,
         json_schema_extra={"exclude_from_form": True},
     )
 

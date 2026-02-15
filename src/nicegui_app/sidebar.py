@@ -236,6 +236,11 @@ def create_vectordb_card(
 
             ui.separator().classes("my-2")
 
+            # Toggle for clearing DB before update
+            ui.switch("Clear DB before updating", value=state.display.clear_db_before_update).bind_value(
+                state.display, "clear_db_before_update"
+            ).classes("mb-2").tooltip("Remove existing chunks before adding new ones")
+
             async def update_engine_db():
                 """Reload chunks into the engine."""
                 if state.context and state.chunker and state.engine:
@@ -243,11 +248,16 @@ def create_vectordb_card(
                     status_label.set_text("Chunking messages...")
 
                     try:
-                        messages = state.context.context
-                        status_label.set_text(f"Chunking {len(messages)} messages...")
-
                         # Run chunking in thread pool to avoid blocking
                         import asyncio
+
+                        # Clear DB if toggle is on
+                        if state.display.clear_db_before_update:
+                            status_label.set_text("Clearing database...")
+                            await asyncio.to_thread(state.engine.clear)
+
+                        messages = state.context.context
+                        status_label.set_text(f"Chunking {len(messages)} messages...")
 
                         chunks = await asyncio.to_thread(state.chunker.chunk_messages, messages)
 
@@ -261,8 +271,11 @@ def create_vectordb_card(
                         page_state.refresh_context_engine()
                         page_state.refresh_context()
                         status_label.set_text("")
-                        ui.notify(f"Updated {len(chunks)} chunks in engine", type="positive")
-                        logger.info(f"Engine updated with {len(chunks)} chunks")
+                        action = "Replaced with" if state.display.clear_db_before_update else "Added"
+                        ui.notify(f"{action} {len(chunks)} chunks in engine", type="positive")
+                        logger.info(
+                            f"Engine updated with {len(chunks)} chunks (clear_first={state.display.clear_db_before_update})"
+                        )
                     except Exception as ex:
                         status_label.set_text("")
                         ui.notify(f"Failed to update engine: {ex}", type="negative")
