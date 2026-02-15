@@ -4,8 +4,6 @@ A hands-on workshop for learning Retrieval-Augmented Generation (RAG) through im
 
 ## Quick Start
 
-### Using `uv` (same instructions for all operating systems)
-
 ### MacOS
 
 ```bash
@@ -79,7 +77,7 @@ python scripts\verify_setup.py
 python -m nicegui_app.main
 ```
 
-### (Conditional) Using `uv` (same instructions for all operating systems)
+### (Optional) Using `uv` (same instructions for all operating systems)
 
 > if not using UV, skip
 
