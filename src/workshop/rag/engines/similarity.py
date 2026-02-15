@@ -29,13 +29,15 @@ def _load_similarity_functions() -> Tuple[Callable, Callable]:
     """
     Dynamically reload and return similarity exercise functions.
 
-    Reloads the appropriate similarity module to pick up code changes
-    without restarting the app.
+    Reloads the exercise_toggles and appropriate similarity module to
+    pick up code changes without restarting the app.
 
     Returns:
         Tuple of (cosine_similarity, get_top_k) functions
     """
     import workshop.exercise_toggles as toggles_mod
+
+    importlib.reload(toggles_mod)
 
     if toggles_mod.USE_SIMILARITY_SOLUTION:
         import workshop.rag.solutions.similarity as mod

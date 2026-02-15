@@ -13,7 +13,6 @@ Also verifies:
 - Toggle switching correctly swaps between exercises and solutions
 """
 
-import importlib
 import os
 from pathlib import Path
 from typing import Any, List, Sequence
@@ -57,39 +56,41 @@ def set_toggles(
     reranking: bool = True,
 ) -> None:
     """
-    Set exercise toggles and reload all consuming modules.
+    Set exercise toggles by find/replace in the file.
 
-    Toggles are read at module import time, so changing them requires
-    reloading the modules that consume them. This function:
-    1. Sets toggle values directly on the exercise_toggles module
-    2. Reloads all consuming modules in dependency order
+    The dynamic loaders reload exercise_toggles.py from disk on each call,
+    so we modify the toggle values in-place for tests.
 
     Args:
         prompting: Whether to use the prompting solution
         similarity: Whether to use the similarity solution
         reranking: Whether to use the reranking solution
     """
-    import workshop.exercise_toggles as toggles
+    import re
 
-    toggles.USE_PROMPTING_SOLUTION = prompting
-    toggles.USE_SIMILARITY_SOLUTION = similarity
-    toggles.USE_RERANKING_SOLUTION = reranking
+    import workshop.exercise_toggles
 
-    import workshop.llm
+    toggles_path = Path(workshop.exercise_toggles.__file__)
+    content = toggles_path.read_text()
 
-    importlib.reload(workshop.llm)
+    # Replace each toggle value using regex
+    content = re.sub(
+        r"USE_PROMPTING_SOLUTION\s*=\s*(True|False)",
+        f"USE_PROMPTING_SOLUTION = {prompting}",
+        content,
+    )
+    content = re.sub(
+        r"USE_SIMILARITY_SOLUTION\s*=\s*(True|False)",
+        f"USE_SIMILARITY_SOLUTION = {similarity}",
+        content,
+    )
+    content = re.sub(
+        r"USE_RERANKING_SOLUTION\s*=\s*(True|False)",
+        f"USE_RERANKING_SOLUTION = {reranking}",
+        content,
+    )
 
-    import workshop.rag.engines.similarity
-
-    importlib.reload(workshop.rag.engines.similarity)
-
-    import workshop.rag.engines.qdrant
-
-    importlib.reload(workshop.rag.engines.qdrant)
-
-    import workshop.rag.engines
-
-    importlib.reload(workshop.rag.engines)
+    toggles_path.write_text(content)
 
 
 @pytest.fixture(autouse=True)

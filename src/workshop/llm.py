@@ -50,13 +50,15 @@ def load_system_prompt() -> str:
     """
     Dynamically reload and return the current system prompt.
 
-    Reloads the appropriate prompting module to pick up code changes
-    without restarting the app.
+    Reloads the exercise_toggles and appropriate prompting module to
+    pick up code changes without restarting the app.
 
     Returns:
         System prompt template string with {context} placeholder
     """
     import workshop.exercise_toggles as toggles_mod
+
+    importlib.reload(toggles_mod)
 
     if toggles_mod.USE_PROMPTING_SOLUTION:
         import workshop.rag.solutions.prompting as mod
