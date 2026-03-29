@@ -103,6 +103,14 @@ def _patch_openai_clients() -> None:
     def _patched_async_init(self, *args, **kwargs):
         if "http_client" not in kwargs:
             kwargs["http_client"] = httpx.AsyncClient(verify=False)
+        # Ensure api_key is set from environment if not provided
+        if "api_key" not in kwargs or kwargs.get("api_key") == "litellm-placeholder":
+            import os
+
+            env_key = os.getenv("OPENAI_API_KEY")
+            if env_key:
+                kwargs["api_key"] = env_key
+                logger.debug(f"Patched AsyncOpenAI with API key from environment")
         return _original_async_init(self, *args, **kwargs)
 
     openai.AsyncOpenAI.__init__ = _patched_async_init
